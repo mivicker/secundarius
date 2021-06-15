@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['mikevickers.pythonanywhere.com']
 # Application definition
 
 INSTALLED_APPS = [
+    'routes.apps.RoutesConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
