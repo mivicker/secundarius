@@ -15,9 +15,12 @@
 	<body>
 		<h1>Secundarius - this website is live.</h1>
 		<p>Helpful tools for executing the Gleaners Healthcare Programs.</p>
-		<button type="submit" formmethod="POST">
-			Click on this.
-		</button>
+		<form method="POST" action="">
+		{% csrf_token %}
+			<button type="submit">
+				Click on this.
+			</button>
+		</form>
 		<h2>{{ message }}</h2>
 	</body>
 </html>
