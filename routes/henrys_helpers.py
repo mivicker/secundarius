@@ -2,7 +2,7 @@ import os
 import string
 import datetime
 import pandas as pd
-import config
+from . import config
 
 #Figure out what code is coupled to instance data and what
 #in a different application would be a database call.

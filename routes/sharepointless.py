@@ -1,4 +1,3 @@
-import getpass
 from pathlib import Path
 import json
 from urllib.parse import urljoin
