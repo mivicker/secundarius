@@ -15,6 +15,9 @@
 	<body>
 		<h1>Secundarius - this website is live.</h1>
 		<p>Helpful tools for executing the Gleaners Healthcare Programs.</p>
-		<h2>{{ key_words }}</h2>
+		<form method="POST" action="">
+			{% csrf_token %}
+			<h2>{{ key_words }}</h2>
+		</form>
 	</body>
 </html>

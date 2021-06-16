@@ -1,4 +1,7 @@
 from django.shortcuts import render
 
 def home(request):
-	return render(request, 'routes/routes.html', {'key_words': 'bad things'})
+	word = 'hot dog'
+	if request.method == 'POST':
+		word = 'taco'
+	return render(request, 'routes/routes.html', {'key_words': word})
