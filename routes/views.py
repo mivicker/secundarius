@@ -5,4 +5,4 @@ def home(request):
 		context = {'message': 'bad things'}
 	else:
 		context = {'message': 'nothing'}
-	return(render(request, 'routes/routes.html', context))
+	return render(request, 'routes/routes.html', context)
