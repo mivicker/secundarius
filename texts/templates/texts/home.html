@@ -13,9 +13,16 @@
 		<link rel="stylesheet" href="">
 	</head>
 	<body>
+		{% if messages %}
+			{% for message in messages %}
+				<p>{{ message }}</:p>
+			{% endfor %}
+		{% endif %}
 		<h1>This will send a text to mike v.</h1>
-		<form action="{% url 'send' %}">
+		<form action="{% url 'text-send' %}" method="POST">
 			{% csrf_token %}
+			<input name='password' placeholder="Enter password" />
+			<input name='text-message' placeholder='Enter text message'>
 			<button type="submit">
 				Send this text.
 			</button>
