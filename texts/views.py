@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from twilio.rest import Client
 
 BASE_DIR = os.path.dirname(__file__)
-key = os.path.join(BASE_DIR, "secrets.json")
+key = os.path.join(BASE_DIR, "twilio_secrets.json")
 
 def home(request):
     return render(request, os.path.join('texts', 'home.html'), {})
