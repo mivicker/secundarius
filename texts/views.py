@@ -4,11 +4,14 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from twilio.rest import Client
 
+BASE_DIR = os.path.dirname(__file__)
+key = os.path.join(BASE_DIR, "secrets.json")
+
 def home(request):
     return render(request, os.path.join('texts', 'home.html'), {})
 
 def send(request):
-    with open('twilio_secrets.json') as f:
+    with open(key) as f:
         secrets = json.load(f)
     account_sid = secrets['TWILIO_ACCOUNT_SID']
     auth_token = secrets['TWILIO_AUTH_TOKEN']
