@@ -7,29 +7,19 @@
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<title>Send a text with a csv.</title>
+		<title></title>
 		<meta name="description" content="">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="">
 	</head>
 	<body>
-		{% if messages %}
-			{% for message in messages %}
-				<p>{{ message }}</:p>
-			{% endfor %}
-		{% endif %}
-		<h1>Message Sender</h1>
-		<h2>Current Message</h2>
-		<p>{{ words.words }}</p>
-		<a href="{% url 'edit-words' %}">Edit this message before sending</a>
-		<form enctype="multipart/form-data" action="{% url 'text-send' %}" method="POST">
+		<form action="{% url 'save-words' %}" method="POST">
 			{% csrf_token %}
 			<div>{{ form }}</div>
 			<div>
-			<input name='password' placeholder="Enter password" />
-			<button type="submit">
-				Send this text.
-			</button>
+				<button type="submit">
+					Update message text
+				</button>
 			</div>
 	</body>
 </html>

@@ -15,10 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from texts.views import home, send
+from texts.views import edit_words, home, save, send
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home, name='text-home'),
     path('send', send, name='text-send'),
+    path('edit', edit_words, name='edit-words'),
+    path('save', save, name='save-words'),
 ]
