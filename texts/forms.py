@@ -6,6 +6,7 @@ class UploadFileForm(forms.Form):
 		attrs=({'id': 'upload-csv'})))
 
 class UpdateWordsForm(forms.ModelForm):
+	
 	class Meta:
 		model = Words
 		fields = ['words']	
