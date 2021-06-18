@@ -18,11 +18,12 @@
 				<p>{{ message }}</:p>
 			{% endfor %}
 		{% endif %}
-		<h1>This will send a text to mike v.</h1>
+		<h1>Message Sender</h1>
+		<h2>Current Message</h2>
+		<p>{{ words.words }}</p>
 		<form action="{% url 'text-send' %}" method="POST">
 			{% csrf_token %}
 			<input name='password' placeholder="Enter password" />
-			<input name='text-message' placeholder='Enter text message'>
 			<button type="submit">
 				Send this text.
 			</button>

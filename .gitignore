@@ -1,6 +1,6 @@
 env
 db.sqlite3
-/secundarius/__pycache__
 config.py
 *.pyc
 twilio_secrets.json
+__pycache__
