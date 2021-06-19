@@ -1,6 +1,7 @@
 import io
 import csv
 
-def reader_from(file_input):
-	stream = io.StringIO(file_input)
-	return csv.DictReader(stream)
+def read_csv(file_input):
+    data = file_input.read().decode('UTF-8')
+    stream = io.StringIO(data)
+    return csv.DictReader(stream)
