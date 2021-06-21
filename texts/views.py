@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from twilio.rest import Client
 from .models import Words
-from .csv_loader import reader_from
+from .csv_loader import read_csv
 from .forms import UploadFileForm, UpdateWordsForm
 
 #Load the twilio secrets file.
@@ -37,17 +37,13 @@ def send(request):
     
     client = Client(account_sid, auth_token)
 
-    file = request.FILES['file']
-    data = file.read().decode('UTF-8')
-
-    pass_hash = request.POST['password']
-    if pass_hash == 'out of bananas':
+    if request.POST['password'] == 'out of bananas':
         texts = [client.messages \
             .create(
                 body = Words.objects.first().words,
                 from_ = '+13132514241',
                 to = contact['Phone Number'] 
-            ) for contact in reader_from(data)]
+            ) for contact in read_csv(request.FILES['file'])]
 
         messages.success(request, f'Your messages were sent.')
         return redirect('text-home')
