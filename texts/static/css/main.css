@@ -1,0 +1,10 @@
+.message-display {
+	margin-bottom: 1em;
+}
+
+.message-text {
+	border: 1px dotted black;
+	padding: 1em;
+	margin-bottom: 1em;
+	border-radius: 5px;
+}
