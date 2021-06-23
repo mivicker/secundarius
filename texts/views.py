@@ -1,15 +1,19 @@
 import os
 import json
+import io
+import csv
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from twilio.rest import Client
-from .models import Words
-from .csv_loader import read_csv
+from .models import Words, Log
 from .forms import UploadFileForm, UpdateWordsForm
 
 #Load the twilio secrets file.
 BASE_DIR = os.path.dirname(__file__)
 key = os.path.join(BASE_DIR, "twilio_secrets.json")
+
+with open(key) as f:
+    secrets = json.load(f)
 
 def home(request):
     context = {'words': Words.objects.first(),
@@ -18,7 +22,6 @@ def home(request):
     return render(request, os.path.join('texts', 'home.html'), context)
 
 def edit_words(request):
-        
     context = {
         'form': UpdateWordsForm(initial={'words':Words.objects.first().words})
         }
@@ -29,23 +32,29 @@ def save(request):
     new_words = f.save()
     return redirect('text-home')
 
+def read_csv(file_input):
+    data = file_input.read().decode('UTF-8')
+    stream = io.StringIO(data)
+    return csv.DictReader(stream)
+
+def send_each(words, contacts, client):
+    for contact in contacts:
+        text = client.messages.create(
+            body=words.words,
+            from_='+13132514241',
+            to=contact['Phone Number'])
+        Log.objects.create(
+            sender='13132514241',
+            recipient=contact['Phone Number'][-4:],
+            words=words,
+            status='queued' #This is the typical Twilio api response.
+        )
+
 def send(request):
-    with open(key) as f:
-        secrets = json.load(f)
-    account_sid = secrets['TWILIO_ACCOUNT_SID']
-    auth_token = secrets['TWILIO_AUTH_TOKEN']
-    
-    client = Client(account_sid, auth_token)
+    words = Words.objects.first()    
+    client = Client(secrets['TWILIO_ACCOUNT_SID'],
+        secrets['TWILIO_AUTH_TOKEN'])
+    texts = send_each(words, read_csv(request.FILES['file']), client)
 
-    if request.POST['password'] == 'out of bananas':
-        texts = [client.messages \
-            .create(
-                body = Words.objects.first().words,
-                from_ = '+13132514241',
-                to = contact['Phone Number'] 
-            ) for contact in read_csv(request.FILES['file'])]
-
-        messages.success(request, f'Your messages were sent.')
-        return redirect('text-home')
-    messages.error(request, 'This was the wrong password')
+    messages.success(request, f'Your messages were sent.')
     return redirect('text-home')
