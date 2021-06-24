@@ -21,3 +21,7 @@ class Log(models.Model):
 
     def __str__(self):
         return f'SMS sent on {self.created.date()} to {self.recipient}.'
+
+class Received(models.Model):
+    from_num = models.CharField(max_length=25)
+    content = models.TextField()

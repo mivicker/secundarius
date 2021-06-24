@@ -1,20 +1,14 @@
 import os
-import json
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from django.conf import settings
 from twilio.rest import Client
-from .models import Words, Log
+from django_twilio.decorators import twilio_view
+from .models import Words, Log, Received
 from .forms import UploadFileForm, UpdateWordsForm
 from .handlers import read_csv, send_each
-
-#Load the twilio secrets file.
-BASE_DIR = os.path.dirname(__file__)
-key = os.path.join(BASE_DIR, "twilio_secrets.json")
-
-with open(key) as f:
-    secrets = json.load(f)
 
 @login_required
 def home(request):
@@ -39,8 +33,8 @@ def save(request):
 @login_required
 def send(request):
     words = Words.objects.first()    
-    client = Client(secrets['TWILIO_ACCOUNT_SID'],
-        secrets['TWILIO_AUTH_TOKEN'])
+    client = Client(settings.TWILIO_ACCOUNT_SID,
+        settings.TWILIO_AUTH_TOKEN)
     texts = send_each(words, read_csv(request.FILES['file']), client)
 
     messages.success(request, f'Your messages were sent.')
@@ -51,3 +45,10 @@ def text_logs(request):
     context = {'logs':Log.objects.all()}
     return render(
         request, os.path.join('texts', 'logs.html'), context)
+
+@twilio_view
+def receive(request):
+    content = request.POST['Body']
+    from_ = request.POST['From']
+    r = Received.objects.create(content=content, from_num=from_)
+    return r

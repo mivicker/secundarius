@@ -11,10 +11,16 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import json
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+#Load the twilio secrets file.
+key = os.path.join(BASE_DIR, "twilio_secrets.json")
+
+with open(key) as f:
+    secrets = json.load(f)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -130,3 +136,6 @@ STATIC_URL = '/static/'
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'text-send'
+
+TWILIO_ACCOUNT_SID = secrets['TWILIO_ACCOUNT_SID']
+TWILIO_AUTH_TOKEN = secrets['TWILIO_AUTH_TOKEN']

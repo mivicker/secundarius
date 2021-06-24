@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from texts.views import edit_words, home, save, send, text_logs
+from texts.views import edit_words, home, save, send, text_logs, receive
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,4 +29,5 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(
         template_name='users/logout.html'), name='logout'),
     path('logs/', text_logs, name='logs'),
+    path('receive/', receive, name='recieve'),
 ]
