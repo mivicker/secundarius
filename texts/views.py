@@ -49,6 +49,6 @@ def text_logs(request):
 @twilio_view
 def receive(request):
     content = request.POST['Body']
-    from_ = request.POST['From']
+    from_= request.POST['From']
     r = Received.objects.create(content=content, from_num=from_)
     return r
