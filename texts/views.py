@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from django.conf import settings
 from twilio.rest import Client
+from twilio.twiml import messaging_response
 from .models import Words, Log, Received
 from .forms import UploadFileForm, UpdateWordsForm
 from .handlers import read_csv, send_each
@@ -49,7 +50,5 @@ def text_logs(request):
 def receive(request):
     content = request.values.get('Body', None)
     from_= request.values.get('From', None)
-    receive = Received.objects.create(content=content, from_num=from_)
-    r = Response()
-    r.message(f'Hello you just sent me this:{content}')
+    r = Received.objects.create(content=content, from_num=from_)
     return r
