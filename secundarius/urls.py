@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from texts.views import edit_words, home, save, send
 
 urlpatterns = [
@@ -23,4 +24,8 @@ urlpatterns = [
     path('send', send, name='text-send'),
     path('edit', edit_words, name='edit-words'),
     path('save', save, name='save-words'),
+    path('login/', auth_views.LoginView.as_view(
+        template_name='users/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(
+        template_name='users/logout.html'), name='logout'),
 ]

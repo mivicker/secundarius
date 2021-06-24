@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['mikevickers.pythonanywhere.com', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    'users.apps.UsersConfig',
     'texts.apps.TextsConfig',
     'routes.apps.RoutesConfig',
     'django.contrib.admin',
@@ -126,3 +127,5 @@ MEDIA_ROOT = '/home/mikevickers/secundarius/media'
 MEDIA_URL = '/media/'
 STATIC_ROOT = '/home/mikevickers/secundarius/static'
 STATIC_URL = '/static/'
+
+LOGIN_URL = '/login/'
