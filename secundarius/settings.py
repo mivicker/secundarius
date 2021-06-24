@@ -128,4 +128,5 @@ MEDIA_URL = '/media/'
 STATIC_ROOT = '/home/mikevickers/secundarius/static'
 STATIC_URL = '/static/'
 
-LOGIN_URL = '/login/'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'text-send'

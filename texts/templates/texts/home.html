@@ -8,7 +8,7 @@
 	<p>{{ words.words }}</p>
 	</div>
 	</div>
-	<a href="{% url 'edit-words' %}">Edit this message before sending</a>
+	<a href="{% url 'edit-words' %}">Edit message before sending</a>
 </div>
 <form enctype="multipart/form-data" action="{% url 'text-send' %}" method="POST">
 	{% csrf_token %}
@@ -22,4 +22,5 @@
 	</button>
 	</div>
 </form>
+<p><a href="{% url 'logs' %}">View previously sent texts</a></p>
 {% endblock %}

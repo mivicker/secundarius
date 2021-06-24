@@ -5,7 +5,7 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from twilio.rest import Client
-from .models import Words
+from .models import Words, Log
 from .forms import UploadFileForm, UpdateWordsForm
 from .handlers import read_csv, send_each
 
@@ -45,3 +45,9 @@ def send(request):
 
     messages.success(request, f'Your messages were sent.')
     return redirect('text-home')
+
+@login_required
+def text_logs(request):
+    context = {'logs':Log.objects.all()}
+    return render(
+        request, os.path.join('texts', 'logs.html'), context)

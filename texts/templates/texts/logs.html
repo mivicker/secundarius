@@ -1,0 +1,10 @@
+{% extends 'texts/base.html' %}
+{% block content %}
+{% for log in logs %}
+<a href="{% url 'text-home' %}">Return to send page</a>
+<div class="text-log">
+	<p><strong>{{ log }}</strong></p>
+	<p>{{ log.words }}</p>
+</div>
+{% endfor %}
+{% endblock %}
