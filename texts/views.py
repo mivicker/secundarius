@@ -1,11 +1,10 @@
 import os
 from django.contrib import messages
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from django.conf import settings
 from twilio.rest import Client
-from django_twilio.decorators import twilio_view
 from .models import Words, Log, Received
 from .forms import UploadFileForm, UpdateWordsForm
 from .handlers import read_csv, send_each
@@ -46,10 +45,10 @@ def text_logs(request):
     return render(
         request, os.path.join('texts', 'logs.html'), context)
 
-@twilio_view
+@csrf_exempt
 def receive(request):
-    content = request.POST['Body']
-    from_= request.POST['From']
+    content = request.values.get('Body', None)
+    from_= request.values.get('From', None)
     receive = Received.objects.create(content=content, from_num=from_)
     r = Response()
     r.message(f'Hello you just sent me this:{content}')
