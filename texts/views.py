@@ -50,5 +50,7 @@ def text_logs(request):
 def receive(request):
     content = request.POST['Body']
     from_= request.POST['From']
-    r = Received.objects.create(content=content, from_num=from_)
+    receive = Received.objects.create(content=content, from_num=from_)
+    r = Response()
+    r.message(f'Hello you just sent me this:{content}')
     return r
