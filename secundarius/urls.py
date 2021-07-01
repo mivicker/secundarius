@@ -29,5 +29,5 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(
         template_name='users/logout.html'), name='logout'),
     path('logs/', text_logs, name='logs'),
-    path('receive', receive, name='recieve'),
+    path('receive/', receive, name='recieve'),
 ]
