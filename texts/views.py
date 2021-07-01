@@ -54,4 +54,4 @@ def receive(request):
     from_= request.POST['From']
     r = Received.objects.create(content=content, from_num=from_)
     response = MessagingResponse()
-    return HttpResponse(request, str(response.message("Here is an important message.")))
+    return HttpResponse(str(response.message("Here is an important message.")))
