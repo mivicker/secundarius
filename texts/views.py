@@ -7,7 +7,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from django.conf import settings
 from twilio.rest import Client
-from .models import Words, Log, Received
+from twilio.twiml.messaging_response import MessagingResponse
+from .models import Words, Log
 from .forms import UploadFileForm, UpdateWordsForm
 from .handlers import read_csv, send_each
 
@@ -52,9 +53,5 @@ def receive(request):
     #content = request.values.get('Body', None)
     #from_= request.values.get('From', None)
     #r = Received.objects.create(content=content, from_num=from_)
-    return HttpResponse("""
-    <?xml version="1.0" encoding="UTF-8"?>
-        <response>
-            <message>This is the message</message>
-        </response>
-    """)
+    response = MessagingResponse()
+    return response.message("Here is an important message.")
