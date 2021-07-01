@@ -49,8 +49,8 @@ def text_logs(request):
 
 @csrf_exempt
 def receive(request):
-    content = request.values.get('Body', None)
-    from_= request.values.get('From', None)
+    #content = request.values.get('Body', None)
+    #from_= request.values.get('From', None)
     r = Received.objects.create(content=content, from_num=from_)
     return HttpResponse("""
         <response>
