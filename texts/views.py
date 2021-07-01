@@ -50,8 +50,8 @@ def text_logs(request):
 
 @csrf_exempt
 def receive(request):
-    content = request.values.get('Body', None)
-    from_= request.values.get('From', None)
+    content = request.POST['Body']
+    from_= request.POST['From']
     r = Received.objects.create(content=content, from_num=from_)
     response = MessagingResponse()
     return HttpResponse(request, str(response.message("Here is an important message.")))
