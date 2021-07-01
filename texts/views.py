@@ -1,11 +1,12 @@
 import os
+
+from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from django.conf import settings
 from twilio.rest import Client
-from twilio.twiml import messaging_response
 from .models import Words, Log, Received
 from .forms import UploadFileForm, UpdateWordsForm
 from .handlers import read_csv, send_each
@@ -51,4 +52,8 @@ def receive(request):
     content = request.values.get('Body', None)
     from_= request.values.get('From', None)
     r = Received.objects.create(content=content, from_num=from_)
-    return r
+    return HttpResponse("""
+        <response>
+            <message>This is the message</message>
+        </response>
+    """)
