@@ -53,5 +53,12 @@ def receive(request):
     content = request.POST['Body']
     from_= request.POST['From']
     r = Received.objects.create(content=content, from_num=from_)
-    response = MessagingResponse()
-    return HttpResponse(str(response.message("Here is an important message.")))
+
+    resp = MessagingResponse()
+
+    # Add a text message
+    msg = resp.message("Check out this sweet owl!")
+
+    # Add a picture message
+    msg.media("https://demo.twilio.com/owl.png")
+    return HttpResponse(str(resp))
