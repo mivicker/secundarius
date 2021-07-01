@@ -25,3 +25,8 @@ class Log(models.Model):
 class Received(models.Model):
     from_num = models.CharField(max_length=25)
     content = models.TextField()
+
+    def __str__(self):
+        if len(self.words) > 28:
+            return self.words[:25] + "..."
+        return self.words
