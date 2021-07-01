@@ -53,6 +53,7 @@ def receive(request):
     #from_= request.values.get('From', None)
     #r = Received.objects.create(content=content, from_num=from_)
     return HttpResponse("""
+    <?xml version="1.0" encoding="UTF-8"?>
         <response>
             <message>This is the message</message>
         </response>
