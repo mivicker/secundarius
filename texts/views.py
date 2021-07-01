@@ -51,7 +51,7 @@ def text_logs(request):
 def receive(request):
     #content = request.values.get('Body', None)
     #from_= request.values.get('From', None)
-    r = Received.objects.create(content=content, from_num=from_)
+    #r = Received.objects.create(content=content, from_num=from_)
     return HttpResponse("""
         <response>
             <message>This is the message</message>
