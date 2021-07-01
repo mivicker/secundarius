@@ -56,9 +56,10 @@ def receive(request):
 
     response = MessagingResponse()
 
-    # Add a text message
-    msg = response.message("Check out this sweet owl!")
+    response.message("""
+    PLEASE, DO NOT REPLY TO THIS MESSAGE
+    To get in touch with Gleaners Healthcare Customer Service, please call (313) 725-4878.
+    Reply STOP to opt-out of these messages.
+    """)
 
-    # Add a picture message
-    msg.media("https://demo.twilio.com/owl.png")
     return HttpResponse(str(response))
