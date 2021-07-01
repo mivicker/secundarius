@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 from twilio.rest import Client
 from twilio.twiml.messaging_response import MessagingResponse
-from .models import Words, Log
+from .models import Words, Log, Received
 from .forms import UploadFileForm, UpdateWordsForm
 from .handlers import read_csv, send_each
 
@@ -50,8 +50,8 @@ def text_logs(request):
 
 @csrf_exempt
 def receive(request):
-    #content = request.values.get('Body', None)
-    #from_= request.values.get('From', None)
-    #r = Received.objects.create(content=content, from_num=from_)
+    content = request.values.get('Body', None)
+    from_= request.values.get('From', None)
+    r = Received.objects.create(content=content, from_num=from_)
     response = MessagingResponse()
     return HttpResponse(request, str(response.message("Here is an important message.")))
