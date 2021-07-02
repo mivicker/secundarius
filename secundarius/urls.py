@@ -16,13 +16,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from texts.views import edit_words, home, save, send, text_logs, receive
+from texts.views import (edit_broadcast, edit_reply, home, save, save_reply, send, text_logs, 
+    receive)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home, name='text-home'),
     path('send', send, name='text-send'),
-    path('edit', edit_words, name='edit-words'),
+    path('edit', edit_broadcast, name='edit-words'),
+    path('edit-reply', edit_reply, name='edit-reply'),
     path('save', save, name='save-words'),
     path('login/', auth_views.LoginView.as_view(
         template_name='users/login.html'), name='login'),
@@ -30,4 +32,5 @@ urlpatterns = [
         template_name='users/logout.html'), name='logout'),
     path('logs/', text_logs, name='logs'),
     path('receive/', receive, name='recieve'),
+    path('save-reply', save_reply, name='save-reply'),
 ]

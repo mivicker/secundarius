@@ -2,13 +2,13 @@
 {% block content %}
 <h1>Send a new message</h1>
 <div class="message-display">
-	<h4>Current Message</h4>
+	<h4>Current Message <a class="edit" href="{% url 'edit-words' %}">edit</a></h4>
 	<div class="row">
 	<div class="six columns message-text">
 	<p>{{ words.words }}</p>
 	</div>
 	</div>
-	<a href="{% url 'edit-words' %}">Edit message before sending</a>
+	
 </div>
 <form enctype="multipart/form-data" action="{% url 'text-send' %}" method="POST">
 	{% csrf_token %}
@@ -17,10 +17,17 @@
 	<div>{{ form }}</div>
 	</div>
 	<div>
-	<button type="submit">
+	<button class="button-primary" type="submit">
 		Send this text
 	</button>
 	</div>
 </form>
+
+<h6>Active reply message <a href="{% url 'edit-reply' %}">edit</a></h6>
+<div class="row reply">
+	<div class="six columns">
+		<p>{{ reply.words }}</p>
+	</div>
+</div>
 <p><a href="{% url 'logs' %}">View previously sent texts</a></p>
 {% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'texts/base.html' %}
+{% block content %}
+{% block title %}{% endblock %}
+<form action="{% block url %}{% endblock %}" method="POST">
+	{% csrf_token %}
+	<div>{{ form }}</div>
+	<div>
+		<button type="submit">
+			Update message text
+		</button>
+	</div>
+</form>
+<p><a href="{% url 'text-home' %}">Nevermind</a></p>
+{% endblock content %}

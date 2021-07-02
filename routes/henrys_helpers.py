@@ -23,7 +23,7 @@ def filt_for_day(df, day):
     return df[df["Delivery Date"] == day]
 
 def filt_for_future(df):
-    future_filt = df["Delivery Status"] == 'Future'
+    future_filt = df["Delivery Status"].isin(['Future', 'Holiday-Rescheduled'])
     pick_up_filt = df["Delivery Status"] == "Future - Pick up"
     remaining_filt = ~(future_filt | pick_up_filt)
     if not df[remaining_filt].empty:

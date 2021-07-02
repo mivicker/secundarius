@@ -15,3 +15,12 @@
 	margin-bottom: 1em;
 	border-radius: 5px;
 }
+
+.reply {
+	font-size: smaller;
+	color: gray;
+}
+
+.edit {
+	font-size: smaller;
+}
