@@ -13,7 +13,12 @@ from .handlers import read_csv, send_each
 
 @login_required
 def home(request):
-    context = {'words': Words.objects.first(),
+    if Broadcast.objects.first():
+        words = Broadcast.objects.first()
+    else:
+        words = Broadcast.objects.create(words="Please update this default message.")
+
+    context = {'words': words,
         'form': UploadFileForm
     }
     return render(request, os.path.join('texts', 'home.html'), context)
