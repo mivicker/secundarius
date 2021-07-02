@@ -42,7 +42,7 @@ def edit_reply(request):
     context = {
         'form': UpdateReplyForm(initial={'words':Reply.objects.first().words})
     }
-    return render(request, os.path.join('texts', 'edit.html'), context)
+    return render(request, os.path.join('texts', 'edit-reply.html'), context)
 
 @login_required
 def save(request):
