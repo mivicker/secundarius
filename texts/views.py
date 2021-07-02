@@ -25,12 +25,8 @@ def home(request):
 
 @login_required
 def edit_words(request):
-    if Broadcast.objects.first():
-        initial_words = Broadcast.objects.first().words
-    else:
-        initial_words = ''
     context = {
-        'form': UpdateBroadcastForm(initial={'words':initial_words})
+        'form': UpdateBroadcastForm(initial={'words':Broadcast.objects.first().words})
         }
     return render(request, os.path.join('texts', 'edit.html'), context)
 
