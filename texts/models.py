@@ -5,12 +5,19 @@ class Words(models.Model):
     words = models.TextField()
 
     class Meta:
+        abstract = True
         ordering = ['-created']
 
     def __str__(self):
         if len(self.words) > 28:
             return self.words[:25] + "..."
         return self.words
+
+class Broadcast(Words):
+    pass
+
+class Reply(Words):
+    pass
 
 class Log(models.Model):
     created = models.DateTimeField(auto_now=True)

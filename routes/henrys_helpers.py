@@ -12,7 +12,7 @@ def condition_columns(df):
        'Call Status', 'CustomerServiceAssignment', 'DairyFree',
        'Delivery Date', 'Delivery Notes', 'Delivery Status', 'DeliveryDay',
        'DeliveryNumber', 'DeliveryTime', 'DeliveryZone', 'Driver Notes',
-       'First Name', 'HealthPlan', 'MainContact', 'Member ID', 'PeanutFree',
+       'First Name', 'Healthcare Partner', 'MainContact', 'Member ID', 'PeanutFree',
        'Phone', 'Primary Language',  'TextOptIn',]]
 
 def check_box_types(df):
@@ -32,7 +32,7 @@ def filt_for_future(df):
     return df[future_filt], df[pick_up_filt]
 
 def split_covenant(df):
-    covenant_filt = df['HealthPlan'] == 'Covenant'
+    covenant_filt = df['Healthcare Partner'] == 'Covenant'
     return df[covenant_filt], df[~covenant_filt]
 
 def split_am_pm(df):
@@ -93,7 +93,7 @@ def fill_covenant_row(box, date):
     row = {
         'Member ID': '00000000', 
         'MainContact': 'Centering Pregnancy', 
-        'HealthPlan': 'Covenant', 
+        'Healthcare Partner': 'Covenant', 
         'Box': box, 
         'PeanutFree': 'No', 
         'DairyFree': 'No',
