@@ -1,6 +1,10 @@
 from django.contrib import admin
-from .models import Words
+from .models import Broadcast, Reply, Words
 
-@admin.register(Words)
-class WordsAdmin(admin.ModelAdmin):
+@admin.register(Broadcast)
+class BroadcastAdmin(admin.ModelAdmin):
+	pass
+
+@admin.register(Reply)
+class ReplyAdmin(admin.ModelAdmin):
 	pass

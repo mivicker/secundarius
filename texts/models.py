@@ -23,7 +23,7 @@ class Log(models.Model):
     created = models.DateTimeField(auto_now=True)
     sender = models.CharField(max_length=11)
     recipient = models.CharField(max_length=11)
-    words = models.ForeignKey(Words, on_delete=models.SET_NULL, null=True)
+    words = models.ForeignKey(Broadcast, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=25)
 
     def __str__(self):
