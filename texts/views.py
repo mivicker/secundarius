@@ -8,7 +8,7 @@ from django.conf import settings
 from twilio.rest import Client
 from twilio.twiml.messaging_response import MessagingResponse
 from .models import Broadcast, Words, Log, Received
-from .forms import UploadFileForm, UpdateWordsForm
+from .forms import UploadFileForm, UpdateBroadcastForm
 from .handlers import read_csv, send_each
 
 @login_required
@@ -25,13 +25,13 @@ def edit_words(request):
     else:
         initial_words = ''
     context = {
-        'form': UpdateWordsForm(initial={'words':initial_words})
+        'form': UpdateBroadcastForm(initial={'words':initial_words})
         }
     return render(request, os.path.join('texts', 'edit.html'), context)
 
 @login_required
 def save(request):
-    f = UpdateWordsForm(request.POST)
+    f = UpdateBroadcastForm(request.POST)
     new_words = f.save()
     return redirect('text-home')
 
