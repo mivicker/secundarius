@@ -2,7 +2,6 @@
 {% block content %}
 <a href="{% url 'text-home' %}">Return to send page</a>
 {% for log in logs %}
-
 <div class="text-log">
 	<p><strong>{{ log }}</strong></p>
 	<p>{{ log.words }}</p>
