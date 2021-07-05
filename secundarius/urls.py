@@ -32,5 +32,5 @@ urlpatterns = [
         template_name='users/logout.html'), name='logout'),
     path('logs/', text_logs, name='logs'),
     path('receive/', receive, name='recieve'),
-    path('save-reply', save_reply, name='save-reply'),
+    path('save-reply/', save_reply, name='save-reply'),
 ]

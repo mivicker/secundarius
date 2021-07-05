@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Words(models.Model):
     created = models.DateTimeField(auto_now=True)
@@ -14,7 +15,7 @@ class Words(models.Model):
         return self.words
 
 class Broadcast(Words):
-    pass
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
 class Reply(Words):
     pass
