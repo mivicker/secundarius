@@ -35,6 +35,6 @@ class Received(models.Model):
     content = models.TextField()
 
     def __str__(self):
-        if len(self.words) > 28:
+        if len(self.content) > 28:
             return self.content[:25] + "..."
         return self.content
