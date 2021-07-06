@@ -37,6 +37,7 @@ ALLOWED_HOSTS = ['mikevickers.pythonanywhere.com', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    'counts.apps.CountsConfig',
     'users.apps.UsersConfig',
     'texts.apps.TextsConfig',
     'routes.apps.RoutesConfig',
