@@ -36,5 +36,5 @@ class Received(models.Model):
 
     def __str__(self):
         if len(self.words) > 28:
-            return self.words[:25] + "..."
-        return self.words
+            return self.content[:25] + "..."
+        return self.content
