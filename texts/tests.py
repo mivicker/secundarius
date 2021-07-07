@@ -28,6 +28,9 @@ class SendViewTest(TestCase):
         ]
 
     def test_read_csv(self):
+        """
+        Reads a csv into a dictionary.
+        """
         file = SimpleUploadedFile('recipients.csv', 
             '\n'.join(self.recipients_csv).encode('utf-8'), 
             content_type="csv")
@@ -37,6 +40,10 @@ class SendViewTest(TestCase):
         recipients_dict == self.recipients_dict
 
     def test_send_each(self):
+        """
+        This feels a little like testing implementation,
+        but the goal of this func is to hit the twilio api.
+        """
         fake_twilio = Mock()
         words = Words.objects.create(words="This is the text sent out.")
         calls = [call.messages.create(

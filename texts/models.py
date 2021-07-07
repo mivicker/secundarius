@@ -27,8 +27,12 @@ class Log(models.Model):
     words = models.ForeignKey(Broadcast, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=25)
 
+    class Meta:
+        ordering = ['-created']
+
     def __str__(self):
         return f'SMS sent on {self.created.date()} to {self.recipient}.'
+
 
 class Received(models.Model):
     from_num = models.CharField(max_length=25)
