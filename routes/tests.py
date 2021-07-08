@@ -24,7 +24,6 @@ class TestHelpers(TestCase):
         with self.assertRaises(ValueError): 
             validate_arguments(args)
 
-
 class TestSharepointless(TestCase):
 
     def test_get_app_password(self):
@@ -65,7 +64,7 @@ class TestViews(TestCase):
         # arrange
 	# act - post request with no form data
 	# assert - that the info from the next business day loads
-        
+        pass
 
     def test_selector_with_input(self):
         pass

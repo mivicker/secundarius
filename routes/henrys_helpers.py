@@ -7,13 +7,12 @@ from . import config
 #Figure out what code is coupled to instance data and what
 #in a different application would be a database call.
 
-def condition_columns(df):
-    return df[['Delivery ID', 'Address', 'City', 'State', 'ZIP', 'Box Menu', 'Box Size', 'Box Type',
-       'Call Status', 'CustomerServiceAssignment', 'DairyFree',
-       'Delivery Date', 'Delivery Notes', 'Delivery Status', 'DeliveryDay',
-       'DeliveryNumber', 'DeliveryTime', 'DeliveryZone', 'Driver Notes',
-       'First Name', 'Healthcare Partner', 'MainContact', 'Member ID', 'PeanutFree',
-       'Phone', 'Primary Language',  'TextOptIn',]]
+def condition_columns(df, ordered_part=['Delivery ID', 'Address', 'City', 'State', 'ZIP']):
+    columns = df.columns
+    remaining = list(filter(lambda col: col not in ordered_part, columns))
+    final_order = ordered_part + remaining
+
+    return df[final_order]
 
 def check_box_types(df):
     return df["Box Type"].isnull().any()
