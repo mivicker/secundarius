@@ -1,36 +1,42 @@
 import pandas as pd
 from pathlib import Path
+import json
 
-# This script converts the menumatrix that was developed
-# during Henry's groceries planning phase to three
-# json files that can be loaded into the database.
+def serialize(records_list, table_name):
+    return [{'model': table_name, 
+     'pk': i,
+     'fields': fields} for i, fields in enumerate(records_list)]
 
+def dump_records(dictionary, filename):
+    with open(filename, 'w') as f:
+        f.write(json.dumps(dictionary))
+
+#Load the file and clean up the names.
 menus = pd.read_csv(
-    Path(Path.home(),
-     'Gleaners Community Food Bank', 
-     'Healthcare Programs - Healthcare Working Directory', 
-     'menumatrix.csv'))
+    Path(Path.home(), 'Gleaners Community Food Bank', 
+    'Healthcare Programs - Healthcare Working Directory', 'menumatrix.csv'))
 
 menus = menus.rename(mapper={'Item Code':'item_code', 
                              'Description':'description', 
                              'Storage':'storage'}, axis=1)
- 
+
+#Wraps the records in the necessary structure. MUST BE A FRESH DB FOR THIS.
+
 #Create the join table records
 melted = menus.melt(id_vars='item_code', 
                     value_vars = menus.columns[3:], 
                     var_name='menu', 
                     value_name='quantity')
-melted['pk'] = range(len(melted))
-melted[melted['quantity'] != 0].to_json(
-	'menu_product_join.json', orient='records')
+join_records = melted[melted['quantity'] != 0].to_dict(orient='records')
 
 #Create product records
 products = menus[menus.columns[:3]].copy()
-products['pk'] = range(len(products))
-products.to_json('products.json', orient='records')
+product_records = products.to_dict(orient='records')
 
 #Create menu records
-(pd.concat([pd.Series(menus.columns[3:]), pd.Series(range(len(menus)))], axis=1)
-    .rename(mapper={0: 'description', 1: 'pk'}, axis=1)
-    .dropna()
-    .to_json('menus.json', orient='records'))
+menu_records = [{'description': description} 
+                for description in menus.columns[3:]]
+
+dump_records(serialize(menu_records, 'counts.menus'), 'menus.json')
+dump_records(serialize(product_records, 'counts.records'), 'products.json')
+dump_records(serialize(join_records, 'counts.share'), 'menu_product_join.json'))
