@@ -2,6 +2,10 @@ import pandas as pd
 from pathlib import Path
 import json
 
+# This is broken code, but it shows the process by which I created
+# the json necessary to be loaded into the django database from
+# the planning documents.
+
 def serialize(records_list, table_name):
     return [{'model': table_name, 
      'pk': i,
@@ -39,4 +43,22 @@ menu_records = [{'description': description}
 
 dump_records(serialize(menu_records, 'counts.menus'), 'menus.json')
 dump_records(serialize(product_records, 'counts.records'), 'products.json')
-dump_records(serialize(join_records, 'counts.share'), 'menu_product_join.json'))
+
+#Once these are completed, them we can run this code
+
+base_path = Path(Path.home(), 'Desktop', 'secundarius')
+
+with open(Path(base_path, 'product_mapper.json'), 'r') as f:
+    prod_mapper = json.load(f)
+    
+with open(Path(base_path, 'menu_mapper.json'), 'r') as f:
+    menu_mapper = json.load(f)
+
+def update(record, field, value):
+    record[field] = value
+    return record
+
+with_menu_pks = [update(record, 'menu', menu_mapper[record['menu']]) for record in join_records]
+share_records = [update(record, 'product', prod_mapper[record['product']]) for record in join_records]
+
+dump_records(serialize(share_records, 'counts.share'), 'shares.json')
