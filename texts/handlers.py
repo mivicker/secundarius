@@ -23,3 +23,6 @@ def send_each(words, contacts, client):
             reply=reply,
             status='queued' #This is the typical Twilio api response.
         )
+
+def lookup_reply(recipient):
+    return Log.objects.filter(recipient=recipient).first().reply

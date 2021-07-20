@@ -9,7 +9,7 @@ from twilio.rest import Client
 from twilio.twiml.messaging_response import MessagingResponse
 from .models import Broadcast, Reply, Log, Received
 from .forms import UpdateReplyForm, UploadFileForm, UpdateBroadcastForm
-from .handlers import read_csv, send_each
+from .handlers import read_csv, send_each, lookup_reply
 
 @login_required
 def home(request):
@@ -77,8 +77,7 @@ def receive(request):
     content = request.POST['Body']
     from_= request.POST['From']
     r = Received.objects.create(content=content, from_num=from_)
-    
-    reply = Reply.objects.first()
+    reply = lookup_reply(request.POST['From'])
 
     response = MessagingResponse()
 
