@@ -1,6 +1,6 @@
 import io
 import csv
-from .models import Log
+from .models import Log, Reply
 
 
 def read_csv(file_input):
@@ -9,6 +9,8 @@ def read_csv(file_input):
     return csv.DictReader(stream)
 
 def send_each(words, contacts, client):
+    reply = Reply.objects.first()
+
     for contact in contacts:
         text = client.messages.create(
             body=words.words,
@@ -16,7 +18,8 @@ def send_each(words, contacts, client):
             to=contact['Phone Number'])
         Log.objects.create(
             sender='13132514241',
-            recipient=contact['Phone Number'][-4:],
+            recipient=contact['Phone Number'],
             words=words,
+            reply=reply,
             status='queued' #This is the typical Twilio api response.
         )

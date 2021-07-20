@@ -44,7 +44,7 @@ if __name__ == "__main__":
         folder = make_date_directory(day, 'AM', working_path)
         am_path = os.path.join(folder, 'AllDeliveriesAM.csv')
         #save the csv
-        if check_box_types(am):
+        if am["Box Type"].isnull().any():
             print("AM is missing box types. Fix this before going forward.")
         am.to_csv(am_path)
     if not pm.empty:

@@ -18,6 +18,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from texts.views import (edit_broadcast, edit_reply, home, save, save_reply, send, text_logs, 
     receive)
+from counts.views import froz_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,4 +34,5 @@ urlpatterns = [
     path('logs/', text_logs, name='logs'),
     path('receive/', receive, name='recieve'),
     path('save-reply/', save_reply, name='save-reply'),
+    path('froz', froz_view, name='froz'),
 ]

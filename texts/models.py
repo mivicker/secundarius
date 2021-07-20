@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.deletion import SET_NULL
+from django.db.models.fields.related import OneToOneField
 
 class Words(models.Model):
     created = models.DateTimeField(auto_now=True)
@@ -26,6 +28,7 @@ class Log(models.Model):
     recipient = models.CharField(max_length=11)
     words = models.ForeignKey(Broadcast, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=25)
+    reply = models.ForeignKey(Reply, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         ordering = ['-created']
