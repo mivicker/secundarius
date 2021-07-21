@@ -1,5 +1,6 @@
 import io
 import csv
+import settings.TWILIO_NUMBER as phone_number
 from .models import Log, Reply
 
 
@@ -14,10 +15,10 @@ def send_each(words, contacts, client):
     for contact in contacts:
         text = client.messages.create(
             body=words.words,
-            from_='+13132514241',
+            from_=f'+{phone_number}',
             to=contact['Phone Number'])
         Log.objects.create(
-            sender='13132514241',
+            sender=phone_number,
             recipient=contact['Phone Number'],
             words=words,
             reply=reply,
