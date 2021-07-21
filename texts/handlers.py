@@ -1,6 +1,6 @@
 import io
 import csv
-import settings.TWILIO_NUMBER as phone_number
+from django.conf import settings
 from .models import Log, Reply
 
 
@@ -10,6 +10,7 @@ def read_csv(file_input):
     return csv.DictReader(stream)
 
 def send_each(words, contacts, client):
+    phone_number = settings.TWILIO_NUMBER
     reply = Reply.objects.first()
 
     for contact in contacts:
