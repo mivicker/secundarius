@@ -17,7 +17,7 @@ import json
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #Load the twilio secrets file.
-key = os.path.join(BASE_DIR, "twilio_secrets.json")
+key = os.path.join(BASE_DIR, "secrets.json")
 
 with open(key) as f:
     secrets = json.load(f)
@@ -26,13 +26,12 @@ with open(key) as f:
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '@sm4(au6@(iobk%#@%cxs#x8#ccn0m1@nma-ew6y(@j!qpuz)z'
+SECRET_KEY = secrets["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = secrets["DEBUG"]
 
-ALLOWED_HOSTS = ['mikevickers.pythonanywhere.com', '127.0.0.1']
-
+ALLOWED_HOSTS = secrets["ALLOWED_HOSTS"]
 
 # Application definition
 

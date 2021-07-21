@@ -2,5 +2,5 @@ env
 db.sqlite3
 config.py
 *.pyc
-twilio_secrets.json
+secrets.json
 __pycache__
