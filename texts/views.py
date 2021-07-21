@@ -77,7 +77,7 @@ def receive(request):
     content = request.POST['Body']
     from_= request.POST['From']
     r = Received.objects.create(content=content, from_num=from_)
-    reply = lookup_reply(request.POST['From'])
+    reply = Reply.objects.first()
 
     response = MessagingResponse()
 
