@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Your page title here :)</title>
+        <link rel="stylesheet" href="/static/print.css">
+    </head>
+    <body>
+        {% for stop in order %}
+        <div class="order">
+           <div class="client-info">
+                <div id="date"><p>{{ stop.delivery_date }}</p></div>
+                <div id="time"><p>{{ stop.delivery_time }}</p></div>
+                <div id="route"><p>Route</p></div>
+                <div id="stop"><p>Stop</p></div>
+                <div id="box-type"><h1>{{ stop.box_type }}</h1></div>
+                <div id="menu"><h1>{{ stop.box_menu }}</h1></div>
+                <div id="box-size"><h1>{{ stop.box_size }}</h1></div>
+                <div id="route-name"><h1>{{ stop.route_num }}</h1></div>
+                <div id="stop-number"><h1>{{ stop.stop_num }}</h1></div>
+                <div id="adjustments"><p>Adjustments</p></div>
+                <div id="health-plan"><p>Health Plan</p></div>
+                <div id="health-plan-text"><p>{{ stop.healthcare_partner }}</p></div>
+                <div id="adjustment-text">
+                    <p>{% if stop.deliverynumber == 1 %}
+                        FIRST DELIVERY
+                        {% else %}
+                        {% endif %}
+                        {% if stop.adjustments %}
+                        {{ stop.adjustments }}
+                        {% else %}
+                        {% endif %}
+                    </p>
+                </div>
+                <div id="member-id"><p>Member ID</p></div>
+                <div id="member-id-text"><p>{{ stop.member_id }}</p></div>
+                <div id="main-contact"><p>Main Contact</p></div>
+                <div id="main-contact-text"><p>{{ stop.member_id }}</p></div>
+            </div>
+            <div id="delivery-notes">
+                <p>{{ stop.delivery_notes }}</p>
+            </div>
+            <div id="products">
+                {% for rack in stop.racks %}
+                {% if rack == 'Dock' %}
+                <div id="beam"><p>Pack day of</p></div>
+                {% endif %}
+                <div id="rack-name">
+                    <p>{{ rack }}</p>
+                        {% if rack == 'Dock' %}
+                        — FROZEN BIN {{ stop.froz_bin }}
+                        {% endif %}
+                    </p>
+                </div>
+                <div id="quantity">
+                    <p>Quantity</p>
+                </div>
+                    {% for item in rack.items %}
+                    <div id="item-code">
+                        <p>{{ item.item_code }}</p>
+                    </div>
+                    <div id="description">
+                        <p>{{item.description }}</p>
+                    </div>
+                    <div id="quantity-text">
+                        <p>{{ item.quantity }}</p>
+                    </div>
+                    <div id="check"></div>
+
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            <div id="info-line">Gleaners Healthcare Programs Warehouse Fulfillment Ticket</div>
+        </div>
+        {% endfor %}
+    </body>
+</html>

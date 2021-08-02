@@ -18,7 +18,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from texts.views import (edit_broadcast, edit_reply, home, save, save_reply, send, text_logs, 
     receive)
-from counts.views import froz_view
+from routes.views import csv_drop_off, documents_menu, fulfillment_tickets, post_csv
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,5 +34,8 @@ urlpatterns = [
     path('logs/', text_logs, name='logs'),
     path('receive/', receive, name='recieve'),
     path('save-reply/', save_reply, name='save-reply'),
-    path('froz', froz_view, name='froz'),
+    path('drop-order/', csv_drop_off, name='drop-off'),
+    path('post-csv/', post_csv, name='post-csv'),
+    path('doc-menu/', documents_menu, name='doc-menu'),
+    path('fullfillment/', fulfillment_tickets, name='pack-tickets'),
 ]

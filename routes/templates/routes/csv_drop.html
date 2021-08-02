@@ -1,0 +1,15 @@
+{% extends 'texts/base.html' %}
+{% block content %}
+<form enctype="multipart/form-data" action="{% url 'post-csv' %}" method="POST">
+	{% csrf_token %}
+	<div class="file-selector">
+		<h4>Upload routes csv</h4>
+	<div>{{ form }}</div>
+	</div>
+	<div>
+	<button class="button-primary" type="submit">
+		Generate fulfillment tickets
+	</button>
+	</div>
+</form>
+{% endblock %}

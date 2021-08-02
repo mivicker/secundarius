@@ -1,0 +1,30 @@
+"""
+{
+    date
+    time
+    routes: [
+        {
+            route_num
+            driver
+            stops: [
+                {
+                    ...stop data ...
+                    racks: [
+                        {
+                            rack_name
+                            products: [
+                                {
+                                    item_code
+                                    description
+                                    quantity
+                                }
+                            ]
+                        }
+                    ]        
+                }
+            ]
+        }
+    ]
+}
+
+"""
