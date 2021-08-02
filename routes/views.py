@@ -17,7 +17,7 @@ def fulfillment_tickets(request):
     file = request.session['order']
     order_dictionary = file
     order = build_fulfillment_context(json.loads(order_dictionary))
-    return render(request, 'routes/simpleprint.html', context={'order': order})
+    return render(request, 'routes/fulfillment.html', context={'order': order})
 
 """
 def route_lists(request):

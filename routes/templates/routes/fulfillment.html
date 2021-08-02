@@ -2,14 +2,14 @@
 <html>
     <head>
         <title>Your page title here :)</title>
-        <link rel="stylesheet" href="/static/print.css">
+        <link rel="stylesheet" href="/static/routes/css/print.css">
     </head>
     <body>
         {% for stop in order %}
         <div class="order">
            <div class="client-info">
                 <div id="date"><p>{{ stop.delivery_date }}</p></div>
-                <div id="time"><p>{{ stop.delivery_time }}</p></div>
+                <div id="time"><p>{{ stop.deliverytime }}</p></div>
                 <div id="route"><p>Route</p></div>
                 <div id="stop"><p>Stop</p></div>
                 <div id="box-type"><h1>{{ stop.box_type }}</h1></div>
@@ -34,18 +34,18 @@
                 <div id="member-id"><p>Member ID</p></div>
                 <div id="member-id-text"><p>{{ stop.member_id }}</p></div>
                 <div id="main-contact"><p>Main Contact</p></div>
-                <div id="main-contact-text"><p>{{ stop.member_id }}</p></div>
+                <div id="main-contact-text"><p>{{ stop.maincontact }}</p></div>
             </div>
             <div id="delivery-notes">
                 <p>{{ stop.delivery_notes }}</p>
             </div>
             <div id="products">
                 {% for rack in stop.racks %}
-                {% if rack == 'Dock' %}
+                {% if rack.rack_name == 'Dock' %}
                 <div id="beam"><p>Pack day of</p></div>
                 {% endif %}
                 <div id="rack-name">
-                    <p>{{ rack }}</p>
+                    <p>{{ rack.rack_name }}</p>
                         {% if rack == 'Dock' %}
                         — FROZEN BIN {{ stop.froz_bin }}
                         {% endif %}
@@ -54,15 +54,15 @@
                 <div id="quantity">
                     <p>Quantity</p>
                 </div>
-                    {% for item in rack.items %}
+                    {% for product in rack.products %}
                     <div id="item-code">
-                        <p>{{ item.item_code }}</p>
+                        <p>{{ product.item_code }}</p>
                     </div>
                     <div id="description">
-                        <p>{{item.description }}</p>
+                        <p>{{ product.description }}</p>
                     </div>
                     <div id="quantity-text">
-                        <p>{{ item.quantity }}</p>
+                        <p>{{ product.quantity }}</p>
                     </div>
                     <div id="check"></div>
 

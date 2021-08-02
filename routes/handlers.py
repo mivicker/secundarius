@@ -1,8 +1,9 @@
 import csv
 import io
+import string
 import re
 from counts.models import Share, Menu, Product
-from .functional import group_dictionaries, pipe 
+from .functional import dict_filter, group_dictionaries, pipe, mapp 
 
 DISPLAY_ORDER = ['Dry Rack 1',
             'Dry Rack 2',
@@ -79,6 +80,7 @@ def fill_racks(stop: dict) -> list:
         dump_menu,
         *exchangers, # applies all product exchanges
         *adders, # applies all product additions
+        dict_filter('quantity', lambda x: x != 0),
         lambda x: group_racks(x, DISPLAY_ORDER),
     )
 
@@ -93,12 +95,21 @@ def attach_menus_to_stops(stops:list) -> list:
     
     return stops
 
+def route_num_to_letter(name):
+    _, num = name.split()
+    index = int(num) - 1
+    return string.ascii_uppercase[index]
+
+def change_route_name(stop):
+    stop['route_num'] = route_num_to_letter(stop['route_num']) 
+
 def build_fulfillment_context(order):
     """
     The main builder that delivers the data tree.
     """
     return pipe(order,
-        lambda ord: [change_keys(stop) for stop in ord],
+        mapp(change_keys)(order), # Mapp is curried unlike map.
+        mapp(change_route_name)(order), 
         lambda lst: list(filter(
             lambda stop: stop['route_num'] != 'DISMISSED REQUEST', lst)),
         attach_menus_to_stops)
@@ -115,8 +126,8 @@ def get_exchanges(stop_data:dict, exchange_dict:dict) -> list:
             exchanges += exchange_dict[exchange]
     return exchanges
 
-def plug_share(product):
-    return dump_product(Share(product=Product.objects.get(item_code=product), 
+def plug_share(item_code):
+    return dump_product(Share(product=Product.objects.get(item_code=item_code), 
                  menu=Menu(description='dummy_menu'),
                  quantity=0))
 
@@ -140,7 +151,7 @@ def make_exchange_func(to_remove: str, to_add: str, ratio: int):
         return indexed_menu
     return exchange
 
-def build_exchangers(stop, exchanges_dict:dict) -> dict:
+def build_exchangers(stop, exchanges_dict:dict) -> list:
     """
     Builds and applies the appropriate series of exchanges to the menu.
     """
@@ -164,16 +175,16 @@ def build_addition_func_for(to_add: str, quantity: int):
 
         # See note above
         
-        indexed_menu[to_add]['quantity'] += quantity 
+        indexed_menu[to_add]['quantity'] = indexed_menu[to_add]['quantity'] + quantity
         return indexed_menu
     return add_to
 
-def build_adders(stop, additions_dict:dict) -> dict:
+def build_adders(stop, additions_dict:dict):
     """
-    Takes a menu dictionary as input and adds each product from the list of
-    additions provided. The additions dict maps the additions keywords to
-    specific item IDs and quantities. 
+    Finds necessary additions from hash tags in notes,
+    returns a list of add functions
     """
     additions = get_additions_from(stop['delivery_notes'])
-    return  [build_addition_func_for(*additions_dict[product]) 
+    adders =  [build_addition_func_for(*additions_dict[product]) 
               for product in additions]
+    return adders

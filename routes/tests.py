@@ -1,7 +1,7 @@
 from itertools import chain
-from routes.functional import group_dictionaries
+from routes.functional import group_dictionaries, lookup_record
 from django.test import TestCase
-from .handlers import dump_menu, group_racks, fill_racks, string_box
+from .handlers import dump_menu, get_additions_from, group_racks, fill_racks, string_box
 from counts.models import Menu, Product, Share
 
 class TestAttachMenu(TestCase):
@@ -10,15 +10,16 @@ class TestAttachMenu(TestCase):
         noodles = Product.objects.create(item_code='010101', description='Noodles', storage='Dry Rack 1')
         eggs = Product.objects.create(item_code='020202', description='Eggs', storage='Cooler Rack')
         tomato_sauce = Product.objects.create(item_code='0000000', description='Tomato Sauce', storage='Dry Rack 1')
+        half_gal = Product.objects.create(item_code='MG1186', description='1/2 Gal', storage='Cooler Rack')
         Share.objects.create(menu=menu, product=noodles, quantity=2)
         Share.objects.create(menu=menu, product=eggs, quantity=4)
         Share.objects.create(menu=menu, product=tomato_sauce, quantity=120)
+        Share.objects.create(menu=menu, product=half_gal, quantity=2)
         Product.objects.create(item_code='MG1018', description='Peanut Butter', storage='Dry Rack 2')
-        Product.objects.create(item_code='MG1186', description='1/2 Gal', storage='Cooler Rack')
         Product.objects.create(item_code='MG1063', description='Whole Gal', storage='Cooler')
         Product.objects.create(item_code='MG1187', description='Almond', storage='Dry Rack 1')
         Product.objects.create(item_code='MG1006', description='Pinto Beans', storage='Dry Rack 1')
-        Product.objects.create(item_code='MG1380', description='Chicken', storage='Frozen Rack')
+        Product.objects.create(item_code='MG1380', description='Chicken', storage='Dock')
 
     def test_string_box(self):
         obj = {'box_type': 'Standard', 'box_size': 'Large', 'box_menu': 'D'}
@@ -75,7 +76,54 @@ class TestAttachMenu(TestCase):
         self.assertNotEqual(grouped[254][0]['B'], grouped[253][0]['B'])
 
     def test_additions(self):
-        pass
+        test_stop = {'box_type':'Standard', 
+                     'box_menu': 'A', 
+                     'box_size': 'Small', 
+                     'delivery_notes': '#AddChickenBreast', 
+                     'peanutfree': 'No', 
+                     'dairyfree': 'Yes'}
+
+        racks = fill_racks(test_stop)
+
+        all_products = list(chain.from_iterable([rack['products'] for rack in racks]))
+        product = lookup_record(all_products, 'item_code', 'MG1380')
+         
+        self.assertEqual(product['quantity'], 1)
+    
+    def test_get_additions(self):
+        delivery_notes = "front door. knock on the door #AddChicken #AddCrunchwrapSupreme"
+
+        additions = get_additions_from(delivery_notes)
+
+        self.assertIn('AddChicken', additions)
+        self.assertIn('AddCrunchwrapSupreme', additions)
 
     def test_substitutions(self):
-        pass
+        test_stop = {'box_type':'Standard', 
+                     'box_menu': 'A', 
+                     'box_size': 'Small', 
+                     'delivery_notes': '', 
+                     'peanutfree': 'No', 
+                     'dairyfree': 'Yes'}
+
+        racks = fill_racks(test_stop)
+
+        all_products = list(chain.from_iterable([rack['products'] for rack in racks]))
+
+        milk = lookup_record(all_products, 'item_code', 'MG1186')
+        almond = lookup_record(all_products, 'item_code', 'MG1187')
+
+        self.assertEqual(almond['quantity'], 2)
+        self.assertEqual(milk['quantity'], 0)
+
+    def test_lookup_record(self):
+        dicts = [
+            {'A': 254, 'B': 360, 'C': 5777},
+            {'A': 254, 'B': 360, 'C': 5777},
+            {'A': 254, 'B': 0, 'C': 0},
+            {'A': 253, 'B': 361, 'C': 5777},
+        ]
+
+        record = lookup_record(dicts, 'B', 361)
+
+        self.assertDictEqual(record, dicts[-1])

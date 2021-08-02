@@ -23,3 +23,19 @@ def group_dictionaries(dictionaries: list, group_key: str) -> dict:
         result[dictionary[group_key]].append(dictionary.copy())
         
     return dict(result)
+
+def lookup_record(records:list, key, value) -> dict:
+    """Returns first dictionary in a list where the key equals value"""
+    for record in records:
+        if record[key] == value:
+            return record
+
+def mapp(func, *args):
+    def apply_over(iterable):
+        return [func(item, *args) for item in iterable]
+    return apply_over
+
+def dict_filter(key, condition):
+    def filterer(dict_):
+        return {key: val for key, val in dict_.items() if condition(val)}
+    return filterer
