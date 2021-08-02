@@ -1,7 +1,8 @@
 from itertools import chain
-from routes.functional import group_dictionaries, lookup_record
+from .functional import group_dictionaries, lookup_record, mapp
 from django.test import TestCase
-from .handlers import dump_menu, get_additions_from, group_racks, fill_racks, string_box
+from .handlers import (dump_menu, get_additions_from, group_racks, 
+    fill_racks, string_box, change_keys)
 from counts.models import Menu, Product, Share
 
 class TestAttachMenu(TestCase):
@@ -114,7 +115,6 @@ class TestAttachMenu(TestCase):
         almond = lookup_record(all_products, 'item_code', 'MG1187')
 
         self.assertEqual(almond['quantity'], 2)
-        self.assertEqual(milk['quantity'], 0)
 
     def test_lookup_record(self):
         dicts = [
@@ -127,3 +127,35 @@ class TestAttachMenu(TestCase):
         record = lookup_record(dicts, 'B', 361)
 
         self.assertDictEqual(record, dicts[-1])
+
+    def test_mapp_no_args(self):
+        func = lambda x: x + 2
+        iterable = [1,2,3,4,5]
+
+        result = mapp(func)(iterable)
+
+        self.assertEqual(result, [3,4,5,6,7])
+
+    def test_mapp_args(self):
+        func = lambda x, y: x + y
+        iterable = [1,2,3,4,5]
+
+        result = mapp(func, 2)(iterable)
+
+        self.assertEqual(result, [3,4,5,6,7])
+
+    def test_change_keys(self):
+        test_obj = {'Item': 'gold', 'OBJECT': 'silver'}
+
+        result = change_keys(test_obj)
+        
+        self.assertEqual(['item', 'object'], list(result.keys()))
+
+    def test_mapp_keys(self):
+        test_objs = [{'Rock Salt': 'gold', 'OBJECT': 'silver'},
+                     {'Item': 'rock', 'OBJECT': 'diamond'}]
+
+        result = mapp(change_keys)(test_objs)
+
+        self.assertEqual(['rock_salt', 'object'], list(result[0].keys()))
+        self.assertEqual(['item', 'object'], list(result[1].keys()))

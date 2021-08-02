@@ -35,7 +35,13 @@ def mapp(func, *args):
         return [func(item, *args) for item in iterable]
     return apply_over
 
-def dict_filter(key, condition):
-    def filterer(dict_):
-        return {key: val for key, val in dict_.items() if condition(val)}
+def dict_map(func, *args):
+    def apply_over(dictionary):
+        return {key: func(val, *args) for key, val in dictionary.items()}
+    return apply_over
+
+def dict_filter(test_key, condition):
+    """This abstraction is off."""
+    def filterer(record):
+        return {key: val for key, val in record.items() if condition(val[test_key])}
     return filterer

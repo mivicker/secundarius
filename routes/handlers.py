@@ -26,6 +26,84 @@ ADDITIONS_DICT = {
     'AddBananas': ('MG0030', 1),
 }
 
+def get_additions_from(notes: str) -> list:
+    """
+    Returned hash-tagged phrases from delivery notes.
+    """
+    return re.findall(r'#([A-Za-z]+)', notes)
+
+def build_addition_func(to_add: str, quantity: int):
+    """
+    Returns a function that adds a given quantity to a given product.
+    """
+    def add_to(indexed_menu):
+
+        if not indexed_menu.get(to_add):
+            indexed_menu[to_add] = plug_share(to_add)
+
+        # See note above
+        
+        indexed_menu[to_add]['quantity'] = indexed_menu[to_add]['quantity'] + quantity
+        return indexed_menu
+    return add_to
+
+def build_adders(stop, additions_dict:dict):
+    """
+    Finds necessary additions from hash tags in notes,
+    returns a list of add functions
+    """
+    additions = get_additions_from(stop['delivery_notes'])
+    adders =  [build_addition_func(*additions_dict[product]) 
+              for product in additions]
+    return adders
+
+def plug_share(item_code):
+    """
+    Creates a share dictionary for a given item_code.
+    """
+    return dump_product(Share(product=Product.objects.get(item_code=item_code), 
+                 menu=Menu(description='dummy_menu'),
+                 quantity=0))
+
+def make_exchange_func(to_remove: str, to_add: str, ratio: int):
+    """
+    Builds a function that exchanges two products at a specific ratio.
+    """
+    def exchange(indexed_menu):
+        
+        if not indexed_menu.get(to_add):
+            indexed_menu[to_add] = plug_share(to_add)
+        if not indexed_menu.get(to_remove):
+            indexed_menu[to_remove] = plug_share(to_remove)
+        
+        # This nested assignment is causing the above problems
+        
+        original_quantity = indexed_menu[to_remove]['quantity']
+        indexed_menu[to_remove]['quantity'] = 0
+        indexed_menu[to_add]['quantity'] = ( indexed_menu[to_add]['quantity'] 
+                                   + original_quantity * ratio)
+        return indexed_menu
+    return exchange
+
+def build_exchangers(stop, exchanges_dict:dict) -> list:
+    """
+    Builds and applies the appropriate series of exchanges to the menu.
+    """
+    exchanges = get_exchanges(stop, exchanges_dict)
+    return [make_exchange_func(*exchange) for exchange in exchanges]
+
+def get_exchanges(stop_data:dict, exchange_dict:dict) -> list:
+    """
+    Check the stop data for a yes value in the exchange column,
+    and adds the tuple representing the exchange to a list of
+    valid exchanges for that stop.
+    """
+    exchanges = []
+    for exchange in exchange_dict.keys():
+        if stop_data[exchange] == 'Yes':
+            exchanges += exchange_dict[exchange]
+    return exchanges
+
 def change_keys(dictionary:dict) -> dict:
     return{key.lower().replace('#', 'num').replace(' ', '_'): dictionary[key] 
            for key in dictionary.keys()}
@@ -69,7 +147,7 @@ def string_box(stop:dict) -> str:
 
 def fill_racks(stop: dict) -> list:
     """
-    Generates the menu from the stop data. 
+    Takes stop data and returns menu.
     """
     exchangers = build_exchangers(stop, EXCHANGES_DICT)
     adders = build_adders(stop, ADDITIONS_DICT)
@@ -101,90 +179,17 @@ def route_num_to_letter(name):
     return string.ascii_uppercase[index]
 
 def change_route_name(stop):
-    stop['route_num'] = route_num_to_letter(stop['route_num']) 
+    stop['route_num'] = route_num_to_letter(stop['route_num'])
+    return stop
 
 def build_fulfillment_context(order):
     """
     The main builder that delivers the data tree.
     """
     return pipe(order,
-        mapp(change_keys)(order), # Mapp is curried unlike map.
-        mapp(change_route_name)(order), 
+        mapp(change_keys), # Mapp is curried unlike map.
         lambda lst: list(filter(
             lambda stop: stop['route_num'] != 'DISMISSED REQUEST', lst)),
+        mapp(change_route_name), 
         attach_menus_to_stops)
 
-def get_exchanges(stop_data:dict, exchange_dict:dict) -> list:
-    """
-    Check the stop data for a yes value in the exchange column,
-    and adds the tuple representing the exchange to a list of
-    valid exchanges for that stop.
-    """
-    exchanges = []
-    for exchange in exchange_dict.keys():
-        if stop_data[exchange] == 'Yes':
-            exchanges += exchange_dict[exchange]
-    return exchanges
-
-def plug_share(item_code):
-    return dump_product(Share(product=Product.objects.get(item_code=item_code), 
-                 menu=Menu(description='dummy_menu'),
-                 quantity=0))
-
-def make_exchange_func(to_remove: str, to_add: str, ratio: int):
-    """
-    Builds a function that exchanges two products at a specific ratio.
-    """
-    def exchange(indexed_menu):
-        
-        if not indexed_menu.get(to_add):
-            indexed_menu[to_add] = plug_share(to_add)
-        if not indexed_menu.get(to_remove):
-            indexed_menu[to_remove] = plug_share(to_remove)
-        
-        # This nested assignment is causing the above problems
-        
-        original_quantity = indexed_menu[to_remove]['quantity']
-        indexed_menu[to_remove]['quantity'] = 0
-        indexed_menu[to_add]['quantity'] = ( indexed_menu[to_add]['quantity'] 
-                                   + original_quantity * ratio)
-        return indexed_menu
-    return exchange
-
-def build_exchangers(stop, exchanges_dict:dict) -> list:
-    """
-    Builds and applies the appropriate series of exchanges to the menu.
-    """
-    exchanges = get_exchanges(stop, exchanges_dict)
-    return [make_exchange_func(*exchange) for exchange in exchanges]
-
-def get_additions_from(notes: str) -> list:
-    """
-    Returned hash-tagged phrases from delivery notes.
-    """
-    return re.findall(r'#([A-Za-z]+)', notes)
-
-def build_addition_func_for(to_add: str, quantity: int):
-    """
-    Returns a function that adds a given quantity to a given product.
-    """
-    def add_to(indexed_menu):
-
-        if not indexed_menu.get(to_add):
-            indexed_menu[to_add] = plug_share(to_add)
-
-        # See note above
-        
-        indexed_menu[to_add]['quantity'] = indexed_menu[to_add]['quantity'] + quantity
-        return indexed_menu
-    return add_to
-
-def build_adders(stop, additions_dict:dict):
-    """
-    Finds necessary additions from hash tags in notes,
-    returns a list of add functions
-    """
-    additions = get_additions_from(stop['delivery_notes'])
-    adders =  [build_addition_func_for(*additions_dict[product]) 
-              for product in additions]
-    return adders
