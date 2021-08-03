@@ -45,10 +45,15 @@ def dict_filter(test_key, condition):
     return filterer
 
 class DefaultArgDict(UserDict):
-    """Like a usual defaultdict, but it takes the key as a function argument"""
+    """
+    Like a usual defaultdict, but it takes the key as a function argument.
+    This is starting to feel like anti-patten.
+    """
     def __init__(self, factory, initialdata):
         self.factory = factory
         self.data = initialdata
 
     def __missing__(self, key):
-        return self.factory(key)
+        result = self.factory(key)
+        self[key] = result
+        return result

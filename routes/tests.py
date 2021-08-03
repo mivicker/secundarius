@@ -1,7 +1,7 @@
 from itertools import chain
 from .functional import group_dictionaries, lookup_record, mapp, DefaultArgDict, pipe
 from django.test import TestCase
-from .handlers import (dump_menu, get_additions_from, get_magic_words, group_racks, 
+from .handlers import (bind_share_factory, dump_menu, get_additions_from, get_magic_words, group_racks, 
     fill_racks, string_box, change_keys)
 from counts.models import Menu, Product, Share
 
@@ -161,7 +161,20 @@ class TestAttachMenu(TestCase):
         self.assertIn('ChickenBreast', additions)
     
     def test_bind_share_factory(self):
-        pass
+        test_stop = {'box_type':'Standard', 
+                     'box_menu': 'A', 
+                     'box_size': 'Small', 
+                     'delivery_notes': '', 
+                     'peanutfree': 'No', 
+                     'dairyfree': 'Yes'}
+        
+        menu = pipe(test_stop,
+                    change_keys,
+                    string_box,
+                    dump_menu,
+                    bind_share_factory)
+
+        self.assertIn('Noodles', [product['description'] for product in menu.values()])
 
     def test_substitutions(self):
         test_stop = {'box_type':'Standard', 
