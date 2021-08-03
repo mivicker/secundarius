@@ -21,15 +21,16 @@
                 <div id="health-plan"><p>Health Plan</p></div>
                 <div id="health-plan-text"><p>{{ stop.healthcare_partner }}</p></div>
                 <div id="adjustment-text">
-                    <p>{% if stop.deliverynumber == 1 %}
+                    {% if stop.deliverynumber == 1 %}
                         FIRST DELIVERY
-                        {% else %}
+                        <p>{% else %}</p>
                         {% endif %}
                         {% if stop.adjustments %}
-                        {{ stop.adjustments }}
+                            {% for adjustment in stop.adjustments %}
+                                <p>{{ adjustment }}</p>
+                            {% endfor %}
                         {% else %}
                         {% endif %}
-                    </p>
                 </div>
                 <div id="member-id"><p>Member ID</p></div>
                 <div id="member-id-text"><p>{{ stop.member_id }}</p></div>

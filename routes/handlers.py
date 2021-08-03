@@ -17,20 +17,23 @@ EXCHANGES_DICT = {'peanutfree': [('MG1018', 'MG1006', 1)],
                                 ('MG1063', 'MG1187', 2)]}
 
 ADDITIONS_DICT = {
-    'AddTurkey': ('MG1024', 1),
-    'AddChickenBreast': ('MG1380', 1),
-    'AddChickenHalal': ('MG1241', 1),
-    'AddChickenQuarters': ('MG1048', 1),
-    'AddHalalQuarters': ('MG1385P', 1),
-    'AddCheese': ('MG1056', 1),
-    'AddBananas': ('MG0030', 1),
+    'Turkey': ('MG1024', 1),
+    'ChickenBreast': ('MG1380', 1),
+    'ChickenHalal': ('MG1241', 1),
+    'ChickenQuarters': ('MG1048', 1),
+    'HalalQuarters': ('MG1385P', 1),
+    'Cheese': ('MG1056', 1),
+    'Bananas': ('MG0030', 1),
 }
+
+def get_magic_words(notes: str) -> list:
+    return re.findall(r'#Add([A-Za-z]+)', notes)
 
 def get_additions_from(notes: str) -> list:
     """
     Returned hash-tagged phrases from delivery notes.
     """
-    return re.findall(r'#([A-Za-z]+)', notes)
+    return [addition for addition in get_magic_words(notes) if addition in ADDITIONS_DICT]
 
 def build_addition_func(to_add: str, quantity: int):
     """
@@ -171,6 +174,12 @@ def attach_menus_to_stops(stops:list) -> list:
     
     return stops
 
+def attach_adjustments_to_stops(stops:list) -> list:
+    for stop in stops:
+        stop['adjustments'] = get_magic_words(stop['delivery_notes'])
+    
+    return stops
+
 def route_num_to_letter(name):
     _, num = name.split()
     index = int(num) - 1
@@ -189,5 +198,5 @@ def build_fulfillment_context(order):
         lambda lst: list(filter(
             lambda stop: stop['route_num'] != 'DISMISSED REQUEST', lst)),
         mapp(change_route_name), 
-        attach_menus_to_stops)
-
+        attach_menus_to_stops,
+        attach_adjustments_to_stops)

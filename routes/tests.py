@@ -1,7 +1,7 @@
 from itertools import chain
 from .functional import group_dictionaries, lookup_record, mapp
 from django.test import TestCase
-from .handlers import (dump_menu, get_additions_from, group_racks, 
+from .handlers import (dump_menu, get_additions_from, get_magic_words, group_racks, 
     fill_racks, string_box, change_keys)
 from counts.models import Menu, Product, Share
 
@@ -76,6 +76,13 @@ class TestAttachMenu(TestCase):
         self.assertEqual(grouped[254][0]['B'], grouped[254][1]['B'])
         self.assertNotEqual(grouped[254][0]['B'], grouped[253][0]['B'])
 
+    def test_get_magic_words(self):
+        notes = "I love to get taco bell and sometimes #AddCrunchWrapSumpreme."
+
+        words = get_magic_words(notes)
+
+        self.assertIn('CrunchWrapSumpreme', words)
+
     def test_additions(self):
         test_stop = {'box_type':'Standard', 
                      'box_menu': 'A', 
@@ -92,12 +99,11 @@ class TestAttachMenu(TestCase):
         self.assertEqual(product['quantity'], 1)
     
     def test_get_additions(self):
-        delivery_notes = "front door. knock on the door #AddChicken #AddCrunchwrapSupreme"
+        delivery_notes = "front door. knock on the door #AddChickenBreast #AddCrunchwrapSupreme"
 
         additions = get_additions_from(delivery_notes)
 
-        self.assertIn('AddChicken', additions)
-        self.assertIn('AddCrunchwrapSupreme', additions)
+        self.assertIn('ChickenBreast', additions)
 
     def test_substitutions(self):
         test_stop = {'box_type':'Standard', 
