@@ -1,5 +1,5 @@
 from itertools import chain
-from .functional import group_dictionaries, lookup_record, mapp, DefaultArgDict
+from .functional import group_dictionaries, lookup_record, mapp, DefaultArgDict, pipe
 from django.test import TestCase
 from .handlers import (dump_menu, get_additions_from, get_magic_words, group_racks, 
     fill_racks, string_box, change_keys)
@@ -60,6 +60,19 @@ class TestFunctional(TestCase):
         arg_dict = DefaultArgDict(lookup, dict_two)
 
         self.assertEqual(arg_dict['B'], 'b')
+
+    def test_pipe(self):
+        func_one = lambda x: x + 1
+        func_two = lambda x: x + 2
+        func_three = lambda x: x * 10
+
+        # (10 + 1 + 2) * 10 = 130 
+        result = pipe(10,
+                      func_one,
+                      func_two,
+                      func_three)
+
+        self.assertEqual(result, 130)
 
 class TestAttachMenu(TestCase):
     def setUp(self):
@@ -136,9 +149,9 @@ class TestAttachMenu(TestCase):
         racks = fill_racks(test_stop)
 
         all_products = list(chain.from_iterable([rack['products'] for rack in racks]))
-        product = lookup_record(all_products, 'item_code', 'MG1380')
+        chicken = lookup_record(all_products, 'item_code', 'MG1380')
          
-        self.assertEqual(product['quantity'], 1)
+        self.assertEqual(chicken['quantity'], 1)
     
     def test_get_additions(self):
         delivery_notes = "front door. knock on the door #AddChickenBreast #AddCrunchwrapSupreme"
@@ -146,6 +159,9 @@ class TestAttachMenu(TestCase):
         additions = get_additions_from(delivery_notes)
 
         self.assertIn('ChickenBreast', additions)
+    
+    def test_bind_share_factory(self):
+        pass
 
     def test_substitutions(self):
         test_stop = {'box_type':'Standard', 
@@ -158,10 +174,7 @@ class TestAttachMenu(TestCase):
         racks = fill_racks(test_stop)
 
         all_products = list(chain.from_iterable([rack['products'] for rack in racks]))
-
-        milk = lookup_record(all_products, 'item_code', 'MG1186')
         almond = lookup_record(all_products, 'item_code', 'MG1187')
-
         self.assertEqual(almond['quantity'], 2)
 
     def test_change_keys(self):

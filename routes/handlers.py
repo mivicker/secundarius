@@ -3,7 +3,7 @@ import io
 import string
 import re
 from counts.models import Share, Menu, Product
-from .functional import dict_filter, group_dictionaries, pipe, mapp 
+from .functional import DefaultArgDict, dict_filter, group_dictionaries, pipe, mapp 
 
 DISPLAY_ORDER = ['Dry Rack 1',
             'Dry Rack 2',
@@ -40,12 +40,6 @@ def build_addition_func(to_add: str, quantity: int):
     Returns a function that adds a given quantity to a given product.
     """
     def add_to(indexed_menu):
-
-        if not indexed_menu.get(to_add):
-            indexed_menu[to_add] = plug_share(to_add)
-
-        # See note above
-        
         indexed_menu[to_add]['quantity'] = indexed_menu[to_add]['quantity'] + quantity
         return indexed_menu
     return add_to
@@ -72,7 +66,7 @@ def get_exchanges(stop_data:dict, exchange_dict:dict) -> list:
             exchanges += exchange_dict[exchange]
     return exchanges
 
-def plug_share(item_code):
+def share_factory(item_code):
     """
     Creates a share dictionary for a given item_code.
     """
@@ -81,19 +75,14 @@ def plug_share(item_code):
               menu=Menu(description='dummy_menu'),
               quantity=0))
 
+def bind_share_factory(menu):
+    return DefaultArgDict(share_factory, menu)
+
 def make_exchange_func(to_remove: str, to_add: str, ratio: int):
     """
     Builds a function that exchanges two products at a specific ratio.
     """
     def exchange(indexed_menu):
-        
-        if not indexed_menu.get(to_add):
-            indexed_menu[to_add] = plug_share(to_add)
-        if not indexed_menu.get(to_remove):
-            indexed_menu[to_remove] = plug_share(to_remove)
-        
-        # This nested assignment is causing the above problems
-        
         original_quantity = indexed_menu[to_remove]['quantity']
         indexed_menu[to_remove]['quantity'] = 0
         indexed_menu[to_add]['quantity'] = ( indexed_menu[to_add]['quantity'] 
@@ -160,6 +149,7 @@ def fill_racks(stop: dict) -> list:
         stop,
         string_box,
         dump_menu,
+        bind_share_factory, # adds a factory method if product in exchange stage isn't found.
         *exchangers, # applies all product exchanges
         *adders, # applies all product additions
         dict_filter('quantity', lambda x: x != 0),
