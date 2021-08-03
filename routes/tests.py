@@ -59,7 +59,7 @@ class TestFunctional(TestCase):
 
         arg_dict = DefaultArgDict(lookup, dict_two)
 
-        self.assertEqual(arg_dict['B'] == 'b')
+        self.assertEqual(arg_dict['B'], 'b')
 
 class TestAttachMenu(TestCase):
     def setUp(self):

@@ -45,6 +45,7 @@ def dict_filter(test_key, condition):
     return filterer
 
 class DefaultArgDict(UserDict):
+    """Like a usual defaultdict, but it takes the key as a function argument"""
     def __init__(self, factory, initialdata):
         self.factory = factory
         self.data = initialdata

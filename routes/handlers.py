@@ -76,9 +76,10 @@ def plug_share(item_code):
     """
     Creates a share dictionary for a given item_code.
     """
-    return dump_product(Share(product=Product.objects.get(item_code=item_code), 
-                 menu=Menu(description='dummy_menu'),
-                 quantity=0))
+    return dump_product(
+        Share(product=Product.objects.get(item_code=item_code), 
+              menu=Menu(description='dummy_menu'),
+              quantity=0))
 
 def make_exchange_func(to_remove: str, to_add: str, ratio: int):
     """
@@ -150,7 +151,7 @@ def string_box(stop:dict) -> str:
 
 def fill_racks(stop: dict) -> list:
     """
-    Takes stop data and returns menu.
+    Takes stop data and returns menu with appropriate adjustments.
     """
     exchangers = build_exchangers(stop, EXCHANGES_DICT)
     adders = build_adders(stop, ADDITIONS_DICT)
