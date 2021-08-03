@@ -1,9 +1,65 @@
 from itertools import chain
-from .functional import group_dictionaries, lookup_record, mapp
+from .functional import group_dictionaries, lookup_record, mapp, DefaultArgDict
 from django.test import TestCase
 from .handlers import (dump_menu, get_additions_from, get_magic_words, group_racks, 
     fill_racks, string_box, change_keys)
 from counts.models import Menu, Product, Share
+
+
+class TestFunctional(TestCase):
+    
+    def test_group_dictionaries(self):
+        dicts = [
+            {'A': 254, 'B': 360, 'C': 5777},
+            {'A': 254, 'B': 360, 'C': 5777},
+            {'A': 254, 'B': 0, 'C': 0},
+            {'A': 253, 'B': 361, 'C': 5777},
+        ]
+
+        grouped = group_dictionaries(dicts, 'A')
+
+        self.assertEqual(len(grouped[254]), 3)
+        self.assertEqual(grouped[254][0]['B'], grouped[254][1]['B'])
+        self.assertNotEqual(grouped[254][0]['B'], grouped[253][0]['B'])
+
+    def test_lookup_record(self):
+        dicts = [
+            {'A': 254, 'B': 360, 'C': 5777},
+            {'A': 254, 'B': 360, 'C': 5777},
+            {'A': 254, 'B': 0, 'C': 0},
+            {'A': 253, 'B': 361, 'C': 5777},
+        ]
+
+        record = lookup_record(dicts, 'B', 361)
+
+        self.assertDictEqual(record, dicts[-1])
+    
+    def test_mapp_no_args(self):
+        func = lambda x: x + 2
+        iterable = [1,2,3,4,5]
+
+        result = mapp(func)(iterable)
+
+        self.assertEqual(result, [3,4,5,6,7])
+
+    def test_mapp_args(self):
+        func = lambda x, y: x + y
+        iterable = [1,2,3,4,5]
+
+        result = mapp(func, 2)(iterable)
+
+        self.assertEqual(result, [3,4,5,6,7])
+
+    def test_default_arg_dict(self):
+        dict_one = {'A':'a', 'B':'b', 'C':'c'}
+        dict_two = {'A':'a'}
+
+        def lookup(key):
+            return dict_one[key]
+
+        arg_dict = DefaultArgDict(lookup, dict_two)
+
+        self.assertEqual(arg_dict['B'] == 'b')
 
 class TestAttachMenu(TestCase):
     def setUp(self):
@@ -62,20 +118,6 @@ class TestAttachMenu(TestCase):
 
         self.assertIn('Noodles', [product['description'] for product in all_products])
 
-    def test_group_dictionaries(self):
-        dicts = [
-            {'A': 254, 'B': 360, 'C': 5777},
-            {'A': 254, 'B': 360, 'C': 5777},
-            {'A': 254, 'B': 0, 'C': 0},
-            {'A': 253, 'B': 361, 'C': 5777},
-        ]
-
-        grouped = group_dictionaries(dicts, 'A')
-
-        self.assertEqual(len(grouped[254]), 3)
-        self.assertEqual(grouped[254][0]['B'], grouped[254][1]['B'])
-        self.assertNotEqual(grouped[254][0]['B'], grouped[253][0]['B'])
-
     def test_get_magic_words(self):
         notes = "I love to get taco bell and sometimes #AddCrunchWrapSumpreme."
 
@@ -121,34 +163,6 @@ class TestAttachMenu(TestCase):
         almond = lookup_record(all_products, 'item_code', 'MG1187')
 
         self.assertEqual(almond['quantity'], 2)
-
-    def test_lookup_record(self):
-        dicts = [
-            {'A': 254, 'B': 360, 'C': 5777},
-            {'A': 254, 'B': 360, 'C': 5777},
-            {'A': 254, 'B': 0, 'C': 0},
-            {'A': 253, 'B': 361, 'C': 5777},
-        ]
-
-        record = lookup_record(dicts, 'B', 361)
-
-        self.assertDictEqual(record, dicts[-1])
-
-    def test_mapp_no_args(self):
-        func = lambda x: x + 2
-        iterable = [1,2,3,4,5]
-
-        result = mapp(func)(iterable)
-
-        self.assertEqual(result, [3,4,5,6,7])
-
-    def test_mapp_args(self):
-        func = lambda x, y: x + y
-        iterable = [1,2,3,4,5]
-
-        result = mapp(func, 2)(iterable)
-
-        self.assertEqual(result, [3,4,5,6,7])
 
     def test_change_keys(self):
         test_obj = {'Item': 'gold', 'OBJECT': 'silver'}

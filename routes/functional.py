@@ -1,7 +1,5 @@
 
-from collections import defaultdict
-from itertools import groupby
-from operator import itemgetter
+from collections import UserDict, defaultdict
 
 def safe_dictionary_lookup(questionable:dict):
     pass
@@ -45,3 +43,11 @@ def dict_filter(test_key, condition):
     def filterer(record):
         return {key: val for key, val in record.items() if condition(val[test_key])}
     return filterer
+
+class DefaultArgDict(UserDict):
+    def __init__(self, factory, initialdata):
+        self.factory = factory
+        self.data = initialdata
+
+    def __missing__(self, key):
+        return self.factory(key)

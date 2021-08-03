@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from unittest.mock import Mock, call
 from .views import send_each, read_csv
-from .models import Words, Log
+from .models import Broadcast, Log
 
 class SendViewTest(TestCase):
     def setUp(self):
@@ -45,7 +45,7 @@ class SendViewTest(TestCase):
         but the goal of this func is to hit the twilio api.
         """
         fake_twilio = Mock()
-        words = Words.objects.create(words="This is the text sent out.")
+        words = Broadcast.objects.create(words="This is the text sent out.")
         calls = [call.messages.create(
                 body=words.words, 
                 from_='+13132514241', 
