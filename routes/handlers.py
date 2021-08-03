@@ -57,6 +57,18 @@ def build_adders(stop, additions_dict:dict):
               for product in additions]
     return adders
 
+def get_exchanges(stop_data:dict, exchange_dict:dict) -> list:
+    """
+    Check the stop data for a yes value in the exchange column,
+    and adds the tuple representing the exchange to a list of
+    valid exchanges for that stop.
+    """
+    exchanges = []
+    for exchange in exchange_dict.keys():
+        if stop_data[exchange] == 'Yes':
+            exchanges += exchange_dict[exchange]
+    return exchanges
+
 def plug_share(item_code):
     """
     Creates a share dictionary for a given item_code.
@@ -91,18 +103,6 @@ def build_exchangers(stop, exchanges_dict:dict) -> list:
     """
     exchanges = get_exchanges(stop, exchanges_dict)
     return [make_exchange_func(*exchange) for exchange in exchanges]
-
-def get_exchanges(stop_data:dict, exchange_dict:dict) -> list:
-    """
-    Check the stop data for a yes value in the exchange column,
-    and adds the tuple representing the exchange to a list of
-    valid exchanges for that stop.
-    """
-    exchanges = []
-    for exchange in exchange_dict.keys():
-        if stop_data[exchange] == 'Yes':
-            exchanges += exchange_dict[exchange]
-    return exchanges
 
 def change_keys(dictionary:dict) -> dict:
     return{key.lower().replace('#', 'num').replace(' ', '_'): dictionary[key] 
@@ -167,8 +167,6 @@ def attach_menus_to_stops(stops:list) -> list:
     Iterates over every stop and attaches the menu.
     """
     for stop in stops:
-        if not stop:
-            continue
         stop['racks'] = fill_racks(stop)
     
     return stops
