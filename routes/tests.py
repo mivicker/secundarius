@@ -1,7 +1,7 @@
 from itertools import chain
 from .functional import group_dictionaries, lookup_record, mapp, DefaultArgDict, pipe
 from django.test import TestCase
-from .handlers import (bind_share_factory, dump_menu, get_additions_from, get_magic_words, group_racks, 
+from .handlers import (bind_share_factory, dump_menu, format_phone, get_additions_from, get_magic_words, group_racks, 
     fill_racks, string_box, change_keys)
 from counts.models import Menu, Product, Share
 
@@ -205,3 +205,10 @@ class TestAttachMenu(TestCase):
 
         self.assertEqual(['rock_salt', 'object'], list(result[0].keys()))
         self.assertEqual(['item', 'object'], list(result[1].keys()))
+
+    def test_format_phone(self):
+        phone = '3132344322'
+
+        formatted = format_phone(phone)
+
+        self.assertIn(formatted, ['(313) 234-4322'])

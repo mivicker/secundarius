@@ -12,13 +12,13 @@ def pipe(first, *args):
         first = fn(first)
     return first
 
-def group_dictionaries(dictionaries: list, group_key: str) -> dict:
+def group_dictionaries(dictionaries: list, group_key: str, key_transform = lambda x: x, agg = lambda x: x) -> dict:
     """
     Group a list of dictionaries by the values of a given key.
     """
     result = defaultdict(lambda: [])
     for dictionary in dictionaries:
-        result[dictionary[group_key]].append(dictionary.copy())
+        result[dictionary[key_transform(group_key)]].append(dictionary.copy())
         
     return dict(result)
 

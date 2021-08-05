@@ -2,8 +2,17 @@ import csv
 import io
 import string
 import re
+import datetime
 from counts.models import Share, Menu, Product
 from .functional import DefaultArgDict, dict_filter, group_dictionaries, pipe, mapp 
+
+FROZEN_ITEMS = [
+    'MG1024',
+    'MG1380', 
+    'MG1241',
+    'MG1048',
+    'MG1385P',
+]
 
 DISPLAY_ORDER = ['Dry Rack 1',
             'Dry Rack 2',
@@ -108,7 +117,7 @@ def load_csv(file):
 
 def dump_product(share):
     """
-    Makes a dictionary out of a share object.
+    Makes a simple dictionary out of a share object.
     """
     return {'item_code': share.product.item_code,
             'description': share.product.description,
@@ -117,7 +126,7 @@ def dump_product(share):
 
 def dump_menu(menu_name: str) -> dict:
     """
-    Finds the menu_obj from database and dumps the key info into a dict. 
+    Finds the menu_obj from database and dumps into a dict. 
     """
     menu = Menu.objects.get(description=menu_name)
     shares = menu.share_set.prefetch_related()
@@ -181,6 +190,7 @@ def change_route_name(stop):
     return stop
 
 def build_fulfillment_context(order):
+    # frozen_map = map_to_letter_name(order)
     """
     The main builder that delivers the data tree.
     """
@@ -190,4 +200,65 @@ def build_fulfillment_context(order):
             lambda stop: stop['route_num'] != 'DISMISSED REQUEST', lst)),
         mapp(change_route_name), 
         attach_menus_to_stops,
+    #    mapp(frozen_letter_stapler(frozen_map)), 
         attach_adjustments_to_stops)
+
+def prepare_menu(order):
+    pass
+
+def extract_date_and_time(order):
+    return order[0]['delivery_date'], order[0]['deliverytime']
+    
+def format_phone(phone_number):
+    area_code, first, last = tuple(re.findall(r'\d{4}$|\d{3}', phone_number))
+    return f'({area_code}) {first}-{last}'
+
+def fix_phone(stop):
+    phone_digits = re.findall('[0-9]{10}', stop['phone']) # attempts to find a coherent phone number.
+    if phone_digits:
+        stop['phone'] = format_phone(phone_digits[0])
+    return stop
+
+def dock_only(menu):
+    return dict_filter(menu, lambda x: x['storage'] == 'Dock')
+
+def menu_to_key(menu):
+    return ((key, val['quantity']) for key, val in sorted(dock_only(menu)).items())
+
+def count_menus(order):
+    return group_dictionaries(order, 'menu', key_transform=menu_to_key, agg=len)
+
+def map_to_letter_name(order):
+    index = 0
+    result = {}
+    for stop in order:
+        if not result.get(menu_to_key(stop['menu'])):
+            result[menu_to_key(stop['menu'])] = string.ascii_uppercase[index]
+            index += 1
+        
+    return result
+
+def frozen_letter_stapler(frozen_map):
+    """Stapler idea could be abstracted."""
+    return lambda stop: stop['froz_bin'] == frozen_map(menu_to_key(stop['menu']))
+
+def build_route_context(order):
+
+    stops = pipe(order,
+        mapp(change_keys),
+        mapp(fix_phone),
+        lambda lst: list(filter(
+            lambda stop: stop['route_num'] != 'DISMISSED REQUEST', lst)),
+        mapp(change_route_name))
+
+    route_groups = group_dictionaries(stops, 'route_num')
+    
+    date, time = extract_date_and_time(stops)
+
+    return [{'name': name,
+             'date': datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%b %d %Y'),
+             'time': time,
+             'stops':  stops} for name, stops in route_groups.items()]
+
+def build_frozen_context(order):
+    frozen_map = map_to_letter_name(order)

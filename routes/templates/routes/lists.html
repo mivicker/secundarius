@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Your page title here :)</title>
+        
+	<link rel="stylesheet" href="/static/css/skeleton.css">
+        <link rel="stylesheet" href="/static/routes/css/listfinesse.css">
+
+    </head>
+    <body>
+{% for route in order %}
+<div class='route'>
+<div class='row'>
+<div class="three columns">
+	<h3>Route {{ route.name }}</h3>
+</div>
+<div class="four columns">
+    <h3>{{ route.date }}</h2>
+</div>
+<div class="two columns">
+    <h3>{{ route.time }}</h2>
+</div>
+</div>
+<div class="row header">
+	<div class="one column"><p>#</p></div>
+	<div class="two columns"><p>Address</p></div>
+	<div class="three columns"><p>Notes</p></div>
+	<div class="two columns"><p>Name</p></div>
+	<div class="one columns"><p>ID</p></div>
+	<div class="two columns"><p>Phone</p></div>
+</div>
+	{% for stop in route.stops %}
+	<div class="row entry">
+			<div class="one column"><p><strong>{{ stop.stop_num }}</strong></p></div>
+			<div class="two columns"><p>{{ stop.address }}, {{ stop.city }} {{ stop.zip }}</p></div>
+			<div class="three columns"><p>{{ stop.delivery_notes }}</p></div>
+			<div class="two columns"><p>{{ stop.maincontact }}</p></div>
+			<div class="one columns"><p>{{ stop.member_id }}</p></div>
+			<div class="two columns"><p>{{ stop.phone }}</p></div>
+	</div>
+	{% endfor %}
+</div>
+ {% endfor %}
+    </body>
+</html>

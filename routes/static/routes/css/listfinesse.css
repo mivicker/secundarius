@@ -1,0 +1,33 @@
+.route {
+    width: 100%;
+    page-break-after: always;
+}
+
+body {
+    font-family: 'Helvetica', 'Arial Narrow', Arial, sans-serif;
+    padding: 0;
+}
+
+h1 {
+    margin: 0in;
+    margin-top: 0.0625in;
+    font-weight: normal;
+    font-size: 0.5;
+}
+
+p {
+    margin: 0px;
+    font-size: 0.14in;
+    padding: .0625in;
+    font-weight: lighter;
+    page-break-inside: avoid;
+}
+
+.entry {
+    border-bottom: 1px dotted black;
+    page-break-inside: avoid;
+}
+
+.header {
+    border-bottom: 1px solid black;
+}

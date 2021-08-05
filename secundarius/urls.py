@@ -18,11 +18,11 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from texts.views import (edit_broadcast, edit_reply, home, save, save_reply, send, text_logs, 
     receive)
-from routes.views import csv_drop_off, documents_menu, fulfillment_tickets, post_csv
+from routes.views import csv_drop_off, documents_menu, fulfillment_tickets, post_csv, route_lists, landing, fulfillment_menu
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home, name='text-home'),
+    path('texts', home, name='text-home'),
     path('send', send, name='text-send'),
     path('edit', edit_broadcast, name='edit-words'),
     path('edit-reply', edit_reply, name='edit-reply'),
@@ -38,4 +38,7 @@ urlpatterns = [
     path('post-csv/', post_csv, name='post-csv'),
     path('doc-menu/', documents_menu, name='doc-menu'),
     path('fullfillment/', fulfillment_tickets, name='pack-tickets'),
+    path('lists/', route_lists, name='route-lists'),
+    path('', landing, name='home'),
+    path('fulfillment-menu/', fulfillment_menu, name='fulfillment-menu')
 ]
