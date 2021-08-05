@@ -136,7 +136,7 @@ STATIC_ROOT = '/home/mikevickers/secundarius/static'
 STATIC_URL = '/static/'
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'text-home'
+LOGIN_REDIRECT_URL = 'home'
 
 TWILIO_ACCOUNT_SID = secrets['TWILIO_ACCOUNT_SID']
 TWILIO_AUTH_TOKEN = secrets['TWILIO_AUTH_TOKEN']
