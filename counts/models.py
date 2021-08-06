@@ -11,6 +11,7 @@ class Product(models.Model):
     item_code = models.CharField(max_length = 8)
     description = models.CharField(max_length = 50)
     storage = models.CharField(max_length=32)
+
     def __str__(self):
         return f"{self.item_code} - {self.description}"
 

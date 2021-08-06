@@ -1,8 +1,4 @@
-
 from collections import UserDict, defaultdict
-
-def safe_dictionary_lookup(questionable:dict):
-    pass
 
 def pipe(first, *args):
     """
@@ -18,7 +14,7 @@ def group_dictionaries(dictionaries: list, group_key: str, key_transform = lambd
     """
     result = defaultdict(lambda: [])
     for dictionary in dictionaries:
-        result[dictionary[key_transform(group_key)]].append(dictionary.copy())
+        result[dictionary[key_transform(group_key)]].append(agg(dictionary.copy()))
         
     return dict(result)
 
@@ -57,3 +53,10 @@ class DefaultArgDict(UserDict):
         result = self.factory(key)
         self[key] = result
         return result
+
+def stapler(arg_field, out_field, func):
+    """ Applies a function to one field and saves it in another. """
+    def staple(stop):
+        stop[out_field] = func(stop[arg_field])
+        return stop
+    return staple

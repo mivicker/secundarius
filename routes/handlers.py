@@ -3,8 +3,9 @@ import io
 import string
 import re
 import datetime
+
 from counts.models import Share, Menu, Product
-from .functional import DefaultArgDict, dict_filter, group_dictionaries, pipe, mapp 
+from .functional import DefaultArgDict, dict_filter, group_dictionaries, pipe, mapp, stapler 
 
 FROZEN_ITEMS = [
     'MG1024',
@@ -34,6 +35,21 @@ ADDITIONS_DICT = {
     'Cheese': ('MG1056', 1),
     'Bananas': ('MG0030', 1),
 }
+
+def load_csv(file):
+    data = file.read().decode('UTF-8')
+    io_string = io.StringIO(data)
+    return csv.DictReader(io_string)
+
+def change_keys(dictionary:dict) -> dict:
+    return{key.lower().replace('#', 'num').replace(' ', '_'): dictionary[key] 
+           for key in dictionary.keys()}
+
+def string_box(stop:dict) -> str:
+    """
+    A hack...
+    """
+    return  stop['box_type'] + ' ' + stop['box_menu'] + ' ' + stop['box_size']
 
 def get_magic_words(notes: str) -> list:
     return re.findall(r'#Add([A-Za-z]+)', notes)
@@ -75,18 +91,6 @@ def get_exchanges(stop_data:dict, exchange_dict:dict) -> list:
             exchanges += exchange_dict[exchange]
     return exchanges
 
-def share_factory(item_code):
-    """
-    Creates a share dictionary for a given item_code.
-    """
-    return dump_product(
-        Share(product=Product.objects.get(item_code=item_code), 
-              menu=Menu(description='dummy_menu'),
-              quantity=0))
-
-def bind_share_factory(menu):
-    return DefaultArgDict(share_factory, menu)
-
 def make_exchange_func(to_remove: str, to_add: str, ratio: int):
     """
     Builds a function that exchanges two products at a specific ratio.
@@ -106,14 +110,17 @@ def build_exchangers(stop, exchanges_dict:dict) -> list:
     exchanges = get_exchanges(stop, exchanges_dict)
     return [make_exchange_func(*exchange) for exchange in exchanges]
 
-def change_keys(dictionary:dict) -> dict:
-    return{key.lower().replace('#', 'num').replace(' ', '_'): dictionary[key] 
-           for key in dictionary.keys()}
+def share_factory(item_code):
+    """
+    Creates a share dictionary for a given item_code.
+    """
+    return dump_product(
+        Share(product=Product.objects.get(item_code=item_code), 
+              menu=Menu(description='dummy_menu'),
+              quantity=0))
 
-def load_csv(file):
-    data = file.read().decode('UTF-8')
-    io_string = io.StringIO(data)
-    return csv.DictReader(io_string)
+def bind_share_factory(menu):
+    return DefaultArgDict(share_factory, menu)
 
 def dump_product(share):
     """
@@ -140,12 +147,6 @@ def group_racks(menu: dict, display_order:list) -> list:
     groups = group_dictionaries(menu.values(), 'storage')
     active_racks = list(filter(lambda x: x in groups, display_order))
     return [{'rack_name': rack, 'products': groups[rack]} for rack in active_racks]
-
-def string_box(stop:dict) -> str:
-    """
-    A hack...
-    """
-    return  stop['box_type'] + ' ' + stop['box_menu'] + ' ' + stop['box_size']
 
 def fill_racks(stop: dict) -> list:
     """
@@ -174,20 +175,10 @@ def attach_menus_to_stops(stops:list) -> list:
     
     return stops
 
-def attach_adjustments_to_stops(stops:list) -> list:
-    for stop in stops:
-        stop['adjustments'] = get_magic_words(stop['delivery_notes'])
-    
-    return stops
-
 def route_num_to_letter(name):
     _, num = name.split()
     index = int(num) - 1
     return string.ascii_uppercase[index]
-
-def change_route_name(stop):
-    stop['route_num'] = route_num_to_letter(stop['route_num'])
-    return stop
 
 def build_fulfillment_context(order):
     # frozen_map = map_to_letter_name(order)
@@ -198,10 +189,11 @@ def build_fulfillment_context(order):
         mapp(change_keys), # Mapp is curried unlike map.
         lambda lst: list(filter(
             lambda stop: stop['route_num'] != 'DISMISSED REQUEST', lst)),
-        mapp(change_route_name), 
+        mapp(stapler('route_num', 'route_num', route_num_to_letter)), 
         attach_menus_to_stops,
     #    mapp(frozen_letter_stapler(frozen_map)), 
-        attach_adjustments_to_stops)
+        mapp(stapler('delivery_notes', 'adjustments', get_magic_words))
+        )
 
 def prepare_menu(order):
     pass
@@ -240,7 +232,7 @@ def map_to_letter_name(order):
 
 def frozen_letter_stapler(frozen_map):
     """Stapler idea could be abstracted."""
-    return lambda stop: stop['froz_bin'] == frozen_map(menu_to_key(stop['menu']))
+    return lambda stop: stop['froz_bin'] == frozen_map[menu_to_key(stop['menu'])]
 
 def build_route_context(order):
 
@@ -249,7 +241,7 @@ def build_route_context(order):
         mapp(fix_phone),
         lambda lst: list(filter(
             lambda stop: stop['route_num'] != 'DISMISSED REQUEST', lst)),
-        mapp(change_route_name))
+        mapp(stapler('route_num', 'route_num', route_num_to_letter))) 
 
     route_groups = group_dictionaries(stops, 'route_num')
     
