@@ -231,7 +231,7 @@ def map_to_letter_name(order):
     return result
 
 def try_parsing_date(text):
-    for fmt in ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y'):
+    for fmt in ('%Y-%m-%d', '%d/%m/%Y'):
         try:
             return datetime.datetime.strptime(text, fmt)
         except ValueError:
