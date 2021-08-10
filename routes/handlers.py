@@ -230,6 +230,14 @@ def map_to_letter_name(order):
         
     return result
 
+def try_parsing_date(text):
+    for fmt in ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y'):
+        try:
+            return datetime.datetime.strptime(text, fmt)
+        except ValueError:
+            pass
+    raise ValueError('no valid date format found')
+
 def frozen_letter_stapler(frozen_map):
     """Stapler idea could be abstracted."""
     return lambda stop: stop['froz_bin'] == frozen_map[menu_to_key(stop['menu'])]
@@ -248,7 +256,7 @@ def build_route_context(order):
     date, time = extract_date_and_time(stops)
 
     return [{'name': name,
-             'date': datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%b %d %Y'),
+             'date': try_parsing_date(date).strftime('%b %d %Y'),
              'time': time,
              'stops':  stops} for name, stops in route_groups.items()]
 
