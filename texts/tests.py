@@ -4,6 +4,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from unittest.mock import Mock, call
 from .views import send_each, read_csv
 from .models import Broadcast, Log
+from .handlers import pluck_variables, render_sms_template
 
 class SendViewTest(TestCase):
     def setUp(self):
@@ -12,13 +13,13 @@ class SendViewTest(TestCase):
         self.recipients_dict = [
             {'Member ID': '1', 
             'First Name': 'Harvey', 
-            'Phone Number': '17342775603'},
+            'phone': '17342775603'},
             {'Member ID': '2',
             'First Name': 'Ruth',
-            'Phone Number': '17344266718'},
+            'phone': '17344266718'},
             {'Member ID': '3',
             'First Name': 'Susu',
-            'Phone Number': '17344265729'}
+            'phone': '17344265729'}
         ]
         self.recipients_csv = [
             'Member ID, First Name, Phone Number',
@@ -49,10 +50,31 @@ class SendViewTest(TestCase):
         calls = [call.messages.create(
                 body=words.words, 
                 from_='+13132514241', 
-                to=recipient['Phone Number']) 
+                to=recipient['phone']) 
             for recipient in self.recipients_dict]
 
         texts = send_each(words, self.recipients_dict, fake_twilio)
 
         self.assertEqual(len(Log.objects.all()), len(calls))
         fake_twilio.assert_has_calls(calls)
+
+class TestRenderUserSMSTemplate(TestCase):
+    def test_pluck_variables(self):
+        template = "This is a text that will be sent to [[ name ]], at [[ phone ]]."
+
+        vars = pluck_variables(template)
+
+        self.assertIn('name', vars)
+        self.assertIn('phone', vars)
+
+    def test_render_sms_template(self):
+        template = "An important message on [[ date ]] for [[ customer ]]!"
+
+        context = {
+            'date': 'Aug 2',
+            'customer': 'Adele'
+        }
+
+        result = render_sms_template(template, context)
+
+        self.assertEqual(result, "An important message on Aug 2 for Adele!")

@@ -35,7 +35,6 @@ def dict_map(func, *args):
     return apply_over
 
 def dict_filter(test_key, condition):
-    """This abstraction is off."""
     def filterer(record):
         return {key: val for key, val in record.items() if condition(val[test_key])}
     return filterer

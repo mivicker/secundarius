@@ -212,3 +212,6 @@ class TestAttachMenu(TestCase):
         formatted = format_phone(phone)
 
         self.assertIn(formatted, ['(313) 234-4322'])
+
+    def test_build_fulfillment_context(self):
+        pass

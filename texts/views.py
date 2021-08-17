@@ -7,9 +7,9 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 from twilio.rest import Client
 from twilio.twiml.messaging_response import MessagingResponse
-from .models import Broadcast, Reply, Log, Received
+from .models import Broadcast, Reply, Log, Received, FillField
 from .forms import UpdateReplyForm, UploadFileForm, UpdateBroadcastForm
-from .handlers import read_csv, send_each, lookup_reply
+from .handlers import read_csv, send_each, pluck_variables
 
 @login_required
 def home(request):
@@ -46,8 +46,12 @@ def edit_reply(request):
 
 @login_required
 def save(request):
-    f = UpdateBroadcastForm(request.POST)
-    new_words = f.save()
+    broadcast = UpdateBroadcastForm(request.POST)
+    new_broadcast = broadcast.save()
+    for variable in pluck_variables(new_broadcast.words):
+        FillField.objects.create(
+            field_name=variable, broadcast=new_broadcast)
+
     return redirect('text-home')
 
 @login_required

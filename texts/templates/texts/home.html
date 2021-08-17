@@ -2,10 +2,21 @@
 {% block content %}
 <h1>Send a new message</h1>
 <div class="message-display">
-	<h4>Current Message <a class="edit" href="{% url 'edit-words' %}">edit</a></h4>
 	<div class="row">
-	<div class="six columns message-text">
-	<p>{{ words.words }}</p>
+	<div class="eight columns">
+	<h4>Current Message <a class="edit" href="{% url 'edit-words' %}">edit</a></h4>
+	<div class="message-text">
+	<h5>{{ words.words }}</h5>
+	</div>
+	</div>
+	<div class="four columns">
+	<h4>Your csv must have these columns:</h4>
+	<ul>
+		<li>phone</li>
+		{% for field in words.fillfield_set.all %}
+		<li>{{ field.field_name }}</li>
+		{% endfor %}
+	</ul>
 	</div>
 	</div>
 	
