@@ -4,11 +4,10 @@ from django.conf import settings
 from .models import Log, Reply
 from jinja2 import Environment, BaseLoader, meta
 
-
 def read_csv(file_input):
     data = file_input.read().decode('UTF-8')
     stream = io.StringIO(data)
-    return csv.DictReader(stream)
+    return list(csv.DictReader(stream))
 
 def send_each(words, contacts, client):
     phone_number = settings.TWILIO_NUMBER

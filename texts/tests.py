@@ -27,7 +27,14 @@ class SendViewTest(TestCase):
             '2,Ruth,17344266718',
             '3,Susu,17344265729'
         ]
-
+        
+        self.recipients_csv = [
+            'Member ID, First Name, Phone Number',
+            '1,Harvey,17342775603',
+            '2,Ruth,17344266718',
+            '3,Susu,17344265729'
+        ]
+ 
     def test_read_csv(self):
         """
         Reads a csv into a dictionary.

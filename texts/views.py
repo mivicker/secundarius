@@ -14,23 +14,21 @@ from .handlers import read_csv, send_each, pluck_variables
 @login_required
 def home(request):
     if request.method == 'POST':
-        form = UploadFileForm(request.POST)
+        form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             words = Broadcast.objects.first()    
-            client = Client(settings.TWILIO_ACCOUNT_SID,
-               settings.TWILIO_AUTH_TOKEN)
-            texts = send_each(words, read_csv(request.FILES['file']), client)
+            #client = Client(settings.TWILIO_ACCOUNT_SID,
+            #   settings.TWILIO_AUTH_TOKEN)
+            #texts = send_each(words, read_csv(request.FILES['file']), client)
 
             messages.success(request, f'Your messages were sent.')
             return redirect('text-home')
-        messages.error(request, f'The csv you submitted didn\'t have the necessary columns.')
+        messages.error(request, f'The csv you submitted doesn\'t have the necessary columns.')
 
-    words = Broadcast.objects.first()
-    reply = Reply.objects.first()
-    
-    context = {'words': words,
-        'reply': reply,
-        'form': UploadFileForm
+    context = {
+        'words': Broadcast.objects.first(),
+        'reply': Reply.objects.first(),
+        'form': UploadFileForm()
     }
     return render(request, os.path.join('texts', 'home.html'), context)
 
