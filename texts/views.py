@@ -13,17 +13,21 @@ from .handlers import read_csv, send_each, pluck_variables
 
 @login_required
 def home(request):
-    if Broadcast.objects.first():
-        words = Broadcast.objects.first()
-    else:
-        words = Broadcast.objects.create(words="Please update this default message.")
-    if Reply.objects.first():
-        reply = Reply.objects.first()
-    else:
-        reply = Reply.objects.create(words="""DO NOT REPLY TO THIS MESSAGE 
-            To talk to Gleaners Healthcare Customer Service, please call (313) 725-4878. 
-            Reply STOP to opt out of text messages""")
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            words = Broadcast.objects.first()    
+            client = Client(settings.TWILIO_ACCOUNT_SID,
+               settings.TWILIO_AUTH_TOKEN)
+            texts = send_each(words, read_csv(request.FILES['file']), client)
 
+            messages.success(request, f'Your messages were sent.')
+            return redirect('text-home')
+        messages.error(request, f'The csv you submitted didn\'t have the necessary columns.')
+
+    words = Broadcast.objects.first()
+    reply = Reply.objects.first()
+    
     context = {'words': words,
         'reply': reply,
         'form': UploadFileForm
@@ -58,16 +62,6 @@ def save(request):
 def save_reply(request):
     f = UpdateReplyForm(request.POST)
     new_reply = f.save()
-    return redirect('text-home')
-
-@login_required
-def send(request):
-    words = Broadcast.objects.first()    
-    client = Client(settings.TWILIO_ACCOUNT_SID,
-        settings.TWILIO_AUTH_TOKEN)
-    texts = send_each(words, read_csv(request.FILES['file']), client)
-
-    messages.success(request, f'Your messages were sent.')
     return redirect('text-home')
 
 @login_required

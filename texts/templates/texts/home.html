@@ -21,7 +21,12 @@
 	</div>
 	
 </div>
-<form enctype="multipart/form-data" action="{% url 'text-send' %}" method="POST">
+			{% if messages %}
+				{% for message in messages %}
+					<p>{{ message }}</p>
+				{% endfor %}
+			{% endif %}
+<form enctype="multipart/form-data" action="{% url 'text-home' %}" method="POST">
 	{% csrf_token %}
 	<div class="file-selector">
 		<h4>Upload recipients csv</h4>

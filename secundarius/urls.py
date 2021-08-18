@@ -16,14 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from texts.views import (edit_broadcast, edit_reply, home, save, save_reply, send, text_logs, 
+from texts.views import (edit_broadcast, edit_reply, home, save, save_reply, text_logs, 
     receive)
 from routes.views import csv_drop_off, documents_menu, fulfillment_tickets, post_csv, route_lists, landing, fulfillment_menu
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('texts', home, name='text-home'),
-    path('send', send, name='text-send'),
     path('edit', edit_broadcast, name='edit-words'),
     path('edit-reply', edit_reply, name='edit-reply'),
     path('save', save, name='save-words'),
