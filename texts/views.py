@@ -17,9 +17,9 @@ def home(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             words = Broadcast.objects.first()    
-            #client = Client(settings.TWILIO_ACCOUNT_SID,
-            #   settings.TWILIO_AUTH_TOKEN)
-            #texts = send_each(words, read_csv(request.FILES['file']), client)
+            client = Client(settings.TWILIO_ACCOUNT_SID,
+               settings.TWILIO_AUTH_TOKEN)
+            texts = send_each(words, read_csv(request.FILES['file']), client)
 
             messages.success(request, f'Your messages were sent.')
             return redirect('text-home')
