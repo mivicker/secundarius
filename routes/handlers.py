@@ -1,13 +1,13 @@
+
 import csv
 import io
 import string
-import re
-import datetime
 
 from counts.models import Share, Menu, Product
 from .functional import DefaultArgDict, dict_filter, group_dictionaries, pipe, mapp, stapler
 
-from .menu_modifiers import get_magic_words, build_exchangers, build_adders, ADDITIONS_DICT
+from .menu_modifiers import get_magic_words_from, build_exchangers, build_adders
+from .clean_up import extract_date_and_time, try_parsing_date
 
 FROZEN_ITEMS = [
     'MG1024',
@@ -24,24 +24,10 @@ DISPLAY_ORDER = ['Dry Rack 1',
             'Bakery Trays',
             'Dock']
 
-EXCHANGES_DICT = {'peanutfree': [('MG1018', 'MG1006', 1)],
-                 'dairyfree':  [('MG1186', 'MG1187', 1),
-                                ('MG1063', 'MG1187', 2)]}
-
 def load_csv(file):
     data = file.read().decode('UTF-8')
     io_string = io.StringIO(data)
     return csv.DictReader(io_string)
-
-def change_keys(dictionary:dict) -> dict:
-    return{key.lower().replace('#', 'num').replace(' ', '_'): dictionary[key] 
-           for key in dictionary.keys()}
-
-def string_box(stop:dict) -> str:
-    """
-    A hack...
-    """
-    return  stop['box_type'] + ' ' + stop['box_menu'] + ' ' + stop['box_size']
 
 def share_factory(item_code):
     """
@@ -81,22 +67,20 @@ def group_racks(menu: dict, display_order:list) -> list:
     active_racks = list(filter(lambda x: x in groups, display_order))
     return [{'rack_name': rack, 'products': groups[rack]} for rack in active_racks]
 
-def fill_racks(stop: dict) -> list:
+def collect_products(stop: dict) -> dict:
     """
     Takes stop data and returns menu with appropriate adjustments.
     """
-    exchangers = build_exchangers(stop, EXCHANGES_DICT)
-    adders = build_adders(stop, ADDITIONS_DICT)
+    exchangers = build_exchangers(stop)
+    adders = build_adders(stop)
 
     return pipe(
-        stop,
-        string_box,
+        stop['box'],
         dump_menu,
         bind_share_factory, # adds a factory method if product in exchange stage isn't found.
         *exchangers, # applies all product exchanges
         *adders, # applies all product additions
         dict_filter('quantity', lambda x: x != 0),
-        lambda x: group_racks(x, DISPLAY_ORDER),
     )
 
 def attach_menus_to_stops(stops:list) -> list:
@@ -104,94 +88,69 @@ def attach_menus_to_stops(stops:list) -> list:
     Iterates over every stop and attaches the menu.
     """
     for stop in stops:
-        stop['racks'] = fill_racks(stop)
+        products = collect_products(stop)
+        stop['racks'] = group_racks(products, DISPLAY_ORDER)
+        stop['froz_bin'] = 'A'
     
     return stops
 
-def route_num_to_letter(name):
-    _, num = name.split()
-    index = int(num) - 1
-    return string.ascii_uppercase[index]
-
 def build_fulfillment_context(order):
-    # frozen_map = map_to_letter_name(order)
     """
-    The main builder that delivers the data tree.
+    Main func delivering full route object.
     """
     return pipe(order,
-        mapp(change_keys), # Mapp is curried unlike map.
-        lambda lst: list(filter(
-            lambda stop: stop['route_num'] != 'DISMISSED REQUEST', lst)),
-        mapp(stapler('route_num', 'route_num', route_num_to_letter)), 
         attach_menus_to_stops,
-    #    mapp(frozen_letter_stapler(frozen_map)), 
-        mapp(stapler('delivery_notes', 'adjustments', get_magic_words))
+        mapp(stapler('adjustments', get_magic_words_from))
         )
 
-def prepare_menu(order):
-    pass
-
-def extract_date_and_time(order):
-    return order[0]['delivery_date'], order[0]['deliverytime']
-    
-def format_phone(phone_number):
-    area_code, first, last = tuple(re.findall(r'\d{4}$|\d{3}', phone_number))
-    return f'({area_code}) {first}-{last}'
-
-def fix_phone(stop):
-    phone_digits = re.findall('[0-9]{10}', stop['phone']) # attempts to find a coherent phone number.
-    if phone_digits:
-        stop['phone'] = format_phone(phone_digits[0])
-    return stop
-
-def dock_only(menu):
-    return dict_filter(menu, lambda x: x['storage'] == 'Dock')
-
-def menu_to_key(menu):
-    return ((key, val['quantity']) for key, val in sorted(dock_only(menu)).items())
-
-def count_menus(order):
-    return group_dictionaries(order, 'menu', key_transform=menu_to_key, agg=len)
-
-def map_to_letter_name(order):
-    index = 0
-    result = {}
-    for stop in order:
-        if not result.get(menu_to_key(stop['menu'])):
-            result[menu_to_key(stop['menu'])] = string.ascii_uppercase[index]
-            index += 1
-        
-    return result
-
-def try_parsing_date(text):
-    for fmt in ('%Y-%m-%d', '%m/%d/%Y'):
-        try:
-            return datetime.datetime.strptime(text, fmt)
-        except ValueError:
-            pass
-    raise ValueError('no valid date format found')
-
-def frozen_letter_stapler(frozen_map):
-    """Stapler idea could be abstracted."""
-    return lambda stop: stop['froz_bin'] == frozen_map[menu_to_key(stop['menu'])]
-
 def build_route_context(order):
-
-    stops = pipe(order,
-        mapp(change_keys),
-        mapp(fix_phone),
-        lambda lst: list(filter(
-            lambda stop: stop['route_num'] != 'DISMISSED REQUEST', lst)),
-        mapp(stapler('route_num', 'route_num', route_num_to_letter))) 
-
-    route_groups = group_dictionaries(stops, 'route_num')
+    """
+    This builds the data object for the route lists and in the future
+    the driver application.
+    """
+    route_groups = group_dictionaries(order, 'route_num')
     
-    date, time = extract_date_and_time(stops)
+    date, time = extract_date_and_time(order)
 
     return [{'name': name,
              'date': try_parsing_date(date).strftime('%b %d %Y'),
              'time': time,
              'stops':  stops} for name, stops in route_groups.items()]
 
-def build_frozen_context(order):
-    frozen_map = map_to_letter_name(order)
+def select_frozen(menu: dict) -> dict:
+    return {product for product in menu if product in FROZEN_ITEMS}
+
+def keyify(menu):
+    return ((key, val['quantity']) for key, val in sorted(select_frozen(menu)).items())
+
+def create_frozen_maps(order: list)-> dict:
+    """
+    Creates a map from an order that takes a menu and returns a bin. 
+    """
+    index = 0
+    menu_to_bin = {}
+    bin_to_counts = {}
+    bin_to_menu = {}
+    for stop in order:
+        if not menu_to_bin.get(keyify(stop['menu'])):
+            new_label = string.ascii_uppercase[index]
+            menu_to_bin[keyify(stop['menu'])] = new_label
+            bin_to_counts[new_label] = 1
+            bin_to_menu[new_label] = stop['menu']
+            index += 1
+        else:
+            label = menu_to_bin[keyify(stop['menu'])]
+            bin_to_counts[label] += 1
+
+    return menu_to_bin, bin_to_counts, bin_to_menu
+
+
+## Bin is an 'enum' -- really a string
+## Stop is a stop object
+
+## Counts is an integer
+
+## Need to map stops to bins
+##     (stops: menus -> menus: bins)
+## Need to map bins to counts
+## Need to map bins to menus

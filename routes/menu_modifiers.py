@@ -10,8 +10,16 @@ ADDITIONS_DICT = {
     'Bananas': ('MG0030', 1),
 }
 
+EXCHANGES_DICT = {'peanutfree': [('MG1018', 'MG1006', 1)],
+                 'dairyfree':  [('MG1186', 'MG1187', 1),
+                                ('MG1063', 'MG1187', 2)]}
+
+
 def get_magic_words(notes: str) -> list:
     return re.findall(r'#Add([A-Za-z]+)', notes)
+
+def get_magic_words_from(stop):
+    return get_magic_words(stop['delivery_notes'])
 
 def get_additions_from(notes: str) -> list:
     """
@@ -28,13 +36,13 @@ def build_addition_func(to_add: str, quantity: int):
         return indexed_menu
     return add_to
 
-def build_adders(stop, additions_dict:dict):
+def build_adders(stop):
     """
     Finds necessary additions from hash tags in notes,
     returns a list of add functions
     """
     additions = get_additions_from(stop['delivery_notes'])
-    adders =  [build_addition_func(*additions_dict[product]) 
+    adders =  [build_addition_func(*ADDITIONS_DICT[product]) 
               for product in additions]
     return adders
 
@@ -62,9 +70,9 @@ def make_exchange_func(to_remove: str, to_add: str, ratio: int):
         return indexed_menu
     return exchange
 
-def build_exchangers(stop, exchanges_dict:dict) -> list:
+def build_exchangers(stop) -> list:
     """
     Builds and applies the appropriate series of exchanges to the menu.
     """
-    exchanges = get_exchanges(stop, exchanges_dict)
+    exchanges = get_exchanges(stop, EXCHANGES_DICT)
     return [make_exchange_func(*exchange) for exchange in exchanges]

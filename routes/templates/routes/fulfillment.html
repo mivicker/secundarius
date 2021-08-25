@@ -46,10 +46,10 @@
                 <div id="beam"><p>Pack day of</p></div>
                 {% endif %}
                 <div id="rack-name">
-                    <p>{{ rack.rack_name }}</p>
-                        {% if rack == 'Dock' %}
+                    <p>{{ rack.rack_name }}
+                        {% if rack.rack_name == 'Dock' %}
                         — FROZEN BIN {{ stop.froz_bin }}
-                        {% endif %}
+                        {% endif %}</p>
                     </p>
                 </div>
                 <div id="quantity">

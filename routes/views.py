@@ -2,6 +2,7 @@ import json
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .handlers import build_fulfillment_context, build_route_context, load_csv
+from .clean_up import clean_upload
 from texts.forms import UploadFileForm
 
 @login_required
@@ -15,18 +16,20 @@ def post_csv(request):
 
 @login_required
 def documents_menu(request):
-    return render('routes/menu.html')
+    return render(request,'routes/menu.html')
 
 @login_required
 def fulfillment_tickets(request):
     file = request.session['order']
-    order = build_fulfillment_context(json.loads(file))
+    cleaned = clean_upload(json.loads(file))
+    order = build_fulfillment_context(cleaned)
     return render(request, 'routes/fulfillment.html', context={'order': order})
 
 @login_required
 def route_lists(request):
     file = request.session['order']
-    order = build_route_context(json.loads(file))
+    cleaned = clean_upload(json.loads(file))
+    order = build_route_context(cleaned)
     return render(request, 'routes/lists.html', context={'order': order})
 
 @login_required

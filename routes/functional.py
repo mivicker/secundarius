@@ -53,9 +53,10 @@ class DefaultArgDict(UserDict):
         self[key] = result
         return result
 
-def stapler(arg_field, out_field, func):
-    """ Applies a function to one field and saves it in another. """
+def stapler(out_field, func):
+    """ Returns a function that applies another function 
+        to an object and saves it in a new field."""
     def staple(stop):
-        stop[out_field] = func(stop[arg_field])
+        stop[out_field] = func(stop)
         return stop
     return staple
