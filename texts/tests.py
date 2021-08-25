@@ -46,6 +46,10 @@ class SendViewTest(TestCase):
         recipients_dict = read_csv(file)
 
         recipients_dict == self.recipients_dict
+    def test_validate_upload(self):
+        file = SimpleUploadedFile('recipients.csv', 
+            '\n'.join(self.recipients_csv).encode('utf-8'), 
+            content_type="csv")
 
     def test_send_each(self):
         """
