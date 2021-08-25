@@ -4,7 +4,8 @@ import io
 import string
 
 from counts.models import Share, Menu, Product
-from .functional import DefaultArgDict, dict_filter, group_dictionaries, pipe, mapp, stapler
+from .functional import (DefaultArgDict, dict_filter, 
+    group_dictionaries, pipe, mapp, stapler, dict_sort_keys, dict_sort_values)
 
 from .menu_modifiers import get_magic_words_from, build_exchangers, build_adders
 from .clean_up import extract_date_and_time, try_parsing_date
@@ -15,6 +16,9 @@ FROZEN_ITEMS = [
     'MG1241',
     'MG1048',
     'MG1385P',
+    'MG1178',
+    'MG1181',
+    'MG1286'
 ]
 
 DISPLAY_ORDER = ['Dry Rack 1',
@@ -30,9 +34,7 @@ def load_csv(file):
     return csv.DictReader(io_string)
 
 def share_factory(item_code):
-    """
-    Creates a share dictionary for a given item_code.
-    """
+    """Creates a share dictionary for a given item_code."""
     return dump_product(
         Share(product=Product.objects.get(item_code=item_code), 
               menu=Menu(description='dummy_menu'),
@@ -42,35 +44,27 @@ def bind_share_factory(menu):
     return DefaultArgDict(share_factory, menu)
 
 def dump_product(share):
-    """
-    Makes a simple dictionary out of a share object.
-    """
+    """Makes a simple dictionary out of a share object."""
     return {'item_code': share.product.item_code,
             'description': share.product.description,
             'storage': share.product.storage,
             'quantity': share.quantity}
 
 def dump_menu(menu_name: str) -> dict:
-    """
-    Finds the menu_obj from database and dumps into a dict. 
-    """
+    """Finds the menu_obj from database and dumps into a dict."""
     menu = Menu.objects.get(description=menu_name)
     shares = menu.share_set.prefetch_related()
     return {share.product.item_code: dump_product(share) for share in shares}
 
 def group_racks(menu: dict, display_order:list) -> list:
-    """
-    Takes a menu dictionary and returns a dictionary of rack keys to 
-    product lists.
-    """
+    """Takes a menu dictionary and returns a dictionary of rack keys to 
+       product lists."""
     groups = group_dictionaries(menu.values(), 'storage')
     active_racks = list(filter(lambda x: x in groups, display_order))
     return [{'rack_name': rack, 'products': groups[rack]} for rack in active_racks]
 
 def collect_products(stop: dict) -> dict:
-    """
-    Takes stop data and returns menu with appropriate adjustments.
-    """
+    """Takes stop data and returns menu with appropriate adjustments."""
     exchangers = build_exchangers(stop)
     adders = build_adders(stop)
 
@@ -84,23 +78,23 @@ def collect_products(stop: dict) -> dict:
     )
 
 def attach_menus_to_stops(stops:list) -> list:
-    """
-    Iterates over every stop and attaches the menu.
-    """
+    """Iterates over every stop and attaches the menu."""
     for stop in stops:
-        products = collect_products(stop)
-        stop['racks'] = group_racks(products, DISPLAY_ORDER)
-        stop['froz_bin'] = 'A'
+        stop['menu'] = collect_products(stop)
+
+    menu_to_bin, _, _ = create_frozen_maps(stops)
+
+    for stop in stops:
+        stop['racks'] = group_racks(stop['menu'], DISPLAY_ORDER)
+        stop['froz_bin'] = menu_to_bin[keyify(stop['menu'])]
     
     return stops
 
 def build_fulfillment_context(order):
-    """
-    Main func delivering full route object.
-    """
+    """Main func delivering full route object."""
     return pipe(order,
         attach_menus_to_stops,
-        mapp(stapler('adjustments', get_magic_words_from))
+        mapp(stapler('adjustments', get_magic_words_from)),
         )
 
 def build_route_context(order):
@@ -118,10 +112,10 @@ def build_route_context(order):
              'stops':  stops} for name, stops in route_groups.items()]
 
 def select_frozen(menu: dict) -> dict:
-    return {product for product in menu if product in FROZEN_ITEMS}
+    return {key: val for key, val in menu.items() if val['item_code'] in FROZEN_ITEMS}
 
-def keyify(menu):
-    return ((key, val['quantity']) for key, val in sorted(select_frozen(menu)).items())
+def keyify(menu: dict) -> tuple:
+    return tuple((key, val['quantity']) for key, val in dict_sort_keys(select_frozen(menu)).items())
 
 def create_frozen_maps(order: list)-> dict:
     """
@@ -136,7 +130,7 @@ def create_frozen_maps(order: list)-> dict:
             new_label = string.ascii_uppercase[index]
             menu_to_bin[keyify(stop['menu'])] = new_label
             bin_to_counts[new_label] = 1
-            bin_to_menu[new_label] = stop['menu']
+            bin_to_menu[new_label] = select_frozen(stop['menu'])
             index += 1
         else:
             label = menu_to_bin[keyify(stop['menu'])]
@@ -144,13 +138,18 @@ def create_frozen_maps(order: list)-> dict:
 
     return menu_to_bin, bin_to_counts, bin_to_menu
 
+def build_frozen_context(order):
+    for stop in order:
+        stop['menu'] = collect_products(stop)
 
-## Bin is an 'enum' -- really a string
-## Stop is a stop object
+    _, bin_to_counts, bin_to_menu = create_frozen_maps(order)
 
-## Counts is an integer
+    sorted_bins = dict_sort_values(bin_to_counts)
 
-## Need to map stops to bins
-##     (stops: menus -> menus: bins)
-## Need to map bins to counts
-## Need to map bins to menus
+    date, time = extract_date_and_time(order)
+
+    return {'bins': [{'label': key,
+             'count': bin_to_counts[key],
+             'menu': bin_to_menu[key]} for key in sorted_bins.keys()],
+             'date': date,
+             'time': time}

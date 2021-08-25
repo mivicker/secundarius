@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Your page title here :)</title>
+	<link rel="stylesheet" href="static/css/skeleton.css">
+	<link rel="stylesheet" href="static/css/main.css">
+    </head>
+    <body>
+<div class="container">
+	<h1>Frozen {{ date }} {{ time }}</h1>
+	{% for bin in bins %}
+	<div class="froz-menu">
+	<div class="row">
+	<div class="two columns">
+	<h2>{{ bin.count }}</h2>
+	</div>
+	<div class="three columns">
+		<h2>Bin {{ bin.label }}</h2>
+	</div>
+	<div class="row">
+	<p>
+	</div>
+	</div>
+	<table width="100%">
+		<tr>
+			<th>Item #</th><th>Description</th><th>Quantity</th>
+		</tr>
+		{% for product in bin.menu.values %}
+		<tr>
+			<td>{{ product.item_code }}</td><td>{{ product.description }}</td><td>{{ product.quantity }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+	</div>
+	{% endfor %}
+</div>
+    </body>

@@ -60,3 +60,11 @@ def stapler(out_field, func):
         stop[out_field] = func(stop)
         return stop
     return staple
+
+def dict_sort_keys(dictionary:dict) -> dict:
+    sorted_keys = sorted(dictionary)
+    return {key: dictionary[key] for key in sorted_keys}
+
+def dict_sort_values(dictionary: dict) -> dict:
+    return dict(sorted(dictionary.items(), 
+        key=lambda item: item[1], reverse=True))

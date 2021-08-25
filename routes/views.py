@@ -1,7 +1,7 @@
 import json
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .handlers import build_fulfillment_context, build_route_context, load_csv
+from .handlers import build_frozen_context, build_fulfillment_context, build_route_context, load_csv
 from .clean_up import clean_upload
 from texts.forms import UploadFileForm
 
@@ -39,9 +39,10 @@ def landing(request):
 @login_required
 def fulfillment_menu(request):
     return render(request, "routes/menu.html", context={})
-"""
+
+@login_required
 def frozen_tickets(request):
-    csv = request.FILES['file']
-    order = build_frozen_context(csv)
-    return render(request, 'routes/froz.html', context={'order': order})
-"""
+    order = request.session['order']
+    cleaned = clean_upload(json.loads(order))
+    
+    return render(request, 'routes/froz.html', context=build_frozen_context(cleaned))

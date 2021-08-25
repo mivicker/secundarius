@@ -1,0 +1,216 @@
+@media print {
+
+body {
+    font-family: 'Helvetica', 'Arial Narrow', Arial, sans-serif;
+    padding: 0;
+}
+
+h1 {
+    margin: 0in;
+    margin-top: 0.0625in;
+    font-weight: normal;
+    font-size: 0.375in;
+}
+
+p {
+    margin: 0px;
+    font-size: 0.1875in;
+    font-weight: lighter;
+}
+
+.client-info {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto; 
+    grid-gap: 0in;
+}
+
+.client-info > div {
+    padding: .0312in;
+    border: 1px dotted black;
+}
+
+#date {
+    grid-column-start: 1;
+    grid-column-end: 4;
+    border: none;
+    border-bottom: 1px dotted black; 
+}
+
+#time {
+    grid-column-start: 4;
+    grid-column-end: 10;
+    border: none;
+    border-bottom: 1px dotted black; 
+}
+
+#route {
+    grid-column-start: 10;
+    grid-column-end: 12;
+}
+
+#stop {
+    grid-column-start: 12;
+    grid-column-end: 14;
+}
+
+#box-type {
+    grid-column-start: 1;
+    grid-column-end: 4;
+    border: none;
+}
+
+#menu {
+    grid-column-start: 4;
+    grid-column-end: 7;
+    text-align: left;
+    border: none;
+}
+
+#box-size {
+    grid-column-start: 7;
+    grid-column-end: 10;
+    border: none;
+}
+
+#route-name {
+    grid-column-start: 10;
+    grid-column-end: 12;
+    text-align: center;
+}
+
+#stop-number {
+    grid-column-start: 12;
+    grid-column-end: 14;
+    text-align: center;
+}
+
+#adjustments {
+    grid-column-start: 10;
+    grid-column-end: 14;
+}
+
+#health-plan {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    border: none;
+}
+
+#health-plan-text {
+    grid-column-start: 3;
+    grid-column-end: 10;
+    border: none;
+    border-bottom: 1px dotted black; 
+}
+
+#adjustment-text {
+    grid-column-start: 10;
+    grid-column-end: 14;
+    grid-row-start: 4;
+    grid-row-end: 7;
+}
+
+#member-id {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    border: none;
+}
+
+#member-id-text {
+    grid-column-start: 3;
+    grid-column-end: 10;
+    border: none;
+    border-bottom: 1px dotted black; 
+}
+
+#main-contact {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    border: none;
+}
+
+#main-contact-text {
+    grid-column-start: 3;
+    grid-column-end: 10;
+    border: none;
+    border-bottom: 1px dotted black; 
+}
+
+#delivery-notes {
+    margin-top: 0.0625in;
+    margin-bottom: 0.0625in;
+    padding: 0.0625in;
+    border: 1px dotted black;
+}
+
+#beam {
+    background-color: black;
+    grid-column-start: 1;
+    grid-column-end: 14;
+}
+
+#info-line {
+    font-size: 9pt;
+    margin: 0.1625in;
+    vertical-align: bottom;
+}
+
+td, th {
+    padding: 0.0625in;
+}
+
+#check {
+    grid-column-start: 13;
+    grid-column-end: 14;
+    border: 1px dotted black;
+}
+
+#products {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto; 
+    grid-gap: 0in;
+}
+
+#products > div {
+    padding: .0312in;
+    border: 1px dotted black;
+}
+
+.order {
+    page-break-inside: avoid;
+    page-break-after: always;
+}
+
+#rack-name {
+    grid-column-start: 1;
+    grid-column-end: 10;
+}
+
+#quantity {
+    grid-column-start: 10;
+    grid-column-end: 14;
+}
+
+#item-code {
+    grid-column-start: 1;
+    grid-column-end: 4;
+}
+
+#description {
+    grid-column-start: 4;
+    grid-column-end: 10;
+}
+
+#quantity-text {
+    grid-column-start: 10;
+    grid-column-end: 13;
+}
+
+.froz-bin {
+    margin: 10px;
+    font-size: 0.25in;
+    font-weight:bolder;
+}
+
+}
