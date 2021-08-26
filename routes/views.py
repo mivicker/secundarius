@@ -5,13 +5,37 @@ from .handlers import build_frozen_context, build_fulfillment_context, build_rou
 from .clean_up import clean_upload
 from texts.forms import UploadFileForm
 
+# Main landing page for site
+
+@login_required
+def landing(request):
+    return render(request, "routes/landing.html", context={})
+
+## Menu page for fulfillment system
+
+@login_required
+def fulfillment_menu(request):
+    return render(request, 'routes/fulfillmenu.html')
+
+### Download deliveries csv
+
 @login_required
 def download_menu(request):
     return render(request, 'routes/download_menu.html', context={})
 
 @login_required
+def deliveries_report(request):
+    return render(request, 'routes/deliveries_report.html', context={})
+
+@login_required
 def download_deliveries(request):
     return render(request, 'routes/download_deliveries.html', context={})
+
+@login_required
+def delivery_csv(request):
+    pass
+
+### Prepare route documentation
 
 @login_required
 def csv_drop_off(request):
@@ -27,17 +51,6 @@ def documents_menu(request):
     return render(request,'routes/documents-menu.html')
 
 @login_required
-def fulfillment_menu(request):
-    return render(request, 'routes/fullfillmenu.html')
-
-@login_required
-def fulfillment_tickets(request):
-    file = request.session['order']
-    cleaned = clean_upload(json.loads(file))
-    order = build_fulfillment_context(cleaned)
-    return render(request, 'routes/fulfillment.html', context={'order': order})
-
-@login_required
 def route_lists(request):
     file = request.session['order']
     cleaned = clean_upload(json.loads(file))
@@ -45,12 +58,11 @@ def route_lists(request):
     return render(request, 'routes/lists.html', context={'order': order})
 
 @login_required
-def landing(request):
-    return render(request, "routes/landing.html", context={})
-
-@login_required
-def fulfillment_menu(request):
-    return render(request, "routes/menu.html", context={})
+def fulfillment_tickets(request):
+    file = request.session['order']
+    cleaned = clean_upload(json.loads(file))
+    order = build_fulfillment_context(cleaned)
+    return render(request, 'routes/fulfillment.html', context={'order': order})
 
 @login_required
 def frozen_tickets(request):
