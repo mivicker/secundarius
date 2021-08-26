@@ -14,7 +14,6 @@ EXCHANGES_DICT = {'peanutfree': [('MG1018', 'MG1006', 1)],
                  'dairyfree':  [('MG1186', 'MG1187', 1),
                                 ('MG1063', 'MG1187', 2)]}
 
-
 def get_magic_words(notes: str) -> list:
     return re.findall(r'#Add([A-Za-z]+)', notes)
 

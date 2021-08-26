@@ -6,6 +6,14 @@ from .clean_up import clean_upload
 from texts.forms import UploadFileForm
 
 @login_required
+def download_menu(request):
+    return render(request, 'routes/download_menu.html', context={})
+
+@login_required
+def download_deliveries(request):
+    return render(request, 'routes/download_deliveries.html', context={})
+
+@login_required
 def csv_drop_off(request):
     return render(request, 'routes/csv_drop.html', context={'form':UploadFileForm})
 
@@ -16,7 +24,11 @@ def post_csv(request):
 
 @login_required
 def documents_menu(request):
-    return render(request,'routes/menu.html')
+    return render(request,'routes/documents-menu.html')
+
+@login_required
+def fulfillment_menu(request):
+    return render(request, 'routes/fullfillmenu.html')
 
 @login_required
 def fulfillment_tickets(request):
