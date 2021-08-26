@@ -44,7 +44,7 @@ def csv_drop_off(request):
 @login_required
 def post_csv(request):
     request.session['order'] = json.dumps(list(load_csv(request.FILES['file'])))
-    return redirect('fulfillment-menu')
+    return redirect('doc-menu')
 
 @login_required
 def documents_menu(request):

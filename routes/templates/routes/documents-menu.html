@@ -1,6 +1,11 @@
 {% extends "texts/base.html" %}
 {% block content %}
-<h2><a href="{% url  'pack-tickets' %}">Fulfillment tickets</a></h2>
+<div class="nav">
+	<p><a href="{% url 'home' %}">Main menu</a> > <a href="{% url 'fulfillment-menu' %}">Fulfillment menu</a> > <a href="{% url 'drop-off' %}">Upload csv</a> > Choose documents</p>	
+</div>
+
+<h1>Choose Documents</h1>
+<h2><a href="{% url 'pack-tickets' %}">Fulfillment tickets</a></h2>
 <h2><a href="{% url 'route-lists' %}">Route lists</a></h2>
 <h2><a href="{% url 'frozen-list' %}">Frozen Lists</a></h2>
 {% endblock %}

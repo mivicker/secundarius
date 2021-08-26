@@ -1,9 +1,12 @@
 {% extends 'texts/base.html' %}
 {% block content %}
+<div class="nav">
+	<p><a href="{% url 'home' %}">Main menu</a> > <a href="{% url 'fulfillment-menu' %}">Fulfillment menu</a> > Upload csv</p>
+</div>
 <form enctype="multipart/form-data" action="{% url 'post-csv' %}" method="POST">
 	{% csrf_token %}
 	<div class="file-selector">
-		<h4>Upload routes csv</h4>
+		<h1>Upload routes csv</h1>
 	<div>{{ form }}</div>
 	</div>
 	<div>

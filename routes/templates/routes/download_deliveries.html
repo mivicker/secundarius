@@ -1,4 +1,7 @@
 {% extends 'texts/base.html' %}
 {% block content %}
+<div class="nav">
+	<p><a href="{% url 'home' %}">Main menu</a> > <a href="{% url 'fulfillment-menu' %}">Fulfillment menu</a> > Download deliveries</p>
+</div>
 <h1>This is where to download deliveries</h1>
 {% endblock %}
