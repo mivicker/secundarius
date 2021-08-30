@@ -1,0 +1,3 @@
+{% for block in available_blocks %}
+<p><a href="{% url 'download-csv' block %}">{{ block }}</a></p>
+{% endfor %}

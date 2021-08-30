@@ -5,7 +5,7 @@ import string
 
 from counts.models import Share, Menu, Product
 from .functional import (DefaultArgDict, dict_filter, 
-    group_dictionaries, pipe, mapp, stapler, dict_sort_keys, dict_sort_values)
+    groupby, pipe, mapp, stapler, dict_sort_keys, dict_sort_values)
 
 from .menu_modifiers import get_magic_words_from, build_exchangers, build_adders
 from .clean_up import extract_date_and_time, try_parsing_date
@@ -59,7 +59,7 @@ def dump_menu(menu_name: str) -> dict:
 def group_racks(menu: dict, display_order:list) -> list:
     """Takes a menu dictionary and returns a dictionary of rack keys to 
        product lists."""
-    groups = group_dictionaries(menu.values(), 'storage')
+    groups = groupby(menu.values(), 'storage')
     active_racks = list(filter(lambda x: x in groups, display_order))
     return [{'rack_name': rack, 'products': groups[rack]} for rack in active_racks]
 
@@ -94,7 +94,7 @@ def build_fulfillment_context(order):
     """Main func delivering full route object."""
     return pipe(order,
         attach_menus_to_stops,
-        mapp(stapler('adjustments', get_magic_words_from)),
+        mapp(stapler('adjustments', get_magic_words_from)), # This is terrible.
         )
 
 def build_route_context(order):
@@ -102,7 +102,7 @@ def build_route_context(order):
     This builds the data object for the route lists and in the future
     the driver application.
     """
-    route_groups = group_dictionaries(order, 'route_num')
+    route_groups = groupby(order, 'route_num')
     
     date, time = extract_date_and_time(order)
 

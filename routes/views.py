@@ -1,8 +1,15 @@
+from datetime import time
 import json
+
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+
 from .handlers import build_frozen_context, build_fulfillment_context, build_route_context, load_csv
 from .clean_up import clean_upload
+from .forms import DateForm
+from .download_deliveries import collect_time_blocks, make_csv
+
 from texts.forms import UploadFileForm
 
 # Main landing page for site
@@ -11,31 +18,55 @@ from texts.forms import UploadFileForm
 def landing(request):
     return render(request, "routes/landing.html", context={})
 
-## Menu page for fulfillment system
+
+# Menu page for fulfillment system
 
 @login_required
 def fulfillment_menu(request):
     return render(request, 'routes/fulfillmenu.html')
 
-### Download deliveries csv
+
+# Download deliveries csv
 
 @login_required
-def download_menu(request):
-    return render(request, 'routes/download_menu.html', context={})
+def select_date(request):
+    if request.method == "POST":
+        form = DateForm(request.POST)
+        if form.is_valid():
+            date = form.cleaned_data['date']
+            time_blocks = collect_time_blocks(date)
+            request.session['delivery date'] = date.strftime('%m-%d-%Y')
+            request.session['time blocks'] = time_blocks
+        return redirect('select-time')
+    return render(request, 'routes/select_date.html', context={'form':DateForm()})
 
 @login_required
-def deliveries_report(request):
-    return render(request, 'routes/deliveries_report.html', context={})
+def select_time(request):
+    return render(request, 'routes/select_time.html', context={
+        'available_blocks' : request.session['time blocks'].keys()
+    })
 
 @login_required
-def download_deliveries(request):
-    return render(request, 'routes/download_deliveries.html', context={})
+def download_csv(request, time):
+    blocks = request.session['time blocks']
+    date = request.session['delivery date']
+    csv = make_csv(blocks[time])
+
+    return HttpResponse(csv, headers={
+        'Content-Type': 'application/vnd.ms-excel',
+        'Content-Disposition': f'attachment; filename="Deliveries{date}{time}.csv"',
+        })
 
 @login_required
 def delivery_csv(request):
-    pass
+    request.session['routes'] = ['AM', 'PM', 'Covenant']
 
-### Prepare route documentation
+    routes = request.session['routes']
+
+    return render(request, 'download_deliveries.html', context={'routes':routes})
+
+
+# Prepare route documentation
 
 @login_required
 def csv_drop_off(request):

@@ -1,5 +1,5 @@
 from itertools import chain
-from .functional import group_dictionaries, lookup_record, mapp, DefaultArgDict, pipe
+from .functional import groupby, lookup_record, mapp, DefaultArgDict, pipe
 from django.test import TestCase
 from .handlers import (bind_share_factory, dump_menu, format_phone, get_additions_from, get_magic_words, group_racks, 
     fill_racks, string_box, change_keys)
@@ -8,7 +8,7 @@ from counts.models import Menu, Product, Share
 
 class TestFunctional(TestCase):
     
-    def test_group_dictionaries(self):
+    def test_groupby(self):
         dicts = [
             {'A': 254, 'B': 360, 'C': 5777},
             {'A': 254, 'B': 360, 'C': 5777},
@@ -16,7 +16,7 @@ class TestFunctional(TestCase):
             {'A': 253, 'B': 361, 'C': 5777},
         ]
 
-        grouped = group_dictionaries(dicts, 'A')
+        grouped = groupby(dicts, 'A')
 
         self.assertEqual(len(grouped[254]), 3)
         self.assertEqual(grouped[254][0]['B'], grouped[254][1]['B'])

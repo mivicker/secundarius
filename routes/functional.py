@@ -8,14 +8,14 @@ def pipe(first, *args):
         first = fn(first)
     return first
 
-def group_dictionaries(dictionaries: list, group_key: str, key_transform = lambda x: x, agg = lambda x: x) -> dict:
+def groupby(dictionaries: list, group_key) -> dict:
     """
     Group a list of dictionaries by the values of a given key.
     """
     result = defaultdict(lambda: [])
     for dictionary in dictionaries:
-        result[dictionary[key_transform(group_key)]].append(agg(dictionary.copy()))
-        
+        result[dictionary[group_key]].append(dictionary.copy())
+    
     return dict(result)
 
 def lookup_record(records:list, key, value) -> dict:
@@ -68,3 +68,12 @@ def dict_sort_keys(dictionary:dict) -> dict:
 def dict_sort_values(dictionary: dict) -> dict:
     return dict(sorted(dictionary.items(), 
         key=lambda item: item[1], reverse=True))
+
+def index(dictionaries:list, field) -> dict:
+    if len(set(item[field] for item in dictionaries)) != len(dictionaries):
+        raise ValueError("Field must be unique for each dictionary.")
+    return {dictionary[field] for dictionary in dictionaries}
+
+def ungroup(dictionary:dict) -> list:
+    """wrapper for  dict.values, but is opposite of groupby"""
+    return [value for group in dictionary.values() for value in group]

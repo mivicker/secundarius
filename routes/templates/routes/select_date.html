@@ -3,5 +3,14 @@
 <div class="nav">
 	<p><a href="{% url 'home' %}">Main menu</a> > <a href="{% url 'fulfillment-menu' %}">Fulfillment menu</a> > Download deliveries</p>
 </div>
-<h1>This is where to download deliveries</h1>
+<h1>Select delivery date</h1>
+<form action="{% url 'select-date' %}" method="POST">
+	{% csrf_token %}
+	<div>{{ form }}</div>
+	<div>
+		<button type="submit">
+			Get deliveries
+		</button>
+	</div>
+</form>
 {% endblock %}
