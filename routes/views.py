@@ -5,7 +5,8 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
-from .handlers import build_frozen_context, build_fulfillment_context, build_route_context, load_csv
+from .handlers import (build_frozen_context, build_fulfillment_context, 
+                       build_route_context, load_csv, dump_menu)
 from .clean_up import clean_upload
 from .forms import DateForm
 from .download_deliveries import collect_time_blocks, make_csv
@@ -52,10 +53,12 @@ def download_csv(request, time):
     date = request.session['delivery date']
     csv = make_csv(blocks[time])
 
-    return HttpResponse(csv, headers={
-        'Content-Type': 'application/vnd.ms-excel',
-        'Content-Disposition': f'attachment; filename="Deliveries{date}{time}.csv"',
-        })
+    response = HttpResponse(csv)
+
+    response['Content-Type'] = 'application/vnd.ms-excel'
+    response['Content-Disposition'] = f'attachment; filename="Deliveries{date}{time}.csv"'
+
+    return response
 
 @login_required
 def delivery_csv(request):
@@ -101,3 +104,6 @@ def frozen_tickets(request):
     cleaned = clean_upload(json.loads(order))
     
     return render(request, 'routes/froz.html', context=build_frozen_context(cleaned))
+
+# Single menu
+
