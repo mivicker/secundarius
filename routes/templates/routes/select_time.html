@@ -1,3 +1,12 @@
+{% extends 'texts/base.html' %}
+
+{% block content %}
+<div class="nav">
+	<p><a href="{% url 'home' %}">Main menu</a> > <a href="{% url 'fulfillment-menu' %}">Fulfillment</a> > <a href="{% url 'select-date' %}">Select date</a> > Select time</p>
+</div>
+<h1>Select csv for download</h1>
+
 {% for block in available_blocks %}
-<p><a href="{% url 'download-csv' block %}">{{ block }}</a></p>
+	<h2><a href="{% url 'download-csv' block %}">{{ block }}</a></h2>
 {% endfor %}
+{% endblock %}

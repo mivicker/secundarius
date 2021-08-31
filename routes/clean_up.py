@@ -39,7 +39,7 @@ def fix_phone(stop):
     return stop
 
 def try_parsing_date(text):
-    for fmt in ('%Y-%m-%d', '%m/%d/%Y'):
+    for fmt in ('%B %d, %Y','%Y-%m-%d', '%m/%d/%Y'):
         try:
             return datetime.datetime.strptime(text, fmt)
         except ValueError:

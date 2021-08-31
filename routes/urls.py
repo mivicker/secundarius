@@ -6,7 +6,7 @@ from .views import (csv_drop_off, documents_menu, frozen_tickets,
 
 urlpatterns = [
     # Paths for the create route docs workflow
-    path('fulfillment-menu/', fulfillment_menu, name='fulfillment-menu'),
+    path('', fulfillment_menu, name='fulfillment-menu'),
     path('drop-order/', csv_drop_off, name='drop-off'),
     path('post-csv/', post_csv, name='post-csv'),
     path('doc-menu/', documents_menu, name='doc-menu'),

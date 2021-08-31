@@ -1,7 +1,7 @@
 {% extends 'texts/base.html' %}
 {% block content %}
 <div class="nav">
-	<p><a href="{% url 'home' %}">Main menu</a> > <a href="{% url 'fulfillment-menu' %}">Fulfillment menu</a> > Download deliveries</p>
+	<p><a href="{% url 'home' %}">Home</a> > <a href="{% url 'fulfillment-menu' %}">Fulfillment</a> > Select date</p>
 </div>
 <h1>Select delivery date</h1>
 <form action="{% url 'select-date' %}" method="POST">
