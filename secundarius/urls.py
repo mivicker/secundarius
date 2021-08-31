@@ -1,3 +1,4 @@
+from users.views import change_password
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
@@ -13,4 +14,5 @@ urlpatterns = [
         template_name='users/logout.html'), name='logout'),
     path('routes/', include('routes.urls')),
     path('texts/', include('texts.urls')),
+    path('change-password', change_password, name='change-password'),
 ]
