@@ -2,6 +2,7 @@ import csv
 import io
 
 from shareplum import Site, Office365
+from django.conf import settings
 
 from .functional import ungroup, index, groupby
 from .column_order import column_order
@@ -27,8 +28,8 @@ def make_member_id_query(list_of_ids):
 def collect_time_blocks(date):
     # prepare the authcook and load the site
     authcookie = Office365('https://gcfbsm.sharepoint.com', 
-                        'mvickers@gcfb.org', 
-                "dmpyppszmcqbffbb").GetCookies()
+                        settings.SP_USERNAME, 
+                settings.SP_PASSWORD).GetCookies()
 
     site = Site('https://gcfbsm.sharepoint.com/sites/DMS', 
                 authcookie=authcookie)
@@ -45,6 +46,7 @@ def collect_time_blocks(date):
     for stop in deliveries:
         stop['Delivery Date'] = stop['Delivery Date'].strftime('%B %d, %Y')
         stop['Modified'] = stop['Modified'].strftime('%B %d, %Y')
+    
     # find any deliveries that are missing box information and load 
     # the constituents list to see if it can be found there.
     need_box_types = [stop['Member ID'] for stop in deliveries 
