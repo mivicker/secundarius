@@ -210,7 +210,7 @@ td, th {
 .froz-bin {
     margin: 10px;
     font-size: 0.25in;
-    font-weight:bolder;
+    page-break-inside: avoid;
 }
 
 }
