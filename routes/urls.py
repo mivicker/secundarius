@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (csv_drop_off, documents_menu, frozen_tickets, 
                     fulfillment_tickets, post_csv, route_lists, 
                     fulfillment_menu, download_csv, select_date, 
-                    select_time)
+                    select_time, upload_error)
 
 urlpatterns = [
     # Paths for the create route docs workflow
@@ -13,6 +13,7 @@ urlpatterns = [
     path('fullfillment/', fulfillment_tickets, name='pack-tickets'),
     path('lists/', route_lists, name='route-lists'),
     path('frozen-list', frozen_tickets, name='frozen-list'),
+    path('upload-error', upload_error, name='upload-error'),
 
     # Paths for the download deliveries workflow
     path('select-date', select_date, name='select-date'),

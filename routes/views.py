@@ -78,24 +78,36 @@ def documents_menu(request):
 
 @login_required
 def route_lists(request):
-    file = request.session['order']
-    cleaned = clean_upload(json.loads(file))
-    order = build_route_context(cleaned)
-    return render(request, 'routes/lists.html', context={'order': order})
-
+    try:
+        file = request.session['order']
+        cleaned = clean_upload(json.loads(file))
+        order = build_route_context(cleaned)
+        return render(request, 'routes/lists.html', context={'order': order})
+    except KeyError:
+        return redirect('upload-error')
+        
 @login_required
 def fulfillment_tickets(request):
     file = request.session['order']
-    cleaned = clean_upload(json.loads(file))
-    order = build_fulfillment_context(cleaned)
-    return render(request, 'routes/fulfillment.html', context={'order': order})
+    try:
+        cleaned = clean_upload(json.loads(file))
+        order = build_fulfillment_context(cleaned)
+        return render(request, 'routes/fulfillment.html', context={'order': order})
+    except KeyError:
+        return redirect('upload-error')
+
+@login_required
+def upload_error(request):
+    return render(request, 'routes/upload_error.html')
 
 @login_required
 def frozen_tickets(request):
-    order = request.session['order']
-    cleaned = clean_upload(json.loads(order))
-    
-    return render(request, 'routes/froz.html', context=build_frozen_context(cleaned))
+    try:
+        order = request.session['order']
+        cleaned = clean_upload(json.loads(order))
+        return render(request, 'routes/froz.html', context=build_frozen_context(cleaned))
+    except KeyError:
+        return redirect('upload-error')
 
 # Single menu
 

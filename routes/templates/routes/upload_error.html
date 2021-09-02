@@ -1,0 +1,9 @@
+{% extends 'texts/base.html' %}
+{% block content %}
+<div class="nav">
+	<p><p><a href="{% url 'home' %}">Home</a> > <a href="{% url 'fulfillment-menu' %}">Fulfillment</a> > <a href="{% url 'drop-off' %}">Upload csv</a> > ERROR!</p>
+</div>
+<h1>The csv file you uploaded isn't valid.</h1>
+<p>Make sure that you've uploaded the csv that you downloaded from bringfood.care. <a href="{% url 'drop-off' %}">Try again</a></p>
+</form>
+{% endblock %}
