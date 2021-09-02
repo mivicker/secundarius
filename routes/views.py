@@ -1,5 +1,6 @@
 from datetime import time
 import json
+import string
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -44,7 +45,7 @@ def select_date(request):
 @login_required
 def select_time(request):
     return render(request, 'routes/select_time.html', context={
-        'available_blocks' : request.session['time blocks'].keys()
+        'available_blocks' : reversed(request.session['time blocks'].keys())
     })
 
 @login_required
@@ -59,15 +60,6 @@ def download_csv(request, time):
     response['Content-Disposition'] = f'attachment; filename="Deliveries{date}{time}.csv"'
 
     return response
-
-@login_required
-def delivery_csv(request):
-    request.session['routes'] = ['AM', 'PM', 'Covenant']
-
-    routes = request.session['routes']
-
-    return render(request, 'download_deliveries.html', context={'routes':routes})
-
 
 # Prepare route documentation
 

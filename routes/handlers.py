@@ -10,6 +10,13 @@ from .functional import (DefaultArgDict, dict_filter,
 from .menu_modifiers import get_magic_words_from, build_exchangers, build_adders
 from .clean_up import extract_date_and_time, try_parsing_date
 
+NAMING_SCHEMES = {
+        'AM': [letter + " Blue" for letter in string.ascii_uppercase],
+        'PM': [letter + " Green" for letter in string.ascii_uppercase],
+        '10-2': ['Kansas', 'Iowa', 'Nevada', 'Oregon', 'Wisconsin', 'New York', 'South Carolina', 'Colorado']
+
+    }
+
 FROZEN_ITEMS = [
     'MG1024',
     'MG1380', 
@@ -82,7 +89,9 @@ def attach_menus_to_stops(stops:list) -> list:
     for stop in stops:
         stop['menu'] = collect_products(stop)
 
-    menu_to_bin, _, _ = create_frozen_maps(stops)
+    time = stops[0]['deliverytime']
+
+    menu_to_bin, _, _ = create_frozen_maps(stops, NAMING_SCHEMES[time])
 
     for stop in stops:
         stop['racks'] = group_racks(stop['menu'], DISPLAY_ORDER)
@@ -117,7 +126,7 @@ def select_frozen(menu: dict) -> dict:
 def keyify(menu: dict) -> tuple:
     return tuple((key, val['quantity']) for key, val in dict_sort_keys(select_frozen(menu)).items())
 
-def create_frozen_maps(order: list)-> dict:
+def create_frozen_maps(order: list, symbols: str)-> dict:
     """
     Creates a map from an order that takes a menu and returns a bin. 
     """
@@ -127,7 +136,7 @@ def create_frozen_maps(order: list)-> dict:
     bin_to_menu = {}
     for stop in order:
         if not menu_to_bin.get(keyify(stop['menu'])):
-            new_label = string.ascii_uppercase[index]
+            new_label = symbols[index]
             menu_to_bin[keyify(stop['menu'])] = new_label
             bin_to_counts[new_label] = 1
             bin_to_menu[new_label] = select_frozen(stop['menu'])
@@ -142,7 +151,9 @@ def build_frozen_context(order):
     for stop in order:
         stop['menu'] = collect_products(stop)
 
-    _, bin_to_counts, bin_to_menu = create_frozen_maps(order)
+    time = order[0]['deliverytime']
+
+    _, bin_to_counts, bin_to_menu = create_frozen_maps(order, NAMING_SCHEMES[time])
 
     sorted_bins = dict_sort_values(bin_to_counts)
 
