@@ -6,11 +6,11 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
-from .handlers import (build_frozen_context, build_fulfillment_context, 
+from .business.handlers import (build_frozen_context, build_fulfillment_context, 
                        build_route_context, load_csv, dump_menu)
-from .clean_up import clean_upload
+from .business.clean_up import clean_upload
 from .forms import DateForm
-from .download_deliveries import collect_time_blocks, make_csv
+from .business.download_deliveries import collect_time_blocks, make_csv
 
 from texts.forms import UploadFileForm
 
@@ -20,13 +20,11 @@ from texts.forms import UploadFileForm
 def landing(request):
     return render(request, "routes/landing.html", context={})
 
-
 # Menu page for fulfillment system
 
 @login_required
 def fulfillment_menu(request):
     return render(request, 'routes/fulfillmenu.html')
-
 
 # Download deliveries csv
 
@@ -69,9 +67,7 @@ def csv_drop_off(request):
 
 @login_required
 def post_csv(request):
-    # request.session['order'] = json.dumps(list(load_csv(request.FILES['file'])))
-    with open('quick-test.json', 'w') as f:
-        f.write(json.dumps(list(load_csv(request.FILES['file']))))
+    request.session['order'] = json.dumps(list(load_csv(request.FILES['file'])))
     return redirect('doc-menu')
 
 @login_required
@@ -110,6 +106,3 @@ def frozen_tickets(request):
         return render(request, 'routes/froz.html', context=build_frozen_context(cleaned))
     except KeyError:
         return redirect('upload-error')
-
-# Single menu
-
