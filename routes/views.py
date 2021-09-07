@@ -1,13 +1,11 @@
-from datetime import time
 import json
-import string
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
 from .business.handlers import (build_frozen_context, build_fulfillment_context, 
-                       build_route_context, load_csv, dump_menu)
+                       build_route_context, load_csv)
 from .business.clean_up import clean_upload
 from .forms import DateForm
 from .business.download_deliveries import collect_time_blocks, make_csv
@@ -67,7 +65,9 @@ def csv_drop_off(request):
 
 @login_required
 def post_csv(request):
-    request.session['order'] = json.dumps(list(load_csv(request.FILES['file'])))
+    # request.session['order'] = json.dumps(list(load_csv(request.FILES['file'])))
+    with open('quick-test.json', 'w') as f:
+        f.write(json.dumps(list(load_csv(request.FILES['file']))))
     return redirect('doc-menu')
 
 @login_required
