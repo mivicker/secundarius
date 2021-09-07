@@ -69,7 +69,9 @@ def csv_drop_off(request):
 
 @login_required
 def post_csv(request):
-    request.session['order'] = json.dumps(list(load_csv(request.FILES['file'])))
+    # request.session['order'] = json.dumps(list(load_csv(request.FILES['file'])))
+    with open('quick-test.json', 'w') as f:
+        f.write(json.dumps(list(load_csv(request.FILES['file']))))
     return redirect('doc-menu')
 
 @login_required
@@ -85,7 +87,7 @@ def route_lists(request):
         return render(request, 'routes/lists.html', context={'order': order})
     except KeyError:
         return redirect('upload-error')
-        
+
 @login_required
 def fulfillment_tickets(request):
     file = request.session['order']

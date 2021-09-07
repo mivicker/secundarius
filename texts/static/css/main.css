@@ -32,3 +32,8 @@
 	border-radius: 5px;
 	page-break-inside: avoid;
 }
+
+#title {
+	font-family: 'Mr Dafoe', cursive;
+	font-size: 100px;
+}

@@ -2,6 +2,7 @@
 import csv
 import io
 import string
+from functools import lru_cache
 
 from counts.models import Share, Menu, Product
 from .functional import (DefaultArgDict, dict_filter, 
@@ -57,9 +58,21 @@ def dump_product(share):
             'storage': share.product.storage,
             'quantity': share.quantity}
 
-def dump_menu(menu_name: str) -> dict:
+def make_menu_map():
+    menus = Menu.objects.all()
+    return {menu.description:menu for menu in menus}
+
+def cached_dumper(menu_name, menu_map):
+    menu_map = make_menu_map()
+    return menu_map[menu_name]
+
+def naive_dumper(menu_name):
+    return Menu.objects.get(description=menu_name)
+
+@lru_cache
+def dump_menu(menu_name: str, dumper) -> dict:
     """Finds the menu_obj from database and dumps into a dict."""
-    menu = Menu.objects.get(description=menu_name)
+    menu = dumper(menu_name)
     shares = menu.share_set.prefetch_related()
     return {share.product.item_code: dump_product(share) for share in shares}
 
@@ -70,14 +83,15 @@ def group_racks(menu: dict, display_order:list) -> list:
     active_racks = list(filter(lambda x: x in groups, display_order))
     return [{'rack_name': rack, 'products': groups[rack]} for rack in active_racks]
 
-def collect_products(stop: dict) -> dict:
+def collect_products(stop: dict, dumper) -> dict:
     """Takes stop data and returns menu with appropriate adjustments."""
+
     exchangers = build_exchangers(stop)
     adders = build_adders(stop)
 
     return pipe(
         stop['box'],
-        dump_menu,
+        lambda x: dump_menu(x, dumper=dumper),
         bind_share_factory, # adds a factory method if product in exchange stage isn't found.
         *exchangers, # applies all product exchanges
         *adders, # applies all product additions
@@ -86,8 +100,10 @@ def collect_products(stop: dict) -> dict:
 
 def attach_menus_to_stops(stops:list) -> list:
     """Iterates over every stop and attaches the menu."""
+    dumper = lambda x: cached_dumper(x, make_menu_map())
+    
     for stop in stops:
-        stop['menu'] = collect_products(stop)
+        stop['menu'] = collect_products(stop, dumper)
 
     time = stops[0]['deliverytime']
 
@@ -148,8 +164,11 @@ def create_frozen_maps(order: list, symbols: str)-> dict:
     return menu_to_bin, bin_to_counts, bin_to_menu
 
 def build_frozen_context(order):
+
+    dumper = lambda x: cached_dumper(x, make_menu_map())
+
     for stop in order:
-        stop['menu'] = collect_products(stop)
+        stop['menu'] = collect_products(stop, dumper)
 
     time = order[0]['deliverytime']
 

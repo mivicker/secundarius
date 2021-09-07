@@ -1,8 +1,10 @@
 from itertools import chain
 from .functional import groupby, lookup_record, mapp, DefaultArgDict, pipe
 from django.test import TestCase
-from .handlers import (bind_share_factory, dump_menu, format_phone, get_additions_from, get_magic_words, group_racks, 
-    fill_racks, string_box, change_keys)
+from .handlers import (bind_share_factory, dump_menu,  group_racks, 
+    collect_products, make_menu_map, cached_dumper)
+from .menu_modifiers import get_additions_from, get_magic_words
+from .clean_up import string_box, change_keys, format_phone
 from counts.models import Menu, Product, Share
 
 
@@ -91,6 +93,10 @@ class TestAttachMenu(TestCase):
         Product.objects.create(item_code='MG1006', description='Pinto Beans', storage='Dry Rack 1')
         Product.objects.create(item_code='MG1380', description='Chicken', storage='Dock')
 
+        menu_map = make_menu_map()
+
+        self.dumper = lambda x: cached_dumper(x, menu_map)
+
     def test_string_box(self):
         obj = {'box_type': 'Standard', 'box_size': 'Large', 'box_menu': 'D'}
 
@@ -101,14 +107,14 @@ class TestAttachMenu(TestCase):
     def test_dump_menu(self):
         menu_str = 'Standard A Small'
         
-        dump = dump_menu(menu_str)
+        dump = dump_menu(menu_str, self.dumper)
 
         self.assertIn('Noodles', [item['description'] for item in dump.values()])
 
     def test_group_racks(self):
         DISPLAY_ORDER = ['Dry Rack 1', 'Cooler Rack']
         menu_str = 'Standard A Small'
-        menu = dump_menu(menu_str) # don't couple this to dump_menu
+        menu = dump_menu(menu_str, self.dumper) # don't couple this to dump_menu
 
         sorted_racks = group_racks(menu, DISPLAY_ORDER)
 
@@ -118,15 +124,13 @@ class TestAttachMenu(TestCase):
         self.assertIn('Noodles', all_products)
         self.assertIn('Tomato Sauce', all_products)
 
-    def test_fill_racks(self):
-        test_stop = {'box_type':'Standard', 
-                     'box_menu': 'A', 
-                     'box_size': 'Small', 
+    def test_collect_products(self):
+        test_stop = {'box':'Standard A Small', 
                      'delivery_notes': '#AddChickenBreast', 
                      'peanutfree': 'Yes', 
                      'dairyfree': 'Yes'}
         
-        racks = fill_racks(test_stop)
+        racks = collect_products(test_stop, self.dumper)
         all_products = chain.from_iterable([rack['products'] for rack in racks])
 
         self.assertIn('Noodles', [product['description'] for product in all_products])
@@ -139,14 +143,12 @@ class TestAttachMenu(TestCase):
         self.assertIn('CrunchWrapSumpreme', words)
 
     def test_additions(self):
-        test_stop = {'box_type':'Standard', 
-                     'box_menu': 'A', 
-                     'box_size': 'Small', 
+        test_stop = {'box':'Standard A Small', 
                      'delivery_notes': '#AddChickenBreast', 
                      'peanutfree': 'No', 
                      'dairyfree': 'Yes'}
 
-        racks = fill_racks(test_stop)
+        racks = collect_products(test_stop, self.dumper)
 
         all_products = list(chain.from_iterable([rack['products'] for rack in racks]))
         chicken = lookup_record(all_products, 'item_code', 'MG1380')
@@ -171,20 +173,18 @@ class TestAttachMenu(TestCase):
         menu = pipe(test_stop,
                     change_keys,
                     string_box,
-                    dump_menu,
+                    lambda x: dump_menu(x, self.dumper),
                     bind_share_factory)
 
         self.assertIn('Noodles', [product['description'] for product in menu.values()])
 
     def test_substitutions(self):
-        test_stop = {'box_type':'Standard', 
-                     'box_menu': 'A', 
-                     'box_size': 'Small', 
+        test_stop = {'box':'Standard A Small', 
                      'delivery_notes': '', 
                      'peanutfree': 'No', 
                      'dairyfree': 'Yes'}
 
-        racks = fill_racks(test_stop)
+        racks = collect_products(test_stop, self.dumper)
 
         all_products = list(chain.from_iterable([rack['products'] for rack in racks]))
         almond = lookup_record(all_products, 'item_code', 'MG1187')
