@@ -45,8 +45,10 @@ def collect_products(stop: dict, dumper) -> dict:
 
 class MenuMaker:
     def __init__(self, menu_set):
-        menu_queryset = Menu.objects.filter(description__in=menu_set).prefetch_related('share_set')
-        self.menus = {menu.description: self.dump_menu(menu) for menu in menu_queryset}
+        menu_queryset = Menu.objects.filter(
+            description__in=menu_set).prefetch_related('share_set')
+        self.menus = {menu.description: self.dump_menu(menu) 
+                      for menu in menu_queryset}
 
     @staticmethod
     def dump_product(product):

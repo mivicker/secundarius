@@ -10,3 +10,4 @@ class Driver(models.Model):
 class Visit(models.Model):
     driver = models.ForeignKey('Driver', on_delete=models.CASCADE)
     member = models.CharField(max_length=15)
+    date = models.DateField()

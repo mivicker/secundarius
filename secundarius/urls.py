@@ -1,8 +1,9 @@
-from users.views import change_password
+from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 
+from users.views import change_password
 from routes.views import landing
 
 urlpatterns = [
@@ -16,3 +17,8 @@ urlpatterns = [
     path('texts/', include('texts.urls')),
     path('change-password', change_password, name='change-password'),
 ]
+
+if 'survey' in settings.INSTALLED_APPS:
+    urlpatterns += [
+        path('survey/', include('survey.urls'))
+    ]
