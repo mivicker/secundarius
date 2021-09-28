@@ -11,6 +11,17 @@ from .menu_modifiers import build_exchangers, build_adders
 
 from counts.models import Share, Menu, Product
 
+def copy_cache(function):
+    memo = {}
+    def wrapper(*args):
+        if args in memo:
+            return memo[args]
+        else:
+            rv = function(*args)
+            memo[args] = rv
+            return rv
+    return wrapper
+
 def share_factory(item_code):
     """Creates a share dictionary for a given item_code."""
     return MenuMaker.dump_product(
@@ -57,7 +68,7 @@ class MenuMaker:
 	        'storage': product.product.storage,
 	        'quantity': product.quantity}
 
-    @lru_cache
+    @copy_cache
     def dump_menu(self, menu) -> dict:
         """Finds the menu_obj from database and dumps into a dict."""
         shares = menu.share_set.all()

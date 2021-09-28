@@ -4,3 +4,4 @@ config.py
 *.pyc
 secrets.json
 __pycache__
+surveys

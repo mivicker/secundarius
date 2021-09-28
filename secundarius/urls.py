@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
@@ -16,9 +15,5 @@ urlpatterns = [
     path('routes/', include('routes.urls')),
     path('texts/', include('texts.urls')),
     path('change-password', change_password, name='change-password'),
+    path('surveys/', include('surveys.urls')),
 ]
-
-if 'survey' in settings.INSTALLED_APPS:
-    urlpatterns += [
-        path('survey/', include('survey.urls'))
-    ]
