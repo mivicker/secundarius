@@ -15,5 +15,4 @@ urlpatterns = [
     path('routes/', include('routes.urls')),
     path('texts/', include('texts.urls')),
     path('change-password', change_password, name='change-password'),
-    path('surveys/', include('surveys.urls')),
 ]
