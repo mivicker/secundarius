@@ -2,7 +2,7 @@
 # the initial menu, but it will handle the additions and 
 # exchanges gracefully.
 
-from functools import lru_cache
+from copy import deepcopy
 
 from counts.models import Share, Menu, Product
 from .functional import (DefaultArgDict, dict_filter, groupby, pipe)
@@ -15,7 +15,7 @@ def copy_cache(function):
     memo = {}
     def wrapper(*args):
         if args in memo:
-            return memo[args]
+            return deepcopy(memo[args])
         else:
             rv = function(*args)
             memo[args] = rv
