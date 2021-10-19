@@ -36,6 +36,8 @@ def fix_phone(stop):
     phone_digits = re.findall('[0-9]{10}', stop['phone']) # attempts to find a coherent phone number.
     if phone_digits:
         stop['phone'] = format_phone(phone_digits[0])
+    if len(phone_digits) > 1:
+        stop['delivery_notes'] = stop['delivery_notes'] + f" Alternate phone: {format_phone(phone_digits[1])}"
     return stop
 
 def try_parsing_date(text):

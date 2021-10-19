@@ -14,6 +14,7 @@ EXCHANGES_DICT = {'peanutfree': [('MG1018', 'MG1006', 1)],
                  'dairyfree':  [('MG1186', 'MG1187', 1),
                                 ('MG1063', 'MG1187', 2)]}
 
+
 def get_magic_words(notes: str) -> list:
     return re.findall(r'#Add([A-Za-z]+)', notes)
 
@@ -25,6 +26,18 @@ def get_additions_from(notes: str) -> list:
     Returned hash-tagged phrases from delivery notes.
     """
     return [addition for addition in get_magic_words(notes) if addition in ADDITIONS_DICT]
+
+def get_exchanges(stop_data:dict, exchange_dict:dict) -> list:
+    """
+    Check the stop data for a yes value in the exchange column,
+    and adds the tuple representing the exchange to a list of
+    valid exchanges for that stop.
+    """
+    exchanges = []
+    for exchange in exchange_dict.keys():
+        if stop_data[exchange] == 'Yes':
+            exchanges += exchange_dict[exchange]
+    return exchanges
 
 def build_addition_func(to_add: str, quantity: int):
     """
@@ -44,18 +57,6 @@ def build_adders(stop):
     adders =  [build_addition_func(*ADDITIONS_DICT[product]) 
               for product in additions]
     return adders
-
-def get_exchanges(stop_data:dict, exchange_dict:dict) -> list:
-    """
-    Check the stop data for a yes value in the exchange column,
-    and adds the tuple representing the exchange to a list of
-    valid exchanges for that stop.
-    """
-    exchanges = []
-    for exchange in exchange_dict.keys():
-        if stop_data[exchange] == 'Yes':
-            exchanges += exchange_dict[exchange]
-    return exchanges
 
 def make_exchange_func(to_remove: str, to_add: str, ratio: int):
     """

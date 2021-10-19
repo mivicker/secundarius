@@ -3,8 +3,9 @@ from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from unittest.mock import Mock, call
 from .views import send_each, read_csv
-from .models import Broadcast, Log
-from .handlers import pluck_variables, render_sms_template
+from .models import Broadcast
+from .logic import pluck_variables, render_sms_template
+
 
 class SendViewTest(TestCase):
     def setUp(self):
@@ -44,8 +45,8 @@ class SendViewTest(TestCase):
             content_type="csv")
         
         recipients_dict = read_csv(file)
-
         recipients_dict == self.recipients_dict
+
     def test_validate_upload(self):
         file = SimpleUploadedFile('recipients.csv', 
             '\n'.join(self.recipients_csv).encode('utf-8'), 
@@ -66,8 +67,8 @@ class SendViewTest(TestCase):
 
         texts = send_each(words, self.recipients_dict, fake_twilio)
 
-        self.assertEqual(len(Log.objects.all()), len(calls))
         fake_twilio.assert_has_calls(calls)
+
 
 class TestRenderUserSMSTemplate(TestCase):
     def test_pluck_variables(self):
