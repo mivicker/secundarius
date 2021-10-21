@@ -2,7 +2,7 @@ import io
 import csv
 from typing import List, Iterable
 from dataclasses import dataclass
-from returns.result import safe, _Failure
+from returns.result import safe, Failure
 from returns.context import RequiresContext
 from returns.curry import curry
 from jinja2 import Environment, BaseLoader, meta
@@ -69,4 +69,4 @@ def send_each(contacts:List[dict]) -> RequiresContext[List[dict], SendDeps]:
 
 
 def filt_for_failures(return_messages:Iterable) -> Iterable:
-    return filter(lambda msg: type(msg) == _Failure, return_messages)
+    return filter(lambda msg: type(msg) == Failure, return_messages)
