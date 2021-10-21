@@ -12,14 +12,17 @@
 {% for route in order %}
 <div class='route'>
 <div class='row'>
-<div class="three columns">
-	<h3>Route {{ route.name }}</h3>
+<div class="two columns">
+	<h3>Route {{ route.route_name }}</h3>
 </div>
 <div class="four columns">
     <h3>{{ route.date }}</h2>
 </div>
-<div class="two columns">
+<div class="one columns">
     <h3>{{ route.time }}</h2>
+</div>
+<div class="two columns">
+    <h3>{{ route.driver }}</h3>
 </div>
 </div>
 <div class="row header">
@@ -30,14 +33,14 @@
 	<div class="one columns"><p>ID</p></div>
 	<div class="two columns"><p>Phone</p></div>
 </div>
-	{% for stop in route.stops %}
+	{% for visit in route.visits %}
 	<div class="row entry">
-			<div class="one column"><p><strong>{{ stop.stop_num }}</strong></p></div>
-			<div class="two columns"><p>{{ stop.address }}, {{ stop.city }} {{ stop.zip }}</p></div>
-			<div class="three columns"><p>{{ stop.delivery_notes }}</p></div>
-			<div class="two columns"><p>{{ stop.maincontact }}</p></div>
-			<div class="one columns"><p>{{ stop.member_id }}</p></div>
-			<div class="two columns"><p>{{ stop.phone }}</p></div>
+			<div class="one column"><p><strong>{{ visit.stop_num }}</strong></p></div>
+			<div class="two columns"><p>{{ visit.address }}, {{ visit.city }} {{ visit.zip }}</p></div>
+			<div class="three columns"><p>{{ visit.delivery_notes }}</p></div>
+			<div class="two columns"><p>{{ visit.maincontact }}</p></div>
+			<div class="one columns"><p>{{ visit.member_id }}</p></div>
+			<div class="two columns"><p>{{ visit.phone }}</p></div>
 	</div>
 	{% endfor %}
 </div>

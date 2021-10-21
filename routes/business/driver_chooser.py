@@ -1,3 +1,4 @@
+from django.conf import settings
 from shareplum import Site, Office365
 
 def collect_time_blocks(date):

@@ -1,10 +1,13 @@
 import json
+import datetime
+import string
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .business.handlers import (build_frozen_context, build_fulfillment_context, 
-                       build_route_context, load_csv)
-from .business.clean_up import clean_upload
+from .business.handlers import (build_frozen_context, load_csv)
+from .logic.adapter import (clean_upload, build_fulfillment_context, Translator, 
+                            build_menu_cache, build_item_cache, build_route_context)
+from .logic.box import Warehouse 
 from .forms import DateForm
 from .business.download_deliveries import collect_time_blocks, make_csv
 from texts.forms import UploadFileForm
@@ -72,22 +75,40 @@ def documents_menu(request: HttpRequest):
 
 @login_required
 def route_lists(request: HttpRequest):
-    try:
-        file = request.session['order']
-        cleaned = clean_upload(json.loads(file))
-        order = build_route_context(cleaned)
-        return render(request, 'routes/lists.html', context={'order': order})
-    except KeyError:
-        return redirect('upload-error')
+    translator = Translator()
+    warehouse = Warehouse(
+        date=datetime.datetime.today().date(),
+        window=str,
+        substitutions=[],
+        menus=build_menu_cache(),
+        items=build_item_cache(),
+        bin_listen_to=('rack', 'Frozen'),
+        label_pool=list(string.ascii_uppercase)
+    )
+   # try:
+    file = request.session['order']
+    cleaned = clean_upload(json.loads(file))
+    order = build_route_context(cleaned, warehouse, translator)
+    return render(request, 'routes/lists.html', context={'order': order})
+  #  except KeyError:
+  #      return redirect('upload-error')
 
 
 @login_required
 def fulfillment_tickets(request: HttpRequest):
     file = request.session['order']
     cleaned = clean_upload(json.loads(file))
-    order = build_fulfillment_context(cleaned)
-    with open('output.json', 'w') as f:
-        f.write(json.dumps(order))
+    translator = Translator()
+    warehouse = Warehouse(
+        date=datetime.datetime.today().date(),
+        window=str,
+        substitutions=[],
+        menus=build_menu_cache(),
+        items=build_item_cache(),
+        bin_listen_to=('rack', 'Frozen'),
+        label_pool=list(string.ascii_uppercase)
+    )
+    order = build_fulfillment_context(cleaned, warehouse, translator)
     return render(request, 'routes/fulfillment.html', context={'order': order})
 
 

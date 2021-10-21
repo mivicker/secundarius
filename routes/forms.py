@@ -1,6 +1,6 @@
 import datetime
-
 from django import forms
+
 
 def next_delivery_day():
     today = datetime.date.today()
@@ -9,6 +9,7 @@ def next_delivery_day():
     if today.weekday() == 5:
         return (today + datetime.timedelta(days=2))
     return today + datetime.timedelta(days=1)
+
 
 class DateForm(forms.Form):
     date = forms.DateField(widget=forms.SelectDateWidget, 

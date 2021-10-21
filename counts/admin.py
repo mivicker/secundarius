@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Menu, Product, Share
+from .models import Menu, Item, Share
 
 class ShareTabularInline(admin.TabularInline):
     model = Share
@@ -8,6 +8,6 @@ class ShareTabularInline(admin.TabularInline):
 class MenuAdmin(admin.ModelAdmin):
     inlines = [ShareTabularInline]
 
-@admin.register(Product)
+@admin.register(Item)
 class ProductAdmin(admin.ModelAdmin):
     pass

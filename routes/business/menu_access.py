@@ -3,13 +3,10 @@
 # exchanges gracefully.
 
 from copy import deepcopy
-
-from counts.models import Share, Menu, Product
+from counts.models import Share, Menu, Item
 from .functional import (DefaultArgDict, dict_filter, groupby, pipe)
-
 from .menu_modifiers import build_exchangers, build_adders
 
-from counts.models import Share, Menu, Product
 
 def copy_cache(function):
     memo = {}
@@ -25,7 +22,7 @@ def copy_cache(function):
 def share_factory(item_code):
     """Creates a share dictionary for a given item_code."""
     return MenuMaker.dump_product(
-        Share(product=Product.objects.get(item_code=item_code), 
+        Share(product=Item.objects.get(item_code=item_code), 
               menu=Menu(description='dummy_menu'),
               quantity=0))
 
