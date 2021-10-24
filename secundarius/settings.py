@@ -130,9 +130,9 @@ STATIC_URL = '/static/'
 
 # default static files settings for PythonAnywhere.
 # see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
-MEDIA_ROOT = '/home/mikevickers/secundarius/media'
+MEDIA_ROOT = '/home/mvickers/secundarius/media'
 MEDIA_URL = '/media/'
-STATIC_ROOT = '/home/mikevickers/secundarius/static'
+STATIC_ROOT = '/home/mvickers/secundarius/static'
 STATIC_URL = '/static/'
 
 LOGIN_URL = 'login'

@@ -2,6 +2,7 @@ env
 db.sqlite3
 config.py
 *.pyc
+counts/data/visits.json
 secrets.json
 __pycache__
 surveys

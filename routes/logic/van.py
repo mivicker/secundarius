@@ -77,6 +77,8 @@ def assign_drivers(drivers: List[str],
                       key=lambda x: x[1], 
                       reverse=True)
 
+    print(scores)
+
     return scores[0][0]
 
 
