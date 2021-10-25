@@ -6,7 +6,7 @@ import datetime
 from dataclasses import dataclass, field
 from functools import reduce
 from operator import concat
-from typing import Dict, List, NamedTuple, Tuple, Optional
+from typing import Callable, Dict, List, NamedTuple, Tuple, Optional
 from collections import defaultdict, Counter
 from returns.context import RequiresContext
 from returns.curry import curry
@@ -36,6 +36,8 @@ class Item:
     price: float
     type: str
     food_group: str = 'Undefined'
+    recurrance: int = 1
+    expand_rule: Callable = lambda x: 1
 
 
 class Share(NamedTuple):
