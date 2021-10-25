@@ -45,7 +45,7 @@ class Translator:
 
 def get_additions_from(notes: str) -> RequiresContext[List[boxes.ChangeCommand], Translator]:
     """Returned hash-tagged phrases from delivery notes."""
-    return lambda translator: [translator.addition[addition] for addition in get_magic_words(notes) 
+    return lambda translator: [translator.additions[addition] for addition in get_magic_words(notes) 
                                if addition in translator.additions]
 
 
