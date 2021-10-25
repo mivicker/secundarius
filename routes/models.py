@@ -33,7 +33,7 @@ def digest_visits(date_start, date_end) -> List[Tuple[str, str]]:
 def update_relationships() -> None:
     """This is probably kind of cumbersome to run, maybe it only
        runs once a week or something out of the shell."""
-    date_start = LastCacheDate.objects.first()
+    date_start = LastCacheDate.objects.first().date
     date_end = datetime.datetime.today().date()
     counts = Counter(digest_visits(date_start, date_end))
     LastCacheDate.objects.create(date=date_end)
