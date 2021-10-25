@@ -66,9 +66,9 @@ def split_visits(attr:str, visits:List[Visit]) -> Dict[str, List[Visit]]:
     return dict(result)
 
 
-def assign_drivers(drivers: List[str], 
+def assign_drivers(drivers: Tuple[str], 
                    routes: List[List[str]], 
-                   summary: Counter) -> List:
+                   summary: Counter) -> Tuple[str, ...]:
     arrangements = permutations(drivers)
 
     scores = sorted([(arrangement, 
@@ -77,13 +77,11 @@ def assign_drivers(drivers: List[str],
                       key=lambda x: x[1], 
                       reverse=True)
 
-    print(scores)
-
     return scores[0][0]
 
 
-def score_arrangement(drivers: List[str],
-                      routes: List[List[str]],
+def score_arrangement(drivers: Tuple[str],
+                      routes: List[List[Visit]],
                       summary: Counter) -> int:
 
     return sum([score_route(driver, route, summary) 
@@ -91,6 +89,6 @@ def score_arrangement(drivers: List[str],
 
 
 def score_route(driver: str, 
-                route: List[Visit], 
+                route: List[Tuple[str, str]], 
                 summary: Counter) -> int:
     return sum(summary.get((visit.member_id, driver), 0) for visit in route)

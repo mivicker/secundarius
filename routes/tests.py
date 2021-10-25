@@ -1,6 +1,6 @@
 import datetime
 from django.test import TestCase
-from .logic.adapter import build_relationship_lookup 
+from .logic.adapter import build_relationship_lookup, build_box_order, Translator, clean_stop
 from .models import update_relationships, Visit, RelationshipCache, LastCacheDate
 from .logic.van import assign_drivers
 
@@ -18,7 +18,7 @@ class Relationships(TestCase):
 
         for relationship in relationships:
             Visit.objects.create(
-                date = relationship[2],
+                delivery_date = relationship[2],
                 member_id = relationship[0],
                 driver = relationship[1]
             )
@@ -45,7 +45,7 @@ class Relationships(TestCase):
 
         for relationship in relationships:
             Visit.objects.create(
-                date = relationship[2],
+                delivery_date = relationship[2],
                 member_id = relationship[0],
                 driver = relationship[1]
             )
@@ -57,6 +57,8 @@ class Relationships(TestCase):
         route_three = ['101030']
 
         counts = build_relationship_lookup()
+
+        print(counts)
         
         assignments = assign_drivers(
             ['hamilton', 'bvickers@coffee.com', 'mvickers@gcfb.org'],
@@ -66,3 +68,19 @@ class Relationships(TestCase):
 
         self.assertEqual(assignments[0], 'mvickers@gcfb.org')
         self.assertEqual(assignments[1], 'bvickers@coffee.com')
+
+
+    def test_build_box_order(self):
+        stop = {
+            "Box Type": "Standard",
+            "Box Menu": "A",
+            "Box Size": "Small",
+            "PeanutFree": "No",
+            "DairyFree": "No",
+            "Delivery Notes": "#addbread",
+            "Phone": "3132000000"
+        }
+
+        translator = Translator()
+
+        box = build_box_order(clean_stop(stop), translator)

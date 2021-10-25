@@ -26,6 +26,9 @@ ADDITIONS_DICT = {
     'HalalQuarters': ('change', 'MG1385P', 1),
     'Cheese': ('change', 'MG1056', 1),
     'Bananas': ('change', 'MG0030', 1),
+    'Bread': ('change', 'MG1136', 1),
+    'MixedVegetables': ('change', 'MG1178', 1),
+    'Strawberries': ('change', 'MG1286', 1)
 }
 
 
@@ -37,7 +40,7 @@ EXCHANGES_DICT = {'peanutfree': [('exchange', 'MG1018', 'MG1006', 1)],
 @dataclass
 class Translator:
     """The translator holds the dictionaries that translate
-       the stop information to the changes tuples needed for the
+       the stop information to the changes tuples ngeeded for the
        box module."""
     additions: dict = field(default_factory=lambda: ADDITIONS_DICT)
     exchanges: dict = field(default_factory=lambda: EXCHANGES_DICT)
@@ -60,8 +63,6 @@ def get_all_modifications(stop: van.Stop) -> RequiresContext[List[boxes.ChangeCo
         additions = get_additions_from(stop['delivery_notes'])(translator)
         exchanges = get_exchanges_from(stop)(translator)
 
-
-
         return itertools.chain(*(additions + exchanges))
     return inner
 
@@ -72,10 +73,9 @@ def build_warehouse_from_db(warehouse:count_models.Warehouse, **kwargs) -> boxes
     return boxes.Warehouse(**warehouse.as_dict(), **kwargs)
 
 
-def build_relationship_lookup():
-    return sum((Counter(cache.as_dict())
-                for cache in route_models.RelationshipCache.objects.all()),
-                Counter())
+def build_relationship_lookup() -> Counter:
+    return Counter(dict(cache.as_tuple() 
+                   for cache in route_models.RelationshipCache.objects.all()))
 
 
 def make_entry(command:str) -> tuple:
