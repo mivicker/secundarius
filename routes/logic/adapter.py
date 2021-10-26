@@ -99,13 +99,15 @@ def build_box_order(stop:van.Stop, translator: Translator) -> boxes.BoxOrder:
 
 
 def organize_racks(box: boxes.Box) -> Dict[str, boxes.Box]:
-    rack_order = ['Dry Rack 1', 
-                  'Dry Rack 2', 
-                  'Produce Rack', 
-                  'Cooler Rack', 
-                  'Bakery Trays', 
-                  'Dock', 
-                  'Frozen']
+    rack_order = [
+        'Dry Rack 1', 
+        'Dry Rack 2', 
+        'Produce Rack', 
+        'Cooler Rack', 
+        'Bakery Trays',
+        'Frozen', 
+        'Dock', 
+                  ]
     racks = boxes.split_box('rack', box)
 
     return {rack_name: racks.get(rack_name, []) 
