@@ -5,6 +5,7 @@ and provides useful functions for reporting.
 import datetime
 from dataclasses import dataclass, field
 from functools import reduce
+from itertools import chain
 from operator import concat
 from typing import Callable, Dict, List, NamedTuple, Tuple, Optional
 from collections import defaultdict, Counter
@@ -83,19 +84,19 @@ def estimate_cost(instance) -> float:
 
 
 @estimate_cost.instance(Share)
-def _(share:Share):
+def _(share: Share):
     """estimates cost of a share"""
     return share.quantity * share.item.price
 
 
 @estimate_cost.instance(Box)
-def _(box:Box):
+def _(box: Box):
     """estimates cost of a box"""
     return sum(estimate_cost(share) for share in box.shares)
 
 
 @curry
-def count_items_by(attr:str, box:Box) -> Counter:
+def count_items_by(attr: str, box: Box) -> Counter:
     """Makes the items attributes available for counting."""
     return Counter([share.item.__getattribute__(attr) for share in box.shares])
 
@@ -120,9 +121,9 @@ def print_label(box: Box) -> RequiresContext[str, Warehouse]:
     return RequiresContext(inner)
 
 
-def build_box(prototype:Prototype) -> RequiresContext[Box, Warehouse]:
+def build_box(prototype: Prototype) -> RequiresContext[Box, Warehouse]:
     """Builds box from the List[Tuple] prototype, needs a warehouse."""
-    def inner(warehouse:Warehouse):
+    def inner(warehouse: Warehouse):
         box = Box(shares=[Share(warehouse.items[item_code], quantity)
                    for item_code, quantity in prototype])
         box.bin_label = print_label(box)(warehouse)
@@ -130,30 +131,39 @@ def build_box(prototype:Prototype) -> RequiresContext[Box, Warehouse]:
     return RequiresContext(inner)
 
 
-def to_prototype(box:Box) -> Prototype:
+def to_prototype(box: Box) -> Prototype:
     """Returns a built box to prototype form"""
     return [(share.item.item_code, share.quantity) for share in box.shares]
 
 
-def sum_prototypes(prototypes:List[Prototype]) -> Prototype:
-    """Add or subtract prototypes from each other. Adding with
-       empty counter object is necessary for sum to work properly, 
-       but has added benifit of clearing all 0 and negative items."""
-    return list(sum([Counter(dict(prototype)) for prototype in prototypes],
-                     Counter()).items())
+def add_prototypes(a: Prototype, b: Prototype) -> Prototype:
+    """Add prototypes to each other."""
+    result = defaultdict(int)
+    for key, value in chain(a, b):
+        result[key] += value
+        
+    return list(result.items())
+ 
+
+def sum_prototypes(prototypes: List[Prototype]) -> Prototype:
+    return reduce(add_prototypes, prototypes)
 
 
-def sum_boxes(boxes:List[Box]) -> RequiresContext[Box, Warehouse]:
+def positive_only(prototype: Prototype) -> Prototype:
+    return [product for product in prototype if product[1] > 0]
+
+
+def sum_boxes(boxes: List[Box]) -> RequiresContext[Box, Warehouse]:
     """Adds boxes together"""
     prototype = sum_prototypes([to_prototype(box) for box in boxes])
     
     return RequiresContext(
-        lambda warehouse: build_box(prototype)(warehouse)
+        lambda warehouse: build_box(positive_only(prototype))(warehouse)
     )
 
 
 @curry
-def split_box(attr:str, box:Box) -> Racks:
+def split_box(attr: str, box: Box) -> Racks:
     """Breaks box into racks (a dictionary) along a particular *item* attr"""
     result:defaultdict = defaultdict(lambda: Box(shares=[]))
     for share in box.shares:
@@ -168,7 +178,7 @@ def simple_change(item_code:str, delta:int) -> Prototype:
 
 
 @curry
-def exchange(prototype:Prototype, remove_item_code:str, 
+def exchange(prototype: Prototype, remove_item_code: str, 
              add_item_code:str, ratio:int) -> Prototype:
     """Returns a change prototype that when added to the provided box
        prototype will exchange one product for another"""
@@ -178,12 +188,12 @@ def exchange(prototype:Prototype, remove_item_code:str,
 
 
 @curry
-def remove(prototype:Prototype, remove_item_code:str) -> Prototype:
+def remove(prototype: Prototype, remove_item_code: str) -> Prototype:
     lookup = dict(prototype)
     return [(remove_item_code, lookup.get(remove_item_code, 0) * -1)]
 
 
-def make_change(c_command:ChangeCommand) -> RequiresContext[Prototype, Prototype]:
+def make_change(c_command: ChangeCommand) -> RequiresContext[Prototype, Prototype]:
     """Chooses the strategey for creating the change, and returns
        the change prototype (once the referrence prototype is applied"""
     def inner(prototype):
@@ -192,13 +202,12 @@ def make_change(c_command:ChangeCommand) -> RequiresContext[Prototype, Prototype
             'exchange': exchange(prototype),
             'remove': remove(prototype),
         }
-
         command, *args = c_command
         return commands[command](*args)
     return RequiresContext(inner)
 
 
-def make_changes(commands:List[ChangeCommand]) -> RequiresContext[Prototype, Prototype]:
+def make_changes(commands: List[ChangeCommand]) -> RequiresContext[Prototype, Prototype]:
     """Turns a list of commands into a change prototype."""
     return RequiresContext(
         lambda prototype: reduce(concat, [make_change(command)(prototype)
@@ -206,12 +215,12 @@ def make_changes(commands:List[ChangeCommand]) -> RequiresContext[Prototype, Pro
     )
 
 
-def modify(prototype:Prototype, changes:List[ChangeCommand]) -> Prototype:
-    """Applies the changes to the prototype"""
-    return sum_prototypes([prototype, make_changes(changes)(prototype)])
+def modify(prototype: Prototype, changes: List[ChangeCommand]) -> Prototype:
+    """Applies the changes to the prototype, only allow positive shares through"""
+    return add_prototypes(prototype, make_changes(changes)(prototype))
 
 
-def build_box_from_order(order:BoxOrder) -> RequiresContext[Box, Warehouse]:
+def build_box_from_order(order: BoxOrder) -> RequiresContext[Box, Warehouse]:
     """The ideal box is what the customer wants, the real box, 
        the closest thing the warehouse can provide."""
     def inner(warehouse:Warehouse) -> Box:
@@ -219,6 +228,14 @@ def build_box_from_order(order:BoxOrder) -> RequiresContext[Box, Warehouse]:
 
         ideal_box = modify(prototype, order.changes)
         real_box = modify(ideal_box, warehouse.substitutions)
-        
-        return build_box(real_box)(warehouse)
+        return build_box(positive_only(real_box))(warehouse)
     return RequiresContext(inner)
+
+
+def lookup_share(box: Box, item_code: str) -> Share:
+    return next((share for share in box.shares 
+                 if share.item.item_code == item_code), None)
+
+
+def lookup_record(prototype: Prototype, item_code: str) -> Tuple[str, int]:
+    return next((record for record in prototype if record[0] == item_code))

@@ -21,7 +21,7 @@ class Visit(models.Model):
         return (self.driver, self.member_id)
 
     def __str__(self):
-        return f'{self.driver} visited {self.member_id} on {self.date}'
+        return f'{self.driver} visited {self.member_id} on {self.delivery_date}'
 
 
 def digest_visits(date_start, date_end) -> List[Tuple[str, str]]:

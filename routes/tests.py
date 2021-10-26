@@ -1,86 +1,96 @@
 import datetime
+from pathlib import Path
 from django.test import TestCase
-from .logic.adapter import build_relationship_lookup, build_box_order, Translator, clean_stop
-from .models import update_relationships, Visit, RelationshipCache, LastCacheDate
-from .logic.van import assign_drivers
+from tinydb import TinyDB
+from .logic.box import (add_prototypes, build_box_from_order, 
+                        Warehouse, Item, lookup_record, lookup_share, 
+                        make_change, make_changes, modify)
+from .logic.adapter import build_box_order, Translator, clean_stop
 
 
 class Relationships(TestCase):
-    def test_update_relationships(self):
-        yesterday = (datetime.datetime.today()- datetime.timedelta(days=1)).date() 
-        two_days_ago = (datetime.datetime.today() - datetime.timedelta(days=2)).date()
+    def setUp(self):
+        db = TinyDB(Path('routes', 'logic', 'db.json'))
 
-        LastCacheDate.objects.create(date=two_days_ago)
+        self.menu_cache = {menu['name']: menu['products'] 
+                      for menu in db.table('menus').all()}
+        self.item_cache = {prod['item_code']: Item(**prod)
+                           for prod in db.table('products').all()}
 
-        relationships = [('101010', 'mvickers@gcfb.org', yesterday),
-                         ('101010', 'mvickers@gcfb.org', yesterday),
-                         ('101020', 'bvickers@coffee.com', yesterday)]
+    def test_add_prototypes(self):
+        prototype = [('a', 1),
+                     ('b', 1),
+                     ('c', 1)]
 
-        for relationship in relationships:
-            Visit.objects.create(
-                delivery_date = relationship[2],
-                member_id = relationship[0],
-                driver = relationship[1]
-            )
+        other = [('a', 5),
+                 ('b', -2),
+                 ('d', 2)]
 
-        update_relationships()
+        result = add_prototypes(prototype, other)
 
-        cache:RelationshipCache = RelationshipCache.objects.get(driver='mvickers@gcfb.org', 
-                                                                member_id='101010')
+        self.assertEqual(lookup_record(result, 'b'), ('b', -1))
 
-        self.assertEqual(cache.visit_count, 2)
+    def test_lookup_record(self):
+        prototype = [('MG0001', 10),
+                     ('MG0003', 5)]
+        result = lookup_record(prototype, 'MG0003')
 
-    def test_algorithm(self):
-        yesterday = (datetime.datetime.today()- datetime.timedelta(days=1)).date() 
-        two_days_ago = (datetime.datetime.today() - datetime.timedelta(days=2)).date()
+        self.assertEqual(result[0], 'MG0003')
+        self.assertEqual(result[1], 5)
 
-        LastCacheDate.objects.create(date=two_days_ago)
+    def test_make_change(self):
+        c_command = ('exchange', 'MG0001', 'MG0002', 2)
 
-        relationships = [('101010', 'mvickers@gcfb.org', yesterday),
-                         ('101010', 'mvickers@gcfb.org', yesterday),
-                         ('101020', 'bvickers@coffee.com', yesterday),
-                         ('101030', 'hamilton', yesterday),
-                         ('101010', 'hamilton', yesterday),
-                         ('101020', 'hamilton', yesterday)]
+        prototype = [('MG0001', 10),
+                     ('MG0003', 5)]
 
-        for relationship in relationships:
-            Visit.objects.create(
-                delivery_date = relationship[2],
-                member_id = relationship[0],
-                driver = relationship[1]
-            )
+        result = make_change(c_command)(prototype)
 
-        update_relationships()
+        self.assertEqual(lookup_record(result, 'MG0002'), ('MG0002', 20))
 
-        route_one = ['101010']
-        route_two = ['101020']
-        route_three = ['101030']
+    def test_make_changes(self):
+        c_command = ('exchange', 'MG0001', 'MG0002', 2)
 
-        counts = build_relationship_lookup()
+        prototype = [('MG0001', 10),
+                     ('MG0003', 5)]
 
-        print(counts)
-        
-        assignments = assign_drivers(
-            ['hamilton', 'bvickers@coffee.com', 'mvickers@gcfb.org'],
-            [route_one, route_two, route_three],
-            counts
-            )
+        result = make_changes([c_command])(prototype)
 
-        self.assertEqual(assignments[0], 'mvickers@gcfb.org')
-        self.assertEqual(assignments[1], 'bvickers@coffee.com')
+        self.assertEqual(lookup_record(result, 'MG0002'), ('MG0002', 20))
 
+    def test_modify(self):
+        c_command = ('exchange', 'MG0001', 'MG0002', 2)
+
+        prototype = [('MG0001', 10),
+                     ('MG0003', 5)]
+
+        result = modify(prototype, [c_command])
+
+        self.assertEqual(lookup_record(result, 'MG0002'), ('MG0002', 20))
 
     def test_build_box_order(self):
         stop = {
             "Box Type": "Standard",
-            "Box Menu": "A",
+            "Box Menu": "B",
             "Box Size": "Small",
             "PeanutFree": "No",
-            "DairyFree": "No",
-            "Delivery Notes": "#addbread",
+            "DairyFree": "Yes",
+            "Delivery Notes": "",
             "Phone": "3132000000"
         }
 
         translator = Translator()
 
-        box = build_box_order(clean_stop(stop), translator)
+        warehouse =  Warehouse(
+        date=datetime.datetime.today().date(),
+        window='AM',
+        substitutions=[('exchange', 'MG0024C', 'MG0040', 20)],
+        menus=self.menu_cache,
+        items=self.item_cache
+        )
+
+        box = build_box_from_order(build_box_order(clean_stop(stop), translator))(warehouse)
+
+        self.assertEqual(lookup_share(box, 'MG1187').quantity, 1)
+        self.assertEqual(lookup_share(box, 'MG0040').quantity, 20)
+        self.assertEqual(lookup_share(box, 'MG0024C'), None)

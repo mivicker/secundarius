@@ -19,16 +19,16 @@ from routes import models as route_models
 
 
 ADDITIONS_DICT = {
-    'Turkey': ('change', 'MG1024', 1),
-    'ChickenBreast': ('change', 'MG1380', 1),
-    'ChickenHalal': ('change', 'MG1241', 1),
-    'ChickenQuarters': ('change', 'MG1048', 1),
-    'HalalQuarters': ('change', 'MG1385P', 1),
-    'Cheese': ('change', 'MG1056', 1),
-    'Bananas': ('change', 'MG0030', 1),
-    'Bread': ('change', 'MG1136', 1),
-    'MixedVegetables': ('change', 'MG1178', 1),
-    'Strawberries': ('change', 'MG1286', 1)
+    'Turkey': [('change', 'MG1024', 1)],
+    'ChickenBreast': [('change', 'MG1380', 1)],
+    'ChickenHalal': [('change', 'MG1241', 1)],
+    'ChickenQuarters': [('change', 'MG1048', 1)],
+    'HalalQuarters': [('change', 'MG1385P', 1)],
+    'Cheese': [('change', 'MG1056', 1)],
+    'Bananas': [('change', 'MG0030', 1)],
+    'Bread': [('change', 'MG1136', 1)],
+    'MixedVegetables': [('change', 'MG1178', 1)],
+    'Strawberries': [('change', 'MG1286', 1)]
 }
 
 
@@ -63,7 +63,7 @@ def get_all_modifications(stop: van.Stop) -> RequiresContext[List[boxes.ChangeCo
         additions = get_additions_from(stop['delivery_notes'])(translator)
         exchanges = get_exchanges_from(stop)(translator)
 
-        return itertools.chain(*(additions + exchanges))
+        return list(itertools.chain(*(additions + exchanges)))
     return inner
 
 
