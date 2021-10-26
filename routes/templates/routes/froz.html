@@ -13,7 +13,7 @@
 	<div class="froz-bin">
 	<div class="row">
 	<div class="two columns">
-	<h2>{{ bin.count }}</h2>
+	<h2>{{ bin.quantity }}</h2>
 	</div>
 	<div class="three columns">
 		<h2>{{ bin.label }}</h2>
@@ -26,9 +26,9 @@
 		<tr>
 			<th>Item #</th><th>Description</th><th>Quantity</th>
 		</tr>
-		{% for product in bin.menu.values %}
+		{% for share in bin.box.shares %}
 		<tr>
-			<td>{{ product.item_code }}</td><td>{{ product.description }}</td><td>{{ product.quantity }}</td>
+			<td>{{ share.item.item_code }}</td><td>{{ share.item.description }}</td><td>{{ share.quantity }}</td>
 		</tr>
 		{% endfor %}
 	</table>

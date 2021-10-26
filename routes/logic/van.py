@@ -53,6 +53,7 @@ class Visit:
     status: DeliveryStatus
     driver: Driver
     route: str
+    labels: str = 'A'
     deliverable: Deliverable = field(default_factory=Empty)
     racks: dict = field(default_factory=dict)
 

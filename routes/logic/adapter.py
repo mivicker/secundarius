@@ -127,7 +127,12 @@ def build_visit_for_fulfillment(stop: van.Stop,
                           warehouse: boxes.Warehouse, 
                           translator: Translator) -> van.Visit:
     
+    attr, target = warehouse.bin_listen_to
+
     letter = route_num_to_letter(stop['route_num'])
+
+    box = boxes.build_box_from_order(
+                      build_box_order(stop)(translator))(warehouse)
 
     return van.Visit(
                   member_id=stop['member_id'],
@@ -135,8 +140,8 @@ def build_visit_for_fulfillment(stop: van.Stop,
                   time_window=stop['deliverytime'],
                   status=stop['delivery_status'],
                   driver='Unassigned',
-                  racks=organize_racks(boxes.build_box_from_order(
-                      build_box_order(stop)(translator))(warehouse)),
+                  racks=organize_racks(box),
+                  labels=warehouse.bin_labels.get(boxes.make_bin_key(attr, target, box)),
                   route=letter,
                   stop=van.Stop(**stop))
 
@@ -193,6 +198,20 @@ def build_route_context(upload, warehouse, translator):
              'time': extract_time(route),
              } for driver, (route_name, route) in zip(assignments, routes.items())]
 
+
+def build_frozen_context(upload, warehouse: boxes.Warehouse, translator):
+    
+    # This just updates the warehouse state :(
+    routes = populate_visits_for_fulfillment(upload, warehouse, translator)
+
+    bins = [{'box': boxes.build_box(list(key))(warehouse),
+             'quantity': quantity,
+             'label': warehouse.bin_labels[key]} 
+             for key, quantity in warehouse.bin_quantities.items()]
+
+    return {'bins': sorted(bins, key=lambda bin: bin['quantity'], reverse=True),
+            'date': extract_date(routes),
+            'time': extract_time(routes)}
 
 
 def change_keys(dictionary: Dict[str,str]) -> dict:
