@@ -15,7 +15,7 @@
                     <div id="time"><p>{{ visit.deliverytime }}</p></div>
                     <div id="route"><p>Route</p></div>
                     <div id="visit"><p>Stop</p></div>
-                    <div id="box-type"><h1>{{ visit.box_type }}</h1></div>
+                    <div id="box-type"><h1>{{ visit.box_type }}{% if visit.dairyfree == 'Yes' %}**{% endif %}</h1></div>
                     <div id="menu"><h1>{{ visit.box_menu }}</h1></div>
                     <div id="box-size"><h1>{{ visit.box_size }}</h1></div>
                     <div id="route-name"><h1>{{ visit.route }}</h1></div>
