@@ -123,7 +123,7 @@ def route_num_to_letter(name: str):
     return string.ascii_uppercase[index]
 
 
-def build_visit_from_stop(stop: van.Stop, 
+def build_visit_for_fulfillment(stop: van.Stop, 
                           warehouse: boxes.Warehouse, 
                           translator: Translator) -> van.Visit:
     
@@ -135,16 +135,34 @@ def build_visit_from_stop(stop: van.Stop,
                   time_window=stop['deliverytime'],
                   status=stop['delivery_status'],
                   driver='Unassigned',
-                  deliverable=boxes.build_box_from_order(
-                      build_box_order(stop)(translator))(warehouse),
                   racks=organize_racks(boxes.build_box_from_order(
                       build_box_order(stop)(translator))(warehouse)),
                   route=letter,
                   stop=van.Stop(**stop))
 
 
-def populate_visits(upload: List[Dict], warehouse: boxes.Warehouse, translator: Translator):
-    return [build_visit_from_stop(stop, warehouse, translator) for stop in upload]
+def populate_visits_for_fulfillment(upload: List[Dict], warehouse: boxes.Warehouse, translator: Translator) -> List[van.Visit]:
+    return [build_visit_for_fulfillment(stop, warehouse, translator) for stop in upload]
+
+
+def build_visit_for_routes(stop: van.Stop, 
+                          warehouse: boxes.Warehouse, 
+                          translator: Translator) -> van.Visit:
+    
+    letter = route_num_to_letter(stop['route_num'])
+
+    return van.Visit(
+                  member_id=stop['member_id'],
+                  date=stop['delivery_date'],
+                  time_window=stop['deliverytime'],
+                  status=stop['delivery_status'],
+                  driver='Unassigned',
+                  route=letter,
+                  stop=van.Stop(**stop))
+
+
+def populate_visits_for_route(upload: List[Dict], warehouse: boxes.Warehouse, translator: Translator) -> List[van.Visit]:
+    return [build_visit_for_routes(stop, warehouse, translator) for stop in upload]
 
 
 @curry
@@ -152,14 +170,14 @@ def build_fulfillment_context(upload: List[Dict], warehouse: boxes.Warehouse, tr
     """This is the function that we need to build the entire damn thing."""
     """Builds boxes, assigns them to drivers."""
 
-    return van.split_visits('route', populate_visits(upload, warehouse, translator))
+    return van.split_visits('route', populate_visits_for_fulfillment(upload, warehouse, translator))
 
 
 def build_route_context(upload, warehouse, translator):
     """Should be more thoughtful about whether we need to create visits,
        for this of if we can just split the list of dicts."""
 
-    routes = build_fulfillment_context(upload, warehouse, translator)
+    routes = van.split_visits('route', populate_visits_for_route(upload, warehouse, translator))
     
     relationships = dict([cache.as_tuple() for cache in route_models.RelationshipCache.objects.all()])
 

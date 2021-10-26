@@ -17,6 +17,11 @@ class Deliverable(Protocol):
     """This is the thing carried by the stop class"""
 
 
+class Empty:
+    """When you don't need to delivery"""
+    pass
+
+
 @dataclass
 class Driver:
     email: str
@@ -44,12 +49,12 @@ class Visit:
     member_id: str
     date: datetime.date
     time_window: str
-    deliverable: Deliverable
     stop: Stop
     status: DeliveryStatus
     driver: Driver
     route: str
-    racks: dict = field(default_factory=lambda: {})
+    deliverable: Deliverable = field(default_factory=Empty)
+    racks: dict = field(default_factory=dict)
 
     def __getattr__(self, attr):
         return self.stop[attr]
