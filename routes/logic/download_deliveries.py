@@ -3,16 +3,64 @@ import io
 
 from shareplum import Site, Office365
 from django.conf import settings
+from collections import defaultdict
 
-from .functional import ungroup, index, groupby
-from .column_order import column_order
+
+column_order = ['Delivery ID', 
+                'Address', 
+		'City', 
+		'State', 
+		'ZIP', 
+		'Box Menu', 
+		'Box Size', 
+		'Box Type',
+		'Call Status',  
+		'DairyFree',
+		'Delivery Date', 
+		'Delivery Notes', 
+		'Delivery Status', 
+		'DeliveryDay',
+		'DeliveryNumber', 
+		'DeliveryTime', 
+		'DeliveryZone', 
+		'Driver Notes',
+		'First Name',
+		'Healthcare Partner', 
+		'MainContact', 
+		'Member ID', 
+		'PeanutFree',
+		'Phone', 
+		'Primary Language',  
+		'TextOptIn',]
+
+
+def groupby(dictionaries: list, group_key) -> dict:
+    """
+    Group a list of dictionaries by the values of a given key.
+    """
+    result = defaultdict(lambda: [])
+    for dictionary in dictionaries:
+        result[dictionary[group_key]].append(dictionary.copy())
+    
+    return dict(result)
+
+
+def index(dictionaries:list, field) -> dict:
+    if len(set(item[field] for item in dictionaries)) != len(dictionaries):
+        raise ValueError("Field must be unique for each dictionary.")
+    return {dictionary[field] for dictionary in dictionaries}
+
+
+def ungroup(dictionary:dict) -> list:
+    """wrapper for  dict.values, but is opposite of groupby"""
+    return [value for group in dictionary.values() for value in group]
 
 
 def fill_in_missing_box(stop, box_info):
     for field in ['Box Type', 'Box Menu', 'Box Size']:
         stop[field] = box_info[field]
-
     return stop
+
 
 def make_member_id_query(list_of_ids):
     query = {'Where':[]}
@@ -22,15 +70,14 @@ def make_member_id_query(list_of_ids):
 
     query['Where'].append(('Eq', 'Member ID', 
                         list_of_ids[-1]['Member ID']))
-
     return query
+
 
 def collect_time_blocks(date):
     # prepare the authcook and load the site
     authcookie = Office365('https://gcfbsm.sharepoint.com', 
                         settings.SP_USERNAME, 
                 settings.SP_PASSWORD).GetCookies()
-
     site = Site('https://gcfbsm.sharepoint.com/sites/DMS', 
                 authcookie=authcookie)
 
@@ -74,21 +121,17 @@ def collect_time_blocks(date):
             if stop['Member ID'] in need_box_types:
                 box_info = member_id_to_box_info[stop['Member ID']]
                 fill_in_missing_box(stop, box_info)
-
     healthplan_groups = groupby(deliveries, 'Healthcare Partner')
 
     # split covenant off from rest of deliveries
-
     covenant = healthplan_groups.pop('Covenant', None)
-
     ungrouped = ungroup(healthplan_groups)
-
     time_groups = groupby(ungrouped, 'DeliveryTime')
-
     if covenant:
         time_groups['Covenant'] = covenant
 
     return time_groups
+
 
 def make_csv(time_group):
     with io.StringIO() as csvfile:

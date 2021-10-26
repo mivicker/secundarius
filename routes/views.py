@@ -1,18 +1,24 @@
 import json
+import io
+import csv
 import datetime
 import string
 from django.http import HttpResponse, HttpRequest
+from django.core.files.uploadedfile import UploadedFile
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .business.handlers import load_csv
 from .logic.adapter import (clean_upload, build_fulfillment_context, Translator, 
                             build_menu_cache, build_item_cache, build_route_context,
                             build_frozen_context)
 from .logic.box import Warehouse 
 from .forms import DateForm
-from .business.download_deliveries import collect_time_blocks, make_csv
+from .logic.download_deliveries import collect_time_blocks, make_csv
 from texts.forms import UploadFileForm
 
+def load_csv(file: UploadedFile):
+    data = file.read().decode('UTF-8')
+    io_string = io.StringIO(data)
+    return csv.DictReader(io_string)
 
 @login_required
 def landing(request: HttpRequest):

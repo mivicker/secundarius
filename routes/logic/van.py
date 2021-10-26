@@ -2,7 +2,7 @@
 The van module handles the particulars of deliveries.
 """
 import datetime
-from typing import Counter, Optional, Protocol, List, Dict, Tuple
+from typing import Counter, Protocol, List, Dict, Tuple
 from dataclasses import dataclass, field
 from collections import defaultdict
 from itertools import permutations
@@ -14,11 +14,11 @@ Stop = dict
 
 
 class Deliverable(Protocol):
-    """This is the thing carried by the stop class"""
+    """This is the thing carried by the visit class"""
 
 
 class Empty:
-    """When you don't need to delivery"""
+    """When you don't need delivery"""
     pass
 
 
