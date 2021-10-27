@@ -77,7 +77,7 @@ class Warehouse:
     menus: Dict[str, Prototype]
     items: Dict[str, Item]
     rack_order: Optional[List[str]] = field(default_factory=list)
-    labeler: Labeler = field(default_factory=Labeler())
+    labeler: Labeler = field(default_factory=Labeler)
 
 
     def asdict(self):

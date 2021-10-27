@@ -206,8 +206,8 @@ def build_frozen_context(upload, warehouse: boxes.Warehouse, translator):
 
     bins = [{'box': boxes.build_box(list(key))(warehouse),
              'quantity': quantity,
-             'label': warehouse.bin_labels[key]} 
-             for key, quantity in warehouse.bin_quantities.items()]
+             'label': warehouse.labeler.bin_labels[key]} 
+             for key, quantity in warehouse.labeler.bin_quantities.items()]
 
     return {'bins': sorted(bins, key=lambda bin: bin['quantity'], reverse=True),
             'date': extract_date(routes),
@@ -273,3 +273,21 @@ def build_menu_cache() -> dict:
 def build_item_cache() -> dict:
     return {item.item_code: boxes.Item(**item.as_dict()) 
             for item in count_models.Item.objects.all()}
+
+
+def build_menu_name_lookup(listen_to, warehouse: boxes.Warehouse) -> Dict[Tuple, str]:
+    attr, target = listen_to
+    return {
+        boxes.make_bin_key(attr, 
+                           target, 
+                           boxes.build_box(value)(warehouse)): key 
+                           for key, value in reversed(warehouse.menus.items())}
+
+
+def build_named_labeler(label_pool: List[str], listen_to: Tuple[str, str], warehouse: boxes.Warehouse) -> boxes.Labeler:
+    menu_name_lookup = build_menu_name_lookup(listen_to, warehouse)
+    return boxes.Labeler(
+        label_pool=label_pool,
+        bin_labels=menu_name_lookup,
+        bin_listen_to=listen_to
+    )
