@@ -91,8 +91,6 @@ def route_lists(request: HttpRequest):
         substitutions=[],
         menus=build_menu_cache(),
         items=build_item_cache(),
-        bin_listen_to=('rack', 'Frozen'),
-        label_pool=list(string.ascii_uppercase)
     )
     file = request.session['order']
     cleaned = clean_upload(json.loads(file))
