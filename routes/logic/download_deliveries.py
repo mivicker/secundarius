@@ -46,7 +46,7 @@ def groupby(dictionaries: list, group_key) -> dict:
 
 
 def index(dictionaries:list, field) -> dict:
-    if len(set(item[field] for item in dictionaries)) != len(dictionaries):
+    if len({item[field] for item in dictionaries}) != len(dictionaries):
         raise ValueError("Field must be unique for each dictionary.")
     return {dictionary[field] for dictionary in dictionaries}
 

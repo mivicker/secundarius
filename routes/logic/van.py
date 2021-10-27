@@ -90,11 +90,12 @@ def score_arrangement(drivers: Tuple[str],
                       routes: List[List[Visit]],
                       summary: Counter) -> int:
 
-    return sum([score_route(driver, route, summary) 
-                for driver, route in zip(drivers, routes)])
+    return sum(score_route(driver, route, summary) 
+                for driver, route in zip(drivers, routes))
 
 
 def score_route(driver: str, 
                 route: List[Tuple[str, str]], 
                 summary: Counter) -> int:
     return sum(summary.get((visit.member_id, driver), 0) for visit in route)
+    

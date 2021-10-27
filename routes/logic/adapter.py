@@ -79,7 +79,7 @@ def build_relationship_lookup() -> Counter:
 
 
 def make_entry(command:str) -> tuple:
-    return tuple(item for item in command.split())
+    return tuple(command.split())
 
 
 def breakout_substitutions(commands:str) -> Tuple:
@@ -127,7 +127,7 @@ def build_visit_for_fulfillment(stop: van.Stop,
                           warehouse: boxes.Warehouse, 
                           translator: Translator) -> van.Visit:
     
-    attr, target = warehouse.bin_listen_to
+    attr, target = warehouse.labeler.bin_listen_to
 
     letter = route_num_to_letter(stop['route_num'])
 
@@ -141,7 +141,7 @@ def build_visit_for_fulfillment(stop: van.Stop,
                   status=stop['delivery_status'],
                   driver='Unassigned',
                   racks=organize_racks(box),
-                  labels=warehouse.bin_labels.get(boxes.make_bin_key(attr, target, box)),
+                  labels=warehouse.labeler.bin_labels.get(boxes.make_bin_key(attr, target, box)),
                   route=letter,
                   stop=van.Stop(**stop))
 
@@ -215,8 +215,8 @@ def build_frozen_context(upload, warehouse: boxes.Warehouse, translator):
 
 
 def change_keys(dictionary: Dict[str,str]) -> dict:
-    return{key.lower().replace('#', 'num').replace(' ', '_'): dictionary[key] 
-           for key in dictionary.keys()}
+    return{key.lower().replace('#', 'num').replace(' ', '_'): value 
+           for key, value in dictionary.items()}
 
 
 def string_box(stop: van.Stop) -> str:

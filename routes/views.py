@@ -10,15 +10,17 @@ from django.contrib.auth.decorators import login_required
 from .logic.adapter import (clean_upload, build_fulfillment_context, Translator, 
                             build_menu_cache, build_item_cache, build_route_context,
                             build_frozen_context)
-from .logic.box import Warehouse 
+from .logic.box import Warehouse, Labeler 
 from .forms import DateForm
 from .logic.download_deliveries import collect_time_blocks, make_csv
 from texts.forms import UploadFileForm
+
 
 def load_csv(file: UploadedFile):
     data = file.read().decode('UTF-8')
     io_string = io.StringIO(data)
     return csv.DictReader(io_string)
+
 
 @login_required
 def landing(request: HttpRequest):
@@ -102,6 +104,10 @@ def route_lists(request: HttpRequest):
 def fulfillment_tickets(request: HttpRequest):
     file = request.session['order']
     cleaned = clean_upload(json.loads(file))
+    labeler = Labeler(
+        bin_listen_to=('rack', 'Frozen'),
+        label_pool=list(string.ascii_uppercase)
+    )
     translator = Translator()
     warehouse = Warehouse(
         date=datetime.datetime.today().date(),
@@ -109,8 +115,7 @@ def fulfillment_tickets(request: HttpRequest):
         substitutions=[],
         menus=build_menu_cache(),
         items=build_item_cache(),
-        bin_listen_to=('rack', 'Frozen'),
-        label_pool=list(string.ascii_uppercase)
+        labeler=labeler
     )
     order = build_fulfillment_context(cleaned, warehouse, translator)
 
