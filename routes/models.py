@@ -5,6 +5,11 @@ from django.db.models import F
 from django.db import models
 
 
+class Driver(models.Model):
+    email = models.CharField(max_length=50)
+    active = models.BooleanField()
+
+
 class LastCacheDate(models.Model):
     date = models.DateField()
 

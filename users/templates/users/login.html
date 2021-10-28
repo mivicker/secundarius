@@ -1,14 +1,44 @@
-{% extends "texts/base.html" %}
-{% block content %}
-<h1 id='title'>Secundarius</h1>
-        <form method="POST">
-            {% csrf_token %}
-            <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Log In</legend>
-                {{ form }}
-            </fieldset>
-            <div class="form-group">
-                <button class="btn btn-outline-info" type="submit">Login</button>
+{% load static %}
+
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>Secundarius</title>
+		<meta name="description" content="">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="/static/css/main.css">
+		<link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+        <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Mr+Dafoe&display=swap" rel="stylesheet">
+	</head>
+	<body>
+        <article class="vh-100 dt w-100">
+            <div class="dtc v-mid ph3 ph4-l">
+                <h1 id='secundarius' class='tc mv0'>Secundarius</h1>
+                <main class="pa4 black-80" method="post">
+                    <form class="measure center" method="POST">
+                        {% csrf_token %}
+                        <fieldset class="ba b--transparent ph0 mh0 mv0">
+                            {{ form.non_field_errors }}
+                            <div class="form-group">
+                                <label class="db fw6 lh-copy f6 " for="{{ form.username.id_for_label }}">Username:</label>
+                                <input type="text"  class="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" name="username" autofocus autocapitalize="none" autocomplete="username" maxlength="150" required id="id_username">
+                                {{ form.username.errors }}
+                            </div>
+                            <div class="form-group">
+                                <label class="db fw6 lh-copy f6" for="{{ form.password.id_for_label }}">Password:</label>
+                                <input class="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="password" name="password" autocomplete="current-password" required id="id_password">
+                                {{ form.password.errors }}
+                            </div>
+                            <input class="b ph3 pv2 input-reset ba b--black bg-light-gray grow pointer mt3 f6 dib" type="submit" value="Sign in">
+                        </fieldset>
+                    </form>
+                </main>
             </div>
-        </form>
-{% endblock content %}
+        </article>
+	</body>
+</html>

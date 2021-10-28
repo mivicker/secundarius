@@ -33,7 +33,12 @@
 	page-break-inside: avoid;
 }
 
-#title {
+#secundarius {
 	font-family: 'Mr Dafoe', cursive;
+    font-weight: normal;
 	font-size: 100px;
+}
+
+.centered {
+    margin: 0 auto;
 }

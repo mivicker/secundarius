@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from functools import reduce
 from itertools import chain
 from operator import concat
-from typing import Callable, Dict, List, NamedTuple, Tuple, Optional
+from typing import Dict, List, NamedTuple, Tuple, Optional
 from collections import defaultdict, Counter
 from returns.context import RequiresContext
 from returns.curry import curry
@@ -38,9 +38,9 @@ class Item:
     rack: str
     price: float
     type: str
-    food_group: str = "Undefined"
+    food_group: str
     recurrance: int = 1
-    expand_rule: Callable = lambda x: 1
+    expand_rule: str = '111'
 
 
 class Share(NamedTuple):
@@ -60,6 +60,8 @@ class Box:
 
 @dataclass
 class Labeler:
+    """Keeps the grouping of data for label of bins"""
+
     label_pool: Optional[List[str]] = field(default_factory=list)
     bin_listen_to: Optional[Tuple[str, str]] = field(default_factory=tuple)
     bin_labels: Optional[Dict[tuple, str]] = field(default_factory=dict)
@@ -72,20 +74,19 @@ class Warehouse:
 
     date: datetime.datetime
     window: str
-    substitutions: List[Tuple[str, int]]
+    changes: List[ChangeCommand]
 
     menus: Dict[str, Prototype]
     items: Dict[str, Item]
     rack_order: Optional[List[str]] = field(default_factory=list)
     labeler: Labeler = field(default_factory=Labeler)
 
-
     def asdict(self):
         """Only save the important stuff to the database."""
         return {
             k: v
             for k, v in self.__dict__.items()
-            if k in ["date", "window", "substitutions"]
+            if k in ["date", "window", "changes"]
         }
 
 
@@ -111,14 +112,14 @@ def _(box: Box):
 
 @curry
 def count_items_by(attr: str, box: Box) -> Counter:
-    """Makes the items attributes available for counting."""
+    """Makes the items attributes available for counting"""
     return Counter([share.item.__getattribute__(attr) for share in box.shares])
 
 
 @curry
 def make_bin_key(attr: str, target: str, box: Box) -> Tuple:
     """Returns a tuple that can be used in a dict to label subsets
-    of products from menus."""
+    of products from menus"""
     empty_box = Box(shares=[], bin_label="N/A")
     return tuple(to_prototype(split_box(attr, box).get(target, empty_box)))
 
@@ -141,7 +142,7 @@ def print_letter_label(box: Box) -> RequiresContext[str, Warehouse]:
 
 
 def build_box(prototype: Prototype) -> RequiresContext[Box, Warehouse]:
-    """Builds box from the List[Tuple] prototype, needs a warehouse."""
+    """Builds box from the List[Tuple] prototype, needs a warehouse"""
 
     def inner(warehouse: Warehouse):
         box = Box(
@@ -162,7 +163,7 @@ def to_prototype(box: Box) -> Prototype:
 
 
 def add_prototypes(a: Prototype, b: Prototype) -> Prototype:
-    """Add prototypes to each other."""
+    """Add prototypes to each other"""
     result = defaultdict(int)
     for key, value in chain(a, b):
         result[key] += value
@@ -170,10 +171,12 @@ def add_prototypes(a: Prototype, b: Prototype) -> Prototype:
 
 
 def sum_prototypes(prototypes: List[Prototype]) -> Prototype:
+
     return reduce(add_prototypes, prototypes)
 
 
 def positive_only(prototype: Prototype) -> Prototype:
+    """Remove and 0 and negative entries from prototype"""
     return [product for product in prototype if product[1] > 0]
 
 
@@ -260,7 +263,7 @@ def build_box_from_order(order: BoxOrder) -> RequiresContext[Box, Warehouse]:
         prototype = warehouse.menus[order.menu_name]
 
         ideal_box = modify(prototype, order.changes)
-        real_box = modify(ideal_box, warehouse.substitutions)
+        real_box = modify(ideal_box, warehouse.changes)
         return build_box(positive_only(real_box))(warehouse)
 
     return RequiresContext(inner)

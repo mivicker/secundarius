@@ -4,17 +4,33 @@ from django.db import models
 
 # These two functions are directly repeated here and in adapter.
 def make_entry(command:str) -> tuple:
-    return tuple(item for item in command.split())
+    return tuple(command.split())
 
 
 def breakout_substitutions(commands:str) -> Tuple:
     return [make_entry(commands.split('\n'))]
 
 
+class Substitution(models.Model):
+    to_remove = models.CharField(max_length=10, blank=False, null=False)
+    to_add = models.CharField(max_length=10, blank=False, null=False)
+    ratio = models.IntegerField()
+
+
+class OutOfStock(models.Model):
+    to_remove = models.CharField(max_length=10, blank=False, null=False)
+
+
+class Addition(models.Model):
+    to_add = models.CharField(max_length=10, blank=False, null=False)
+
+
 class Warehouse(models.Model):
     date = models.DateField()
     time_window = models.CharField(max_length=50)
-    substitutions = models.TextField()
+    substitutions = models.ManyToManyField(Substitution)
+    out = models.ManyToManyField(OutOfStock)
+    additions = models.ManyToManyField(Addition)
 
     def as_dict(self):
         return {'date': self.date,
@@ -42,6 +58,8 @@ class Item(models.Model):
     description = models.CharField(max_length = 50)
     rack = models.CharField(max_length=32)
     price = models.FloatField(default=1.00)
+    recurrance = models.IntegerField(default=4)
+    scale_rule = models.CharField(max_length=3, default='111')
     type = models.CharField(max_length=250, default='Undefined')
     food_group = models.CharField(max_length=150, default='Undefined')
 
@@ -65,7 +83,7 @@ class Share(models.Model):
     quantity = models.IntegerField(default=1, null=False)
 
     def __str__(self):
-        return f'{str(self.quantity)} {self.product.description}'
+        return f'{self.quantity} {self.product.description}'
 
     def as_tup(self):
         return (self.product.item_code, self.quantity)
