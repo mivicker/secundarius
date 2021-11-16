@@ -1,0 +1,13 @@
+{% extends 'texts/base.html' %}
+{% block content %}
+<form action="{% url 'post-depot' %}" method="POST">
+	{% csrf_token %}
+	<div class="file-selector">
+		<h1>Who's available to drive today?</h1>
+	<div>{{ form }}</div>
+	</div>
+	<div>
+	<button class="button-primary" type="submit">
+		Submit
+	</button>
+{% endblock %}
