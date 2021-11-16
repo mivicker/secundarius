@@ -115,9 +115,9 @@ class Warehouse(models.Model):
     date = models.DateField(blank=True, editable=False)
     time_choices = [('am', 'AM'), ('pm', 'PM')]
     time_window = models.CharField(choices=time_choices, max_length=50)
-    substitutions = models.ManyToManyField(Substitution, blank=True, null=True)
-    out = models.ManyToManyField(OutOfStock, blank=True, null=True)
-    additions = models.ManyToManyField(Addition, blank=True, null=True)
+    substitutions = models.ManyToManyField(Substitution)
+    out = models.ManyToManyField(OutOfStock)
+    additions = models.ManyToManyField(Addition)
 
     def as_dict(self):
         print([change.to_command() 
