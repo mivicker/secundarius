@@ -89,7 +89,12 @@ def build_warehouse_from_db(
 ) -> boxes.Warehouse:
     """Pulls the key stuff from the db, and everything else
     is passed by keyword."""
-    return boxes.Warehouse(**warehouse.as_dict(), **kwargs)
+    return boxes.Warehouse(
+        **warehouse.as_dict(),
+        menus=build_menu_cache(),
+        items=build_item_cache(),
+        **kwargs,
+        )
 
 
 def build_relationship_lookup() -> Counter:
@@ -124,9 +129,9 @@ def organize_racks(box: boxes.Box) -> Dict[str, boxes.Box]:
     # Need to pull this into a config.
     rack_order = [
         "Dry Rack 1",
+        "Cooler Rack",
         "Dry Rack 2",
         "Produce Rack",
-        "Cooler Rack",
         "Bakery Trays",
         "Frozen",
         "Dock",
@@ -209,7 +214,12 @@ def build_fulfillment_context(
     )
 
 
-def build_route_context(upload, warehouse, translator):
+def build_route_context(
+    upload: dict, 
+    warehouse: boxes.Warehouse, 
+    depot: van.Depot, 
+    translator: Translator
+) -> List[dict]: 
     """Should be more thoughtful about whether we need to create visits,
     for this of if we can just split the list of dicts."""
 
@@ -222,13 +232,7 @@ def build_route_context(upload, warehouse, translator):
     )
 
     assignments = van.assign_drivers(
-        [
-            "lnord@gcfb.org",
-            "dburke@gcfb.org",
-            "klomeli@gcfb.org",
-            "sdecollibus@gcfb.org",
-#            "mvickers@gcfb.org",
-        ],
+        depot,
         routes.values(),
         relationships,
     )
@@ -276,6 +280,14 @@ def change_keys(dictionary: Dict[str, str]) -> dict:
 def string_box(stop: van.Stop) -> str:
     """A hack..."""
     return stop["box_type"] + " " + stop["box_menu"] + " " + stop["box_size"]
+
+
+def extract_date_from_order(order: List[dict]):
+    return order[0]['delivery_date']
+
+
+def extract_time_from_order(order: List[dict]):
+    return order[0]['deliverytime']
 
 
 def extract_date(route: List[van.Visit]):
@@ -356,8 +368,12 @@ def build_named_labeler(
 def build_basic_warehouse() -> boxes.Warehouse:
     return boxes.Warehouse(
         date=datetime.datetime.today().date(),
-        window=str,
+        time_window='',
         changes=[],
         menus=build_menu_cache(),
         items=build_item_cache(),
     )
+
+
+def depot_from_db(depot_record: route_models.Depot):
+    return van.Depot(active_drivers=[driver for driver in depot_record.active_drivers.all()])

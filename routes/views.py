@@ -1,3 +1,4 @@
+from datetime import time
 import json
 import io
 import csv
@@ -6,6 +7,9 @@ from django.http import HttpResponse, HttpRequest
 from django.core.files.uploadedfile import UploadedFile
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+
+from counts.models import Warehouse
+from routes.models import Depot
 from .logic.adapter import (
     build_named_labeler,
     clean_upload,
@@ -13,11 +17,17 @@ from .logic.adapter import (
     Translator,
     build_route_context,
     build_frozen_context,
+    build_warehouse_from_db,
     build_basic_warehouse,
+    extract_date_from_order,
+    extract_time_from_order,
+    try_parsing_date,
+    depot_from_db,
 )
-from .forms import DateForm
+from .forms import DateForm, DepotForm
 from .logic.download_deliveries import collect_time_blocks, make_csv
 from texts.forms import UploadFileForm
+from counts.forms import WarehouseForm
 
 
 def load_csv(file: UploadedFile):
@@ -34,6 +44,15 @@ def landing(request: HttpRequest):
 @login_required
 def fulfillment_menu(request: HttpRequest):
     return render(request, "routes/fulfillmenu.html")
+
+
+@login_required
+def fulfillment_options(request: HttpRequest) -> HttpResponse:
+    return render(
+        request, 
+        "routes/fulfillment_options.html", 
+        context={'form': WarehouseForm()}
+        )
 
 
 @login_required
@@ -59,7 +78,7 @@ def select_time(request: HttpRequest):
 
 
 @login_required
-def download_csv(request: HttpRequest, time: str):
+def download_csv(request: HttpRequest, time: str) -> HttpResponse:
     blocks = request.session["time blocks"]
     date = request.session["delivery date"]
     csv = make_csv(blocks[time])
@@ -75,40 +94,54 @@ def download_csv(request: HttpRequest, time: str):
 
 
 @login_required
-def csv_drop_off(request: HttpRequest):
-    return render(request, "routes/csv_drop.html", context={"form": UploadFileForm})
+def csv_drop_off(request: HttpRequest) -> HttpResponse:
+    return render(request, "routes/csv_drop.html", context={"form": UploadFileForm()})
 
 
 @login_required
-def post_csv(request: HttpRequest):
+def post_csv(request: HttpRequest) -> HttpResponse:
     request.session["order"] = json.dumps(list(load_csv(request.FILES["file"])))
-    return redirect("doc-menu")
+    return redirect("document-navigation")
 
 
 @login_required
-def documents_menu(request: HttpRequest):
+def documents_menu(request: HttpRequest) -> HttpResponse:
     return render(request, "routes/documents-menu.html")
 
 
 @login_required
-def route_lists(request: HttpRequest):
+def fulfillment_navagation(request: HttpRequest) -> HttpResponse:
+    return render(request, 'routes/fulfillment_navagation.html')
+
+
+@login_required
+def add_warehouse(request: HttpRequest) -> HttpResponse:
     file = request.session["order"]
     cleaned = clean_upload(json.loads(file))
+    date = try_parsing_date(extract_date_from_order(cleaned))
+    time_window = extract_time_from_order(cleaned)
+    warehouse, created = Warehouse.objects.get_or_create(date=date, time_window=time_window)
+    
+    form = WarehouseForm(request.POST, instance=warehouse)
 
-    translator = Translator()
-    warehouse = build_basic_warehouse()
-
-    order = build_route_context(cleaned, warehouse, translator)
-    return render(request, "routes/lists.html", context={"order": order})
+    if form.is_valid():
+        form.save()
+        return redirect('fulfillment-navagation')
+    redirect('update-warehouse')
 
 
 @login_required
 def fulfillment_tickets(request: HttpRequest):
     file = request.session["order"]
     cleaned = clean_upload(json.loads(file))
+    date = try_parsing_date(extract_date_from_order(cleaned))
+    time_window = extract_time_from_order(cleaned)
+
 
     translator = Translator()
-    warehouse = build_basic_warehouse()
+    warehouse = build_warehouse_from_db(
+        Warehouse.objects.get(date=date, time_window=time_window)
+        )
     labeler = build_named_labeler(
         list(string.ascii_uppercase), ("rack", "Frozen"), warehouse
     )
@@ -126,9 +159,14 @@ def frozen_tickets(request: HttpRequest):
     file = request.session["order"]
     cleaned = clean_upload(json.loads(file))
 
-    translator = Translator()
+    date = try_parsing_date(extract_date_from_order(cleaned))
+    time_window = extract_time_from_order(cleaned)
 
-    warehouse = build_basic_warehouse()
+
+    translator = Translator()
+    warehouse = build_warehouse_from_db(
+        Warehouse.objects.get(date=date, time_window=time_window)
+        )
     labeler = build_named_labeler(
         list(string.ascii_uppercase), ("rack", "Frozen"), warehouse
     )
@@ -139,6 +177,54 @@ def frozen_tickets(request: HttpRequest):
         "routes/froz.html",
         context=build_frozen_context(cleaned, warehouse, translator),
     )
+
+
+@login_required
+def create_depot(request: HttpRequest) -> HttpResponse:
+    return render(
+        request, 
+        "routes/create_depot.html", 
+        context={'form': DepotForm()}
+        )
+
+
+
+@login_required
+def post_depot(request: HttpRequest) -> HttpResponse:
+    file = request.session["order"]
+    cleaned = clean_upload(json.loads(file))
+    date = try_parsing_date(extract_date_from_order(cleaned))
+    time_window = extract_time_from_order(cleaned)
+    depot, created = Depot.objects.get_or_create(date=date, time_window=time_window)
+    
+    form = DepotForm(request.POST, instance=depot)
+
+    if form.is_valid():
+        form.save()
+        return redirect('route-lists')
+    redirect('create-depot')
+
+
+@login_required
+def route_lists(request: HttpRequest):
+    file = request.session["order"]
+    cleaned = clean_upload(json.loads(file))
+    date = try_parsing_date(extract_date_from_order(cleaned))
+    time_window = extract_time_from_order(cleaned)
+
+
+    translator = Translator()
+    warehouse = build_basic_warehouse()
+
+    depot = Depot.objects.get(date=date, time_window=time_window)
+
+    order = build_route_context(
+        cleaned, 
+        warehouse, 
+        depot_from_db(depot), 
+        translator
+        )
+    return render(request, "routes/lists.html", context={"order": order})
 
 
 @login_required

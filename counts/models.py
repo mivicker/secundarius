@@ -1,56 +1,6 @@
 from typing import Tuple
+from itertools import chain
 from django.db import models
-
-
-# These two functions are directly repeated here and in adapter.
-def make_entry(command:str) -> tuple:
-    return tuple(command.split())
-
-
-def breakout_substitutions(commands:str) -> Tuple:
-    return [make_entry(commands.split('\n'))]
-
-
-class Substitution(models.Model):
-    to_remove = models.CharField(max_length=10, blank=False, null=False)
-    to_add = models.CharField(max_length=10, blank=False, null=False)
-    ratio = models.IntegerField()
-
-
-class OutOfStock(models.Model):
-    to_remove = models.CharField(max_length=10, blank=False, null=False)
-
-
-class Addition(models.Model):
-    to_add = models.CharField(max_length=10, blank=False, null=False)
-
-
-class Warehouse(models.Model):
-    date = models.DateField()
-    time_window = models.CharField(max_length=50)
-    substitutions = models.ManyToManyField(Substitution)
-    out = models.ManyToManyField(OutOfStock)
-    additions = models.ManyToManyField(Addition)
-
-    def as_dict(self):
-        return {'date': self.date,
-                'time_window': self.time_window,
-                'substitutions': breakout_substitutions(self.substitutions)}
-
-
-class Menu(models.Model):
-    description = models.CharField(max_length=50)
-    products = models.ManyToManyField("Item", through='Share')
-
-    def __str__(self):
-        return self.description
-
-    def as_dict(self):
-        return {'description': self.description,
-                'products': [share.as_tup() for share in self.share_set.all()]}
-
-    def as_tup(self) -> Tuple[str, Tuple[str, int]]:
-        return (self.description, [share.as_tup() for share in self.share_set.all()])
 
 
 class Item(models.Model):
@@ -77,9 +27,24 @@ class Item(models.Model):
         }
 
 
+class Menu(models.Model):
+    description = models.CharField(max_length=50)
+    products = models.ManyToManyField("Item", through='Share')
+
+    def __str__(self):
+        return self.description
+
+    def as_dict(self):
+        return {'description': self.description,
+                'products': [share.as_tup() for share in self.share_set.all()]}
+
+    def as_tup(self) -> Tuple[str, Tuple[str, int]]:
+        return (self.description, [share.as_tup() for share in self.share_set.all()])
+
+
 class Share(models.Model):
-    menu = models.ForeignKey(Menu, on_delete = models.CASCADE)
-    product = models.ForeignKey(Item, on_delete = models.CASCADE)
+    menu: Menu = models.ForeignKey(Menu, on_delete = models.CASCADE)
+    product: Item = models.ForeignKey(Item, on_delete = models.CASCADE)
     quantity = models.IntegerField(default=1, null=False)
 
     def __str__(self):
@@ -87,3 +52,91 @@ class Share(models.Model):
 
     def as_tup(self):
         return (self.product.item_code, self.quantity)
+
+
+# These two functions are directly repeated here and in adapter.
+def make_entry(command:str) -> tuple:
+    return tuple(command.split())
+
+
+def breakout_substitutions(commands:str) -> Tuple:
+    return [make_entry(commands.split('\n'))]
+
+
+class Substitution(models.Model):
+    to_remove = models.ForeignKey(
+        Item, 
+        blank=False, 
+        null=False, 
+        related_name='substitution_remove_set', 
+        on_delete=models.CASCADE
+        )
+
+    to_add = models.ForeignKey(
+        Item, 
+        blank=False, 
+        null=False, 
+        related_name='substitution_add_set', 
+        on_delete=models.CASCADE
+        )
+
+    ratio = models.FloatField()
+
+    def __str__(self):
+        return f"Substituting {self.to_remove} with {self.to_add} with ratio {self.ratio}"
+
+    def to_command(self):
+        return ('exchange', self.to_remove.item_code, self.to_add.item_code, self.ratio)
+
+
+class OutOfStock(models.Model):
+    to_remove = models.ForeignKey(Item, blank=False, null=False, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Currently out of {self.to_remove}"
+
+    def to_command(self):
+        return ('remove', self.to_remove.item_code)
+
+
+class Addition(models.Model):
+    to_add = models.ForeignKey(Item, blank=False, null=False, on_delete=models.CASCADE)
+    quantity = models.IntegerField(blank=False, null=False, default=1)
+
+    def __str__(self):
+        return f'Add {self.quantity} {self.to_add}'
+
+    def to_command(self):
+        print(('change', self.to_add.item_code, self.quantity))
+        return ('change', self.to_add.item_code, self.quantity)
+
+
+class Warehouse(models.Model):
+    date = models.DateField(blank=True, editable=False)
+    time_choices = [('am', 'AM'), ('pm', 'PM')]
+    time_window = models.CharField(choices=time_choices, max_length=50)
+    substitutions = models.ManyToManyField(Substitution, blank=True, null=True)
+    out = models.ManyToManyField(OutOfStock, blank=True, null=True)
+    additions = models.ManyToManyField(Addition, blank=True, null=True)
+
+    def as_dict(self):
+        print([change.to_command() 
+                            for change in chain(
+                                self.substitutions.all(), 
+                                self.out.all(), 
+                                self.additions.all()
+                                )])
+
+
+        return {'date': self.date,
+                'time_window': self.time_window,
+                'changes': [change.to_command() 
+                            for change in chain(
+                                self.substitutions.all(), 
+                                self.out.all(), 
+                                self.additions.all()
+                                )],
+                }
+
+    def __str__(self) -> str:
+        return f'{self.date}, {self.time_window}'

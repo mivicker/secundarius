@@ -4,11 +4,12 @@
     <head>
         <title>Print Tickets</title>
 	<link rel="stylesheet" href="{% static 'routes/css/skeleton.css' %}">
-	<link rel="stylesheet" href="{% static 'routes/css/main.css' %}">
+	<link rel="stylesheet" href="{% static 'routes/css/print.css' %}">
     </head>
     <body>
 <div class="container">
 	<h1>Frozen {{ date }} {{ time }}</h1>
+    <div class="froz-tickets">
 	{% for bin in bins %}
 	<div class="froz-bin">
 	<div class="row">
@@ -30,9 +31,14 @@
 		<tr>
 			<td>{{ share.item.item_code }}</td><td>{{ share.item.description }}</td><td>{{ share.quantity }}</td>
 		</tr>
+        {% empty %}
+        <tr>
+			<td>There are no frozen items for this box type.</td>
+		</tr>
 		{% endfor %}
 	</table>
 	</div>
 	{% endfor %}
+    </div>
 </div>
     </body>

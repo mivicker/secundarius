@@ -9,6 +9,9 @@ class Driver(models.Model):
     email = models.CharField(max_length=50)
     active = models.BooleanField()
 
+    def __str__(self):
+        return self.email
+
 
 class LastCacheDate(models.Model):
     date = models.DateField()
@@ -68,3 +71,14 @@ class RelationshipCache(models.Model):
 
     def __str__(self):
         return f"Driver {self.driver} has visited {self.member_id} {self.visit_count} times. Last updated {self.cache_date}"
+
+
+class Depot(models.Model):
+    date = models.DateField(blank=True, editable=False)
+    time_choices = [('am', 'AM'), ('pm', 'PM')]
+    time_window = models.CharField(choices=time_choices, max_length=50)
+
+    active_drivers = models.ManyToManyField(Driver)
+
+    def __str__(self):
+        return f'Depot for {self.date}, {self.time_window}'

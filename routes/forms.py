@@ -1,5 +1,6 @@
 import datetime
 from django import forms
+from .models import Depot
 
 
 def next_delivery_day():
@@ -14,3 +15,14 @@ def next_delivery_day():
 class DateForm(forms.Form):
     date = forms.DateField(widget=forms.SelectDateWidget, 
                            initial=next_delivery_day)
+
+
+class DepotForm(forms.ModelForm):
+    class Meta:
+        model = Depot
+        fields = ['active_drivers']
+
+def __init__(self, *args, **kwargs):
+    super(DepotForm, self).__init__(*args, **kwargs)
+    for visible in self.visible_fields():
+        visible.field.widget.attrs['class'] = 'select-field'

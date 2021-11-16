@@ -42,3 +42,7 @@
 .centered {
     margin: 0 auto;
 }
+
+.select-field {
+    height: 150px;
+}

@@ -4,6 +4,7 @@ and provides useful functions for reporting.
 """
 import datetime
 from dataclasses import dataclass, field
+from enum import Enum, auto
 from functools import reduce
 from itertools import chain
 from operator import concat
@@ -17,6 +18,12 @@ from classes import typeclass
 ChangeCommand = Tuple[str, tuple]
 
 
+class Size(Enum):
+    small = auto()
+    family = auto()
+    large = auto()
+
+
 @dataclass
 class BoxOrder:
     """Order creation object to send to box module"""
@@ -27,6 +34,15 @@ class BoxOrder:
 
 # Box info comes out of the db like this.
 Prototype = List[Tuple[str, int]]
+
+
+"""
+@dataclass
+class Prototype:
+    size: Size
+    items: List[Tuple[str, int]]
+
+"""
 
 
 @dataclass(frozen=True)
@@ -73,7 +89,7 @@ class Warehouse:
     """Holds information to the box building process"""
 
     date: datetime.datetime
-    window: str
+    time_window: str
     changes: List[ChangeCommand]
 
     menus: Dict[str, Prototype]
@@ -86,7 +102,7 @@ class Warehouse:
         return {
             k: v
             for k, v in self.__dict__.items()
-            if k in ["date", "window", "changes"]
+            if k in ["date", "time_window", "changes"]
         }
 
 

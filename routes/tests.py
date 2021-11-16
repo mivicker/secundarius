@@ -5,7 +5,7 @@ from tinydb import TinyDB
 from .logic.box import (add_prototypes, build_box_from_order, 
                         Warehouse, Item, lookup_record, lookup_share, 
                         make_change, make_changes, modify)
-from .logic.adapter import build_box_order, Translator, clean_stop
+from .logic.adapter import build_box_order, Translator, clean_stop, extract_date_from_order
 
 
 class Relationships(TestCase):
@@ -94,3 +94,7 @@ class Relationships(TestCase):
         self.assertEqual(lookup_share(box, 'MG1187').quantity, 1)
         self.assertEqual(lookup_share(box, 'MG0040').quantity, 20)
         self.assertEqual(lookup_share(box, 'MG0024C'), None)
+
+class TestDateExtract(TestCase):
+    def test_extract_date_from_order(self):
+        order = [{},{}]

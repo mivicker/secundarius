@@ -6,7 +6,7 @@ import itertools
 from typing import Counter, Protocol, List, Dict, Tuple
 from dataclasses import dataclass, field
 from collections import defaultdict
-from itertools import permutations, zip_longest
+from itertools import permutations
 from returns.curry import curry
 
 
@@ -19,8 +19,13 @@ class Deliverable(Protocol):
 
 class Empty:
     """When you don't need delivery"""
-
     pass
+
+
+@dataclass
+class Depot:
+    """This holds details specific to the route in question."""
+    active_drivers: List[str] # The str is a driver email address.
 
 
 @dataclass
@@ -54,9 +59,9 @@ def fill_gap(drivers:List[str], num_routes:int) -> List[str]:
 
 
 def assign_drivers(
-    drivers: Tuple[str], routes: List[List[str]], summary: Counter
+    depot: Depot, routes: List[List[str]], summary: Counter
 ) -> Tuple[str, ...]:
-    arrangements = permutations(fill_gap(drivers, len(routes)))
+    arrangements = permutations(fill_gap(depot.active_drivers, len(routes)))
 
     scores = sorted(
         [

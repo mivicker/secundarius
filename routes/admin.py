@@ -1,3 +1,11 @@
 from django.contrib import admin
+from .models import Depot, Driver
 
-# Register your models here.
+
+@admin.register(Depot)
+class DepotAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Driver)
+class DriverAdmin(admin.ModelAdmin):
+    pass
