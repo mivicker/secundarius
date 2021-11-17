@@ -78,7 +78,7 @@ class Depot(models.Model):
     time_choices = [('am', 'AM'), ('pm', 'PM')]
     time_window = models.CharField(choices=time_choices, max_length=50)
 
-    active_drivers = models.ManyToManyField(Driver)
+    active_drivers = models.ManyToManyField(Driver, blank=True)
 
     def __str__(self):
         return f'Depot for {self.date}, {self.time_window}'
