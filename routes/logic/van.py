@@ -55,7 +55,7 @@ def split_visits(attr: str, visits: List[Visit]) -> Dict[str, List[Visit]]:
 
 
 def fill_gap(drivers:List[str], num_routes:int) -> List[str]:
-    return [driver for _, driver in itertools.zip_longest(range(num_routes), drivers, fillvalue='not assigned')]
+    return [driver for _, driver in itertools.zip_longest(range(num_routes), drivers, fillvalue='open')]
 
 
 def assign_drivers(
