@@ -5,7 +5,7 @@ from tinydb import TinyDB
 from .logic.box import (add_prototypes, build_box_from_order, 
                         Warehouse, Item, lookup_record, lookup_share, 
                         make_change, make_changes, modify)
-from .logic.adapter import build_box_order, Translator, clean_stop, extract_date_from_order
+from .logic.adapter import build_box_order, Translator, clean_stop
 
 
 class Relationships(TestCase):
