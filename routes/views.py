@@ -6,7 +6,6 @@ from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.core.files.uploadedfile import UploadedFile
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-
 from counts.models import Warehouse
 from routes.models import Depot
 from .logic.adapter import (
@@ -156,7 +155,7 @@ def fulfillment_tickets(request: HttpRequest):
 
     return render(
         request,
-        "routes/fulfillment-inner.html",
+        "routes/fulfillment_inner.html",
         context={"order": build_fulfillment_context(cleaned, warehouse, translator)},
     )
 
