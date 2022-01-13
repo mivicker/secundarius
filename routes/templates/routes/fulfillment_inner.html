@@ -70,7 +70,7 @@
                     <div id="delivery-notes">
                         <p>[[ visit.stop.delivery_notes ]]</p>
                     </div>
-                    <div id="products" v-for="(rack, rack_name) in visit.racks" :key="rack_name">
+                    <div id="products" v-for="(rack, rack_name) in visit.racks">
                         <div id="beam" v-if="rack_name === 'Frozen'">
                             <p>Pack day of</p>
                         </div>

@@ -138,25 +138,9 @@ def fulfillment_vue_page(request:HttpRequest) -> HttpResponse:
 
 @login_required
 def fulfillment_tickets(request: HttpRequest):
-    file = request.session["order"]
-    cleaned = clean_upload(json.loads(file))
-    date = try_parsing_date(extract_date_from_order(cleaned))
-    time_window = extract_time_from_order(cleaned)
-
-
-    translator = Translator()
-    warehouse = build_warehouse_from_db(
-        Warehouse.objects.get(date=date, time_window=time_window)
-        )
-    labeler = build_named_labeler(
-        list(string.ascii_uppercase), ("rack", "Frozen"), warehouse
-    )
-    warehouse.labeler = labeler
-
     return render(
         request,
         "routes/fulfillment_inner.html",
-        context={"order": build_fulfillment_context(cleaned, warehouse, translator)},
     )
 
 
