@@ -112,7 +112,7 @@
         },
         mounted() {
             axios
-                .get("http://localhost:8000/routes/fulfillment-tickets-json")
+                .get("https://www.secundarius.org/routes/fulfillment-tickets-json")
                 .then(response => (this.routes = response.data))
                 .then(response => (this.loading = false))
         }

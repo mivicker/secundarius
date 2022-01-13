@@ -32,7 +32,7 @@ urlpatterns = [
     path('post-warehouse', add_warehouse, name='post-warehouse'),
 
     path('fulfillment-tickets', fulfillment_vue_page, name='fulfillment-tickets'),
-    path('fulfillment-tickets-json', fulfillment_tickets_json, name='fullfillment-tickets-json'),
+    path('fulfillment-tickets-json', fulfillment_tickets_json, name='fulfillment-tickets-json'),
     path('fulfillment-tickets-vue', fulfillment_vue_page, name='fullfillment-tickets-vue'),
     path('fulfillment-navagation', fulfillment_navagation, name='fulfillment-navagation'),
     path('frozen-tickets', frozen_tickets, name='frozen-tickets'),
