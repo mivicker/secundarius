@@ -4,6 +4,8 @@ from .views import ( # At this point just import the whole module.
     documents_menu, 
     frozen_tickets,                 
     fulfillment_tickets, 
+    fulfillment_tickets_json, 
+    fulfillment_vue_page,
     post_csv, 
     route_lists, 
     fulfillment_menu, 
@@ -30,6 +32,8 @@ urlpatterns = [
     path('post-warehouse', add_warehouse, name='post-warehouse'),
 
     path('fulfillment-tickets', fulfillment_tickets, name='fulfillment-tickets'),
+    path('fulfillment-tickets-json', fulfillment_tickets_json, name='fullfillment-tickets-json'),
+    path('fulfillment-tickets-vue', fulfillment_vue_page, name='fullfillment-tickets-vue'),
     path('fulfillment-navagation', fulfillment_navagation, name='fulfillment-navagation'),
     path('frozen-tickets', frozen_tickets, name='frozen-tickets'),
     path('upload-error', upload_error, name='upload-error'),

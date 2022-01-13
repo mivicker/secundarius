@@ -1,5 +1,5 @@
 body {
-    font-family: 'Helvetica', 'Arial Narrow', Arial, sans-serif;
+    font-family: 'Helvetica', sans-serif;
     padding: 0;
 }
 
@@ -148,41 +148,27 @@ p {
 }
 
 #info-line {
-    font-size: 9pt;
-    margin: 0.1625in;
+    height: auto;
+    margin-top: 0.1625in;
     vertical-align: bottom;
 }
 
-td, th {
-    padding: 0.0625in;
-}
-
-#check {
-    grid-column-start: 13;
-    grid-column-end: 14;
-    border: 1px dotted black;
-}
-
-#products {
-    width: 100%;
-    display: grid;
-    grid-template-columns: auto; 
-    grid-gap: 0in;
-}
-
-#products > div {
-    padding: .0312in;
-    border: 1px dotted black;
+#info-line > p {
+    font-size: 9pt;
 }
 
 .order {
     page-break-inside: avoid;
-    page-break-after: always;
-}
+    page-break-after: always; }
 
 #rack-name {
-    grid-column-start: 1;
-    grid-column-end: 10;
+    font-weight: bold;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+#products{
+    margin-top: .75rem;
 }
 
 #quantity {
@@ -213,4 +199,20 @@ td, th {
 
 .froz-tickets {
     margin-top: .3in;
+}
+
+table {
+    column-gap: 0%;
+    padding: 0%;
+    table-layout: fixed;
+    width: 100%;
+    border-bottom: 1px black solid;
+}
+
+td {
+    padding: 0.2rem;
+}
+
+tr:nth-child(odd) {
+    background-color: lightgrey;
 }

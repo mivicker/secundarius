@@ -206,7 +206,6 @@ def populate_visits_for_route(
 def build_fulfillment_context(
     upload: List[Dict], warehouse: boxes.Warehouse, translator: Translator
 ):
-    """This is the function that we need to build the entire damn thing."""
     """Builds boxes, assigns them to drivers."""
 
     return van.split_visits(

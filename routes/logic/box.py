@@ -2,6 +2,7 @@
 The box module handles the particulars of food box creation,
 and provides useful functions for reporting.
 """
+import dataclasses
 import datetime
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -58,8 +59,8 @@ class Item:
     recurrance: int = 1
     expand_rule: str = '111'
 
-
-class Share(NamedTuple):
+@dataclass
+class Share:
     """An item paired with the quantity in the box"""
 
     item: Item

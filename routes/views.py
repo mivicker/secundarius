@@ -1,9 +1,10 @@
 from datetime import time
+from dataclasses import asdict
 import json
 import io
 import csv
 import string
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.core.files.uploadedfile import UploadedFile
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -131,6 +132,21 @@ def add_warehouse(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
+def fulfillment_load_page(request: HttpRequest) -> HttpResponse:
+    return render(
+        request,
+        "routes/loader.html"
+    )
+
+@login_required
+def fulfillment_vue_page(request:HttpRequest) -> HttpResponse:
+    return render(
+        request,
+        "routes/fulfillment_inner.html"
+    )
+
+
+@login_required
 def fulfillment_tickets(request: HttpRequest):
     file = request.session["order"]
     cleaned = clean_upload(json.loads(file))
@@ -151,6 +167,26 @@ def fulfillment_tickets(request: HttpRequest):
         request,
         "routes/fulfillment.html",
         context={"order": build_fulfillment_context(cleaned, warehouse, translator)},
+    )
+
+
+@login_required
+def fulfillment_tickets_json(request: HttpRequest):
+    file = request.session["order"]
+    cleaned = clean_upload(json.loads(file))
+    date = try_parsing_date(extract_date_from_order(cleaned))
+    time_window = extract_time_from_order(cleaned)
+
+    translator = Translator()
+    warehouse = build_warehouse_from_db(
+        Warehouse.objects.get(date=date, time_window=time_window)
+        )
+    labeler = build_named_labeler(
+        list(string.ascii_uppercase), ("rack", "Frozen"), warehouse
+    )
+    warehouse.labeler = labeler
+    return JsonResponse(
+        build_fulfillment_context(cleaned, warehouse, translator)
     )
 
 
@@ -188,8 +224,6 @@ def create_depot(request: HttpRequest) -> HttpResponse:
         )
 
 
-
-@login_required
 def post_depot(request: HttpRequest) -> HttpResponse:
     file = request.session["order"]
     cleaned = clean_upload(json.loads(file))

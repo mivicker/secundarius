@@ -4,7 +4,7 @@ The van module handles the particulars of deliveries.
 import datetime
 import itertools
 from typing import Counter, Protocol, List, Dict, Tuple
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from collections import defaultdict
 from itertools import permutations
 from returns.curry import curry
@@ -17,6 +17,7 @@ class Deliverable(Protocol):
     """This is the thing carried by the visit class"""
 
 
+@dataclass
 class Empty:
     """When you don't need delivery"""
     pass
@@ -49,7 +50,7 @@ def split_visits(attr: str, visits: List[Visit]) -> Dict[str, List[Visit]]:
     dict for attribute if necessary."""
     result: defaultdict = defaultdict(list)
     for visit in visits:
-        result[visit.__getattribute__(attr)].append(visit)
+        result[visit.__getattribute__(attr)].append(asdict(visit))
 
     return dict(result)
 
