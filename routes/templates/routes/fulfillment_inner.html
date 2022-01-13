@@ -1,0 +1,122 @@
+{% load static %}
+<html>
+
+<head>
+    <title>Test vue page</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="{% static 'routes/css/print.css' %}">
+    <link rel="stylesheet" href="{% static 'routes/css/loader.css' %}">
+</head>
+
+<body>
+    <div id="vue_app">
+        <div id="loader" v-show="loading"></div>
+        <div class="orders" v-for="(route, route_name) in routes">
+            <div class="visit" v-for="visit in route">
+                <div class="order">
+                    <div class="client-info">
+                        <div id="date">
+                            <p>[[ visit.stop.delivery_date ]]</p>
+                        </div>
+                        <div id="time">
+                            <p>[[ visit.stop.deliverytime ]]</p>
+                        </div>
+                        <div id="route">
+                            <p>Route</p>
+                        </div>
+                        <div id="stop">
+                            <p>Stop</p>
+                        </div>
+                        <div id="box-type">
+                            <h1>[[ visit.stop.box_type ]]<span v-if="visit.dairyfree === 'Yes'">**</span></h1>
+                        </div>
+                        <div id="menu">
+                            <h1>[[ visit.stop.box_menu ]]</h1>
+                        </div>
+                        <div id="box-size">
+                            <h1>[[ visit.stop.box_size ]]</h1>
+                        </div>
+                        <div id="route-name">
+                            <h1>[[ visit.route ]]</h1>
+                        </div>
+                        <div id="stop-number">
+                            <h1>[[ visit.stop.stop_num ]]</h1>
+                        </div>
+                        <div id="adjustments">
+                            <p>Adjustments</p>
+                        </div>
+                        <div id="health-plan">
+                            <p>Health Plan</p>
+                        </div>
+                        <div id="health-plan-text">
+                            <p>[[ visit.stop.healthcare_partner ]]</p>
+                        </div>
+                        <div id="adjustment-text">
+                        </div>
+                        <div id="member-id">
+                            <p>Member ID</p>
+                        </div>
+                        <div id="member-id-text">
+                            <p>[[ visit.stop.member_id ]]</p>
+                        </div>
+                        <div id="main-contact">
+                            <p>Main Contact</p>
+                        </div>
+                        <div id="main-contact-text">
+                            <p>[[ visit.stop.maincontact ]]</p>
+                        </div>
+                    </div>
+                    <div id="delivery-notes">
+                        <p>[[ visit.stop.delivery_notes ]]</p>
+                    </div>
+                    <div id="products" v-for="(rack, rack_name) in visit.racks" :key="rack_name">
+                        <div id="beam" v-if="rack_name === 'Frozen'">
+                            <p>Pack day of</p>
+                        </div>
+                        <div id="rack-name">
+                            [[ rack_name ]]
+                                <span v-if="rack_name === 'Frozen'">— FROZEN BIN [[ visit.labels ]]</span>
+                        </div>
+                        <table class="shares" cellspacing="0">
+                            <colgroup>
+                                <col span="1" style="width: 15%;">
+                                <col span="1" style="width: 70%;">
+                                <col span="1" style="width: 15%;">
+                             </colgroup>
+
+                            <tr v-for="share in rack.shares" :key="item_code">
+                                <td>[[ share.item.item_code ]]</td>
+                                <td>[[ share.item.description ]]</td> 
+                                <td>[[ share.quantity ]]</td>
+                            <tr>
+                        </table>
+                    </div>
+                    <div id="info-line">
+                    <p>Gleaners Healthcare Programs Fulfillment Ticket</p>    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    const app = new Vue({
+        el: "#vue_app",
+        delimiters: ['[[', ']]'],
+        data() {
+            return {
+                routes: [],
+                loading: true,
+            }
+        },
+        mounted() {
+            axios
+                .get("http://localhost:8000/routes/fulfillment-tickets-json")
+                .then(response => (this.routes = response.data))
+                .then(response => (this.loading = false))
+        }
+    });
+</script>
+
+</html>
