@@ -1,5 +1,3 @@
-from datetime import time
-from dataclasses import asdict
 import json
 import io
 import csv
@@ -121,7 +119,7 @@ def add_warehouse(request: HttpRequest) -> HttpResponse:
     cleaned = clean_upload(json.loads(file))
     date = try_parsing_date(extract_date_from_order(cleaned))
     time_window = extract_time_from_order(cleaned)
-    warehouse, created = Warehouse.objects.get_or_create(date=date, time_window=time_window)
+    warehouse, _ = Warehouse.objects.get_or_create(date=date, time_window=time_window)
     
     form = WarehouseForm(request.POST, instance=warehouse)
 
@@ -130,13 +128,6 @@ def add_warehouse(request: HttpRequest) -> HttpResponse:
         return redirect('fulfillment-navagation')
     redirect('update-warehouse')
 
-
-@login_required
-def fulfillment_load_page(request: HttpRequest) -> HttpResponse:
-    return render(
-        request,
-        "routes/loader.html"
-    )
 
 @login_required
 def fulfillment_vue_page(request:HttpRequest) -> HttpResponse:
@@ -165,7 +156,7 @@ def fulfillment_tickets(request: HttpRequest):
 
     return render(
         request,
-        "routes/fulfillment.html",
+        "routes/fulfillment-inner.html",
         context={"order": build_fulfillment_context(cleaned, warehouse, translator)},
     )
 
