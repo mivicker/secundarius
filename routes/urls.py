@@ -31,7 +31,7 @@ urlpatterns = [
     path('update-warehouse', fulfillment_options, name='update-warehouse'),
     path('post-warehouse', add_warehouse, name='post-warehouse'),
 
-    path('fulfillment-tickets', fulfillment_tickets, name='fulfillment-tickets'),
+    path('fulfillment-tickets', fulfillment_vue_page, name='fulfillment-tickets'),
     path('fulfillment-tickets-json', fulfillment_tickets_json, name='fullfillment-tickets-json'),
     path('fulfillment-tickets-vue', fulfillment_vue_page, name='fullfillment-tickets-vue'),
     path('fulfillment-navagation', fulfillment_navagation, name='fulfillment-navagation'),
