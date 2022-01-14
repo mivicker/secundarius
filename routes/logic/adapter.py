@@ -206,9 +206,9 @@ def build_fulfillment_context(
 ):
     """Builds boxes, assigns them to drivers."""
 
-    return [serialize_route(route) for route in van.split_visits(
+    return {route_name: serialize_route(route) for route_name, route in van.split_visits(
         "route", populate_visits_for_fulfillment(upload, warehouse, translator)
-    )]
+    ).keys()}
 
 def serialize_route(route: List[van.Visit]):
     return [asdict(visit) for visit in route]
