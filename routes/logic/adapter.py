@@ -207,7 +207,7 @@ def build_fulfillment_context(
     return {
         route_name: serialize_route(route) 
         for route_name, route in van.split_visits(
-        "route", populate_visits_for_fulfillment(upload, warehouse, translator)).keys()
+        "route", populate_visits_for_fulfillment(upload, warehouse, translator)).items()
     }
 
 def serialize_route(route: List[van.Visit]):
