@@ -50,7 +50,7 @@ def split_visits(attr: str, visits: List[Visit]) -> Dict[str, List[Visit]]:
     dict for attribute if necessary."""
     result: defaultdict = defaultdict(list)
     for visit in visits:
-        result[visit.__getattribute__(attr)].append(asdict(visit))
+        result[visit.__getattribute__(attr)].append(visit)
 
     return dict(result)
 
@@ -77,7 +77,7 @@ def assign_drivers(
 
 
 def score_arrangement(
-    drivers: Tuple[str], routes: List[List[Visit]], summary: Counter
+    drivers: Tuple[str, ...], routes: List[List[Visit]], summary: Counter
 ) -> int:
 
     return sum(

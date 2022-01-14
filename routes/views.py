@@ -213,6 +213,27 @@ def post_depot(request: HttpRequest) -> HttpResponse:
     redirect('create-depot')
 
 
+def route_lists_json(request: HttpRequest):
+    file = request.session["order"]
+    cleaned = clean_upload(json.loads(file))
+    date = try_parsing_date(extract_date_from_order(cleaned))
+    time_window = extract_time_from_order(cleaned)
+
+
+    translator = Translator()
+    warehouse = build_basic_warehouse()
+
+    depot = Depot.objects.get(date=date, time_window=time_window)
+
+    routes = build_route_context(
+        cleaned, 
+        warehouse, 
+        depot_from_db(depot), 
+        translator
+        )
+    return JsonResponse({'routes': routes})
+
+
 @login_required
 def route_lists(request: HttpRequest):
     file = request.session["order"]

@@ -7,7 +7,7 @@ import datetime
 import re
 import string
 import itertools
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from collections import Counter
 from returns.curry import curry
 from returns.pipeline import flow
@@ -159,9 +159,7 @@ def build_visit_for_fulfillment(
 ) -> van.Visit:
 
     attr, target = warehouse.labeler.bin_listen_to
-
     letter = route_num_to_letter(stop["route_num"])
-
     box = boxes.build_box_from_order(build_box_order(stop)(translator))(warehouse)
 
     return van.Visit(
@@ -208,9 +206,9 @@ def build_fulfillment_context(
 ):
     """Builds boxes, assigns them to drivers."""
 
-    return van.split_visits(
+    return asdict(van.split_visits(
         "route", populate_visits_for_fulfillment(upload, warehouse, translator)
-    )
+    ))
 
 
 def build_route_context(
@@ -240,7 +238,7 @@ def build_route_context(
         {
             "driver": driver,
             "route_name": route_name,
-            "visits": route,
+            "visits": [asdict(visit) for visit in route],
             "date": extract_date(route),
             "time": extract_time(route),
         }

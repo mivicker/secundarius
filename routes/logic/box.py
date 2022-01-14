@@ -2,14 +2,13 @@
 The box module handles the particulars of food box creation,
 and provides useful functions for reporting.
 """
-import dataclasses
 import datetime
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from functools import reduce
 from itertools import chain
 from operator import concat
-from typing import Dict, List, NamedTuple, Tuple, Optional
+from typing import Dict, List, Tuple, Optional
 from collections import defaultdict, Counter
 from returns.context import RequiresContext
 from returns.curry import curry
@@ -35,15 +34,6 @@ class BoxOrder:
 
 # Box info comes out of the db like this.
 Prototype = List[Tuple[str, int]]
-
-
-"""
-@dataclass
-class Prototype:
-    size: Size
-    items: List[Tuple[str, int]]
-
-"""
 
 
 @dataclass(frozen=True)

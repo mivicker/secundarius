@@ -1,9 +1,9 @@
 from django.urls import path
 from .views import ( # At this point just import the whole module.
+    route_lists_json,
     csv_drop_off, 
     documents_menu, 
     frozen_tickets,                 
-    fulfillment_tickets, 
     fulfillment_tickets_json, 
     fulfillment_vue_page,
     post_csv, 
@@ -41,6 +41,7 @@ urlpatterns = [
     path('create-depot', create_depot, name='create-depot'),
     path('post-depot', post_depot, name='post-depot'),
     path('route-lists', route_lists, name='route-lists'),
+    path('route-lists-json', route_lists_json, name='route-lists-json'),
 
     # Paths for the download deliveries workflow
     path('select-date', select_date, name='select-date'),
