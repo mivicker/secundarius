@@ -206,9 +206,9 @@ def build_fulfillment_context(
 ):
     """Builds boxes, assigns them to drivers."""
 
-    return asdict(van.split_visits(
+    return van.split_visits(
         "route", populate_visits_for_fulfillment(upload, warehouse, translator)
-    ))
+    )
 
 
 def build_route_context(
