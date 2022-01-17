@@ -16,7 +16,6 @@ from .logic import read_csv, send_each, filt_for_failures, SendDeps
 @login_required
 def home(request:HttpRequest) -> HttpResponse:
     if request.method == 'POST':
-        """
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             recipients = read_csv((request.FILES['file'].open()
@@ -44,9 +43,6 @@ def home(request:HttpRequest) -> HttpResponse:
             request, 
             "The csv you submitted doesn't have the necessary columns."
             )
-        """
-        time.sleep(4)
-        return redirect('text-home')
 
     context = {
         'words': Broadcast.objects.first(),

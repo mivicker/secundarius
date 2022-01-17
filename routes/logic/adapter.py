@@ -376,4 +376,4 @@ def build_basic_warehouse() -> boxes.Warehouse:
 
 
 def depot_from_db(depot_record: route_models.Depot):
-    return van.Depot(active_drivers=[driver for driver in depot_record.active_drivers.all()])
+    return van.Depot(active_drivers=[driver.email for driver in depot_record.active_drivers.all()])
