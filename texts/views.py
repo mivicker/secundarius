@@ -1,4 +1,5 @@
 import os
+import time
 from django.http import HttpResponse, HttpRequest
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -15,6 +16,7 @@ from .logic import read_csv, send_each, filt_for_failures, SendDeps
 @login_required
 def home(request:HttpRequest) -> HttpResponse:
     if request.method == 'POST':
+        """
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             recipients = read_csv((request.FILES['file'].open()
@@ -33,15 +35,18 @@ def home(request:HttpRequest) -> HttpResponse:
             failures = list(filt_for_failures(responses))
 
             if not failures:
-                messages.success(request, f'Your messages were sent.')
+                messages.success(request, 'Your messages were sent.')
             else:
                 for failure in failures:
                     messages.error(request, failure._inner_value)
             return redirect('text-home')
         messages.error(
             request, 
-            f"The csv you submitted doesn't have the necessary columns."
+            "The csv you submitted doesn't have the necessary columns."
             )
+        """
+        time.sleep(4)
+        return redirect('text-home')
 
     context = {
         'words': Broadcast.objects.first(),
