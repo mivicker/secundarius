@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from .logic import pluck_variables
 
 class Words(models.Model):
     created = models.DateTimeField(auto_now=True)
@@ -11,9 +11,11 @@ class Words(models.Model):
         ordering = ['-created']
 
     def __str__(self):
-        if len(self.words) > 28:
-            return self.words[:25] + "..."
-        return self.words
+        return self.words[:25] + "..." if len(self.words) > 28 else self.words
+
+    @property
+    def fill_fields(self):
+        return pluck_variables(self.words)
 
 
 class Broadcast(Words):

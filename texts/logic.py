@@ -1,6 +1,6 @@
 import io
 import csv
-from typing import List, Iterable
+from typing import List, Iterable, Set
 from dataclasses import dataclass
 from returns.result import safe, Failure
 from returns.context import RequiresContext
@@ -25,11 +25,11 @@ def set_environment() -> Environment:
     return Environment(loader=BaseLoader(),
         block_start_string='@@',
         block_end_string='@@',
-        variable_start_string='[[',
+        variable_start_string='$$',
         variable_end_string=']]')
 
 
-def pluck_variables(string:str):
+def pluck_variables(string: str) -> Set[str]:
     """This will read the broadcast and show which columns
        will need to be provided from the csv."""
 
