@@ -17,7 +17,7 @@
 	<h4>Your csv must have these columns:</h4>
 	<ul>
 		<li>phone</li>
-		{% for field in words.fillfield_set.all %}
+		{% for field in words.fillfields %}
 		<li>{{ field.field_name }}</li>
 		{% endfor %}
 	</ul>
