@@ -26,7 +26,7 @@ def set_environment() -> Environment:
         block_start_string='@@',
         block_end_string='@@',
         variable_start_string='$$',
-        variable_end_string=']]')
+        variable_end_string='$$')
 
 
 def pluck_variables(string: str) -> Set[str]:
