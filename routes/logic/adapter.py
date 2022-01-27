@@ -122,8 +122,6 @@ def build_box_order(stop: van.Stop, translator: Translator) -> boxes.BoxOrder:
         menu_name=string_box(stop),
         changes=get_all_modifications(stop)(translator),
     )
-
-
 def organize_racks(box: boxes.Box) -> Dict[str, boxes.Box]:
     """Displays racks in proper order."""
     # Need to pull this into a config.
@@ -333,7 +331,7 @@ def clean_stop(stop: van.Stop) -> van.Stop:
 
 def clean_upload(upload: List[van.Stop]) -> List[van.Stop]:
     return [
-        clean_stop(stop) for stop in upload if stop["Route #"] != "DISMISSED REQUEST"
+        clean_stop(stop) for stop in upload if re.match("Route[0-9]*", stop.get("Route #", ''))
     ]
 
 

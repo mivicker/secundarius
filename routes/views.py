@@ -98,6 +98,10 @@ def csv_drop_off(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def post_csv(request: HttpRequest) -> HttpResponse:
+    """
+    This needs to look at the file and check if the date is for the next
+    day or not.
+    """
     request.session["order"] = json.dumps(list(load_csv(request.FILES["file"])))
     return redirect("document-navigation")
 
