@@ -25,7 +25,7 @@
 	</div>
 	
 <div v-show="sending"><p>Your texts are currently sending.</p></div>
-</div>
+</div v-show-"!sending">
 			{% if messages %}
 				{% for message in messages %}
 					<p>{{ message }}</p>
