@@ -149,7 +149,7 @@ def route_num_to_letter(name: str):
     _, num = name.split()
     index = int(num) - 1
 
-    return string.ascii_uppercase[-index]
+    return string.ascii_uppercase[-4 + index]
 
 
 def build_visit_for_fulfillment(
