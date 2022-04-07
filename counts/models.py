@@ -120,14 +120,6 @@ class Warehouse(models.Model):
     additions = models.ManyToManyField(Addition, blank=True)
 
     def as_dict(self):
-        print([change.to_command() 
-                            for change in chain(
-                                self.substitutions.all(), 
-                                self.out.all(), 
-                                self.additions.all()
-                                )])
-
-
         return {'date': self.date,
                 'time_window': self.time_window,
                 'changes': [change.to_command() 
@@ -140,3 +132,9 @@ class Warehouse(models.Model):
 
     def __str__(self) -> str:
         return f'{self.date}, {self.time_window}'
+
+
+class Invoice(models.Model):
+    pulled_date = models.DateField(blank=True, editable=False, auto_now=True)
+    start_date = models.DateField(blank=True, editable=False)
+    end_date = models.DateField(blank=True, editable=False)

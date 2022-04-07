@@ -1,3 +1,4 @@
+from typing import Hashable
 import csv
 import io
 
@@ -34,7 +35,7 @@ column_order = ['Delivery ID',
 		'TextOptIn',]
 
 
-def groupby(dictionaries: list, group_key) -> dict:
+def groupby(dictionaries: list, group_key: Hashable) -> dict:
     """
     Group a list of dictionaries by the values of a given key.
     """
@@ -45,13 +46,13 @@ def groupby(dictionaries: list, group_key) -> dict:
     return dict(result)
 
 
-def index(dictionaries:list, field) -> dict:
+def index(dictionaries: list, field: Hashable) -> dict:
     if len({item[field] for item in dictionaries}) != len(dictionaries):
         raise ValueError("Field must be unique for each dictionary.")
     return {dictionary[field] for dictionary in dictionaries}
 
 
-def ungroup(dictionary:dict) -> list:
+def ungroup(dictionary: dict) -> list:
     """wrapper for  dict.values, but is opposite of groupby"""
     return [value for group in dictionary.values() for value in group]
 
@@ -71,6 +72,23 @@ def make_member_id_query(list_of_ids):
     query['Where'].append(('Eq', 'Member ID', 
                         list_of_ids[-1]['Member ID']))
     return query
+
+
+def collect_time_span(starting: str, ending: str):
+    # prepare the authcook and load the site
+    authcookie = Office365('https://gcfbsm.sharepoint.com', 
+                        settings.SP_USERNAME, 
+                settings.SP_PASSWORD).GetCookies()
+    site = Site('https://gcfbsm.sharepoint.com/sites/DMS', 
+                authcookie=authcookie)
+
+    query = {'Where':['And', ('Geq','Delivery Date', starting),
+                  ('Leq','Delivery Date', ending),]}
+
+
+    deliveries_list = site.List('Deliveries')
+
+    return deliveries_list.get_list_items(query=query)
 
 
 def collect_time_blocks(date):

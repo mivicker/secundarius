@@ -2,6 +2,8 @@
 Separate django stuff, box stuff, and van stuff, hide the good stuff
 deep in an underground bunker to stay away from sharepoint.
 """
+
+import contextlib
 from typing import Dict, Tuple, List
 import datetime
 import re
@@ -44,7 +46,7 @@ EXCHANGES_DICT = {
 @dataclass
 class Translator:
     """The translator holds the dictionaries that translate
-    the stop information to the changes tuples ngeeded for the
+    the stop information to the changes tuples needed for the
     box module."""
 
     additions: dict = field(default_factory=lambda: ADDITIONS_DICT)
@@ -76,7 +78,7 @@ def get_all_modifications(
     stop: van.Stop,
 ) -> RequiresContext[List[boxes.ChangeCommand], Translator]:
     def inner(translator: Translator):
-        additions = get_additions_from(stop["delivery_notes"])(translator)
+        additions = get_additions_from(stop.get("delivery_notes", ""))(translator)
         exchanges = get_exchanges_from(stop)(translator)
 
         return list(itertools.chain(*(additions + exchanges)))
@@ -143,13 +145,13 @@ def organize_racks(box: boxes.Box) -> Dict[str, boxes.Box]:
     }
 
 
-def route_num_to_letter(name: str):
+def route_num_to_letter(name: str, start=4):
     """Takes 'Route int'throws away 'Route' and changes int to uppercase
     letter"""
     _, num = name.split()
     index = int(num) - 1
 
-    return string.ascii_uppercase[-4 + index]
+    return string.ascii_uppercase[-start + index]
 
 
 def build_visit_for_fulfillment(
@@ -309,7 +311,7 @@ def fix_phone(stop: van.Stop) -> van.Stop:
         stop["phone"] = format_phone(phone_digits[0])
     if len(phone_digits) > 1:
         stop["delivery_notes"] = (
-            stop["delivery_notes"]
+            stop.get("delivery_notes", "")
             + f" Alternate phone: {format_phone(phone_digits[1])}"
         )
     return stop
@@ -317,10 +319,8 @@ def fix_phone(stop: van.Stop) -> van.Stop:
 
 def try_parsing_date(text: str) -> datetime.datetime:
     for fmt in ("%B %d, %Y", "%Y-%m-%d", "%m/%d/%Y", "%d-%b-%y"):
-        try:
+        with contextlib.suppress(ValueError):
             return datetime.datetime.strptime(text, fmt)
-        except ValueError:
-            pass
     raise ValueError("no valid date format found")
 
 
@@ -329,7 +329,14 @@ def clean_stop(stop: van.Stop) -> van.Stop:
     return flow(stop, change_keys, fix_phone)
 
 
+def clean_unrouted(upload: List[van.Stop]) -> List[van.Stop]:
+    return [clean_stop(stop) for stop in upload]
+
+
 def clean_upload(upload: List[van.Stop]) -> List[van.Stop]:
+    """
+    This cleans and filters and should be refactored.
+    """
     return [
         clean_stop(stop) for stop in upload if re.match("Route[0-9]*", stop.get("Route #", ''))
     ]
@@ -365,7 +372,7 @@ def build_named_labeler(
 
 def build_basic_warehouse() -> boxes.Warehouse:
     return boxes.Warehouse(
-        date=datetime.datetime.today().date(),
+        date=datetime.datetime.now().date(),
         time_window='',
         changes=[],
         menus=build_menu_cache(),
