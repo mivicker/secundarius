@@ -1,14 +1,13 @@
 {% extends 'texts/base.html' %}
 {% block content %}
 <div class="nav">
-	<p><a href="{% url 'home' %}">Home</a> > <a href="">Inventory</a> > Upload xls</p>
+	<p><a href="{% url 'home' %}">Home</a> > <a href="{% url  'fulfillment-menu' %}">Fulfillment</a> > Upload xls</p>
 </div>
     <form enctype="multipart/form-data" action="{% url 'post-invoice' %}" method="POST">
         {% csrf_token %}
         <div class="start-selector">
             <h3>Invoice start date</h3>
             <div>{{ start_date_form }}</div>
-            <p>* The default date is the day after the last requested invoice</p>
         </div>
         <div class="end-selector">
             <h3>Invoice end date</h3>
