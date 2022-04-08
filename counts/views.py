@@ -131,12 +131,14 @@ def post_invoice(request):
 
     worksheet = workbook['Summary']
     # repair broken linkes
-    for i in range(66):
+    for i in range(68):
         worksheet[f"D{3 + i}"] = f"=IFERROR(VLOOKUP(A{i + 3},DET!$A$1:$C$61,2,FALSE), 0)"
         worksheet[f"L{3 + i}"] =  f"=IFERROR(VLOOKUP(A{i + 3},MG!$A$1:$C$61,2,FALSE), 0)"
         worksheet[f"M{3 + i}"] =  f"=IFERROR(VLOOKUP(A{i + 3},MGT1!$A$1:$C$61,2,FALSE), 0)" 
         worksheet[f"I{3 + i}"] =  f"=IFERROR(VLOOKUP(A{i + 3},Estimated!$A$1:$C$61,2,FALSE), 0)" 
-    
+        worksheet[f"G{3 + i}"] =  f"=E{i + 3}*C{i + 3}+F{i + 3}" 
+        worksheet[f"J{3 + i}"] =  f"=D{i + 3}-G{i + 3}" 
+
     f = NamedTemporaryFile(delete=False)
     workbook.save(f.name)
     output = BytesIO(f.read())
@@ -146,6 +148,6 @@ def post_invoice(request):
     response = HttpResponse(output)
     response[
         "Content-Disposition"
-    ] = 'attachment; filename="Created.xlsx"'
+    ] = f'attachment; filename="CountWorksheet{start_date.strftime("%Y-%m-%d")}through{end_date.strftime("%Y-%m-%d")}.xlsx"'
     
     return response
