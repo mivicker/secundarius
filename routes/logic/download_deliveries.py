@@ -1,7 +1,6 @@
 from typing import Hashable
 import csv
 import io
-
 from shareplum import Site, Office365
 from django.conf import settings
 from collections import defaultdict
@@ -84,10 +83,7 @@ def collect_time_span(starting: str, ending: str):
 
     query = {'Where':['And', ('Geq','Delivery Date', starting),
                   ('Leq','Delivery Date', ending),]}
-
-
     deliveries_list = site.List('Deliveries')
-
     return deliveries_list.get_list_items(query=query)
 
 
