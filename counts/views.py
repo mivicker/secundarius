@@ -51,6 +51,15 @@ def key_group(dictionaries, keys):
     return dict(result)
 
 
+def is_countable(delivery):
+    return ((delivery.get('delivery_status') == 'Completed') |
+            (delivery.get('delivery_status') == 'Future'))
+
+
+def filter_for_completed(deliveries):
+    return [delivery for delivery in deliveries if is_countable(delivery)]
+
+
 def get_estimate(start_date, end_date):
     download = dd.collect_time_span(start_date, end_date)
     cleaned = adapter.clean_unrouted(download)
@@ -62,12 +71,14 @@ def get_estimate(start_date, end_date):
     result = []
     for group, deliveries in groups.items():
         date, time_window = group
+        countable = filter_for_completed(deliveries)
+        print(len(deliveries) == len(countable))
         if whs := Warehouse.objects.filter(date=date, time_window=time_window):
             warehouse = adapter.build_warehouse_from_db(whs.first())
         else:
             warehouse = adapter.build_basic_warehouse()
 
-        orders = [adapter.build_box_order(stop)(translator) for stop in deliveries]
+        orders = [adapter.build_box_order(stop)(translator) for stop in countable]
 
         temp = box.sum_prototypes(
                 [
@@ -121,6 +132,7 @@ def post_invoice(request):
             for j, col in enumerate(item, 1):
                 letter = get_column_letter(j)
                 worksheet[f"{letter}{i}"] = col
+    
     estimate = get_estimate(start_date, end_date)
 
     worksheet = workbook.create_sheet(title='Estimated')
