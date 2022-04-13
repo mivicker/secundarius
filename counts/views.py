@@ -10,6 +10,7 @@ from counts.models import Warehouse
 from routes.logic import box
 from routes.logic import adapter
 from routes.logic import download_deliveries as dd
+from .models import Invoice
 from .forms import StartDateForm, EndDateForm
 from .forms import UploadFileForm
 import xlrd
@@ -156,6 +157,8 @@ def post_invoice(request):
     output = BytesIO(f.read())
     f.close()
     os.unlink(f.name)
+
+    Invoice.objects.create(start_date=start_date, end_date=end_date)
 
     response = HttpResponse(output)
     response[
