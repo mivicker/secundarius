@@ -2,9 +2,9 @@
 {% extends 'texts/base.html' %}
 {% block content %}
 <div class="nav">
-	<p><p><a href="{% url 'home' %}">Home</a> > <a href="{% url 'fulfillment-menu' %}">Fulfillment</a> > <a href="{% url 'post-invoice' %}">Invoice</a> > ERROR!</p>
+	<p><p><a href="{% url 'home' %}">Home</a> > <a href="{% url 'fulfillment-menu' %}">Fulfillment</a> > <a href="{% url 'invoice' %}">Invoice</a> > ERROR!</p>
 </div>
 <h1>Sharepoint doesn't like large (or even medium-sized) requests</h1>
-<p>Try entering a shorter date window.<a href="{% url 'post-invoice' %}">Try again</a></p>
+<p>Try entering a shorter date window.<a href="{% url 'invoice' %}">Try again</a></p>
 </form>
 {% endblock %}
