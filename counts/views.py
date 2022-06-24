@@ -16,7 +16,6 @@ from .forms import UploadFileForm
 import xlrd
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
-from shareplum.errors import ShareplumRequestError
 
 
 def invoice(request):
@@ -74,21 +73,22 @@ def get_estimate(start_date, end_date):
     for group, deliveries in groups.items():
         date, time_window = group
         countable = filter_for_completed(deliveries)
-        print(len(deliveries) == len(countable))
         if whs := Warehouse.objects.filter(date=date, time_window=time_window):
             warehouse = adapter.build_warehouse_from_db(whs.first())
         else:
             warehouse = adapter.build_basic_warehouse()
 
-        orders = [adapter.build_box_order(stop)(translator) for stop in countable]
-
-        temp = box.sum_prototypes(
-                [
-                    box.to_prototype(box.build_box_from_order(order)(warehouse))
-                    for order in orders
-                ]
-            )
-        result = box.add_prototypes(result, temp)
+        if orders := [
+            adapter.build_box_order(stop)(translator) 
+            for stop in countable if countable
+            ]:
+            temp = box.sum_prototypes(
+                    [
+                        box.to_prototype(box.build_box_from_order(order)(warehouse))
+                        for order in orders
+                    ]
+                )
+            result = box.add_prototypes(result, temp)
 
     return result
 
@@ -134,10 +134,7 @@ def post_invoice(request):
             for j, col in enumerate(item, 1):
                 letter = get_column_letter(j)
                 worksheet[f"{letter}{i}"] = col
-    try:
         estimate = get_estimate(start_date, end_date)
-    except TypeError:
-        return redirect("sharepoint_error")
 
     worksheet = workbook.create_sheet(title='Estimated')
     for i, item in enumerate(estimate, 1):
