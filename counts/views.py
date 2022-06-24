@@ -5,7 +5,7 @@ from tempfile import NamedTemporaryFile
 import os
 from pathlib import Path
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from counts.models import Warehouse
 from routes.logic import box
 from routes.logic import adapter
@@ -16,6 +16,7 @@ from .forms import UploadFileForm
 import xlrd
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
+from shareplum.errors import ShareplumRequestError
 
 
 def invoice(request):
@@ -133,8 +134,10 @@ def post_invoice(request):
             for j, col in enumerate(item, 1):
                 letter = get_column_letter(j)
                 worksheet[f"{letter}{i}"] = col
-    
-    estimate = get_estimate(start_date, end_date)
+    try:
+        estimate = get_estimate(start_date, end_date)
+    except ShareplumRequestError:
+        return redirect("sharepoint_error")
 
     worksheet = workbook.create_sheet(title='Estimated')
     for i, item in enumerate(estimate, 1):
@@ -166,3 +169,6 @@ def post_invoice(request):
     ] = f'attachment; filename="CountWorksheet{start_date.strftime("%Y-%m-%d")}through{end_date.strftime("%Y-%m-%d")}.xlsx"'
     
     return response
+
+def sharepoint_error(request):
+    return render(request, "counts/sharepoint_error.html")

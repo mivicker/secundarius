@@ -4,7 +4,7 @@ from django.contrib.auth import views as auth_views
 
 from users.views import change_password
 from routes.views import landing
-from counts.views import invoice, post_invoice
+from counts.views import invoice, post_invoice, sharepoint_error
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -18,4 +18,5 @@ urlpatterns = [
     path('change-password', change_password, name='change-password'),
     path('invoice', invoice, name="invoice"),
     path('post-invoice', post_invoice, name="post-invoice"),
+    path('sharepoint-error', sharepoint_error, name="sharepoint_error"),
 ]
