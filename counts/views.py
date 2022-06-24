@@ -136,7 +136,7 @@ def post_invoice(request):
                 worksheet[f"{letter}{i}"] = col
     try:
         estimate = get_estimate(start_date, end_date)
-    except ShareplumRequestError:
+    except TypeError:
         return redirect("sharepoint_error")
 
     worksheet = workbook.create_sheet(title='Estimated')
@@ -169,6 +169,7 @@ def post_invoice(request):
     ] = f'attachment; filename="CountWorksheet{start_date.strftime("%Y-%m-%d")}through{end_date.strftime("%Y-%m-%d")}.xlsx"'
     
     return response
+
 
 def sharepoint_error(request):
     return render(request, "counts/sharepoint_error.html")
