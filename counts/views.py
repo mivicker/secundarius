@@ -28,7 +28,7 @@ def invoice(request):
 
 
 def replace_empty(val):
-    return 0 if val == '' else val
+    return 0 if val == "" else val
 
 
 def cols_to_values(row):
@@ -43,18 +43,19 @@ def key_group(dictionaries, keys):
     if type(keys) != tuple:
         keys = (keys,)
     result = defaultdict(lambda: [])
-    
+
     for dictionary in dictionaries:
-        key = tuple(dictionary.get(key, 'missing') for key in keys)
-        
+        key = tuple(dictionary.get(key, "missing") for key in keys)
+
         result[key].append(dictionary)
-        
+
     return dict(result)
 
 
 def is_countable(delivery):
-    return ((delivery.get('delivery_status') == 'Completed') |
-            (delivery.get('delivery_status') == 'Future'))
+    return (delivery.get("delivery_status") == "Completed") | (
+        delivery.get("delivery_status") == "Future"
+    )
 
 
 def filter_for_completed(deliveries):
@@ -65,7 +66,7 @@ def get_estimate(start_date, end_date):
     download = dd.collect_time_span(start_date, end_date)
     cleaned = adapter.clean_unrouted(download)
 
-    groups = key_group(cleaned, ('delivery_date', 'deliverytime'))
+    groups = key_group(cleaned, ("delivery_date", "deliverytime"))
 
     translator = adapter.Translator()
 
@@ -79,40 +80,36 @@ def get_estimate(start_date, end_date):
             warehouse = adapter.build_basic_warehouse()
 
         if orders := [
-            adapter.build_box_order(stop)(translator) 
-            for stop in countable if countable
-            ]:
+            adapter.build_box_order(stop)(translator) for stop in countable if countable
+        ]:
             temp = box.sum_prototypes(
-                    [
-                        box.to_prototype(box.build_box_from_order(order)(warehouse))
-                        for order in orders
-                    ]
-                )
+                [
+                    box.to_prototype(box.build_box_from_order(order)(warehouse))
+                    for order in orders
+                ]
+            )
             result = box.add_prototypes(result, temp)
 
     return result
 
 
 def post_invoice(request):
-    file = request.FILES.get('file')
+    file = request.FILES.get("file")
     post = dict(request.POST.lists())
+    print()
     start_date, end_date = tuple(
-        datetime.datetime(int(year), int(month), int(day)) for year, month, day in zip(
-            post["date_year"], 
-            post["date_month"], 
-            post["date_day"], 
+        datetime.datetime(int(year), int(month), int(day))
+        for year, month, day in zip(
+            post["date_year"],
+            post["date_month"],
+            post["date_day"],
         )
     )
     book = xlrd.open_workbook(file_contents=file.read())
 
     sh = book.sheet_by_index(0)
 
-    path = Path(
-        os.path.dirname(__file__),
-        'static',
-        'counts',
-        'CountTemplate.xlsx'
-    )
+    path = Path(os.path.dirname(__file__), "static", "counts", "CountTemplate.xlsx")
 
     workbook = load_workbook(path)
 
@@ -121,9 +118,9 @@ def post_invoice(request):
     result = defaultdict(list)
     for rx in range(sh.nrows):
         tup = cols_to_values(sh.row(rx))
-        if (tup[0].startswith('On Hand') | tup[0].startswith('Report')):
+        if tup[0].startswith("On Hand") | tup[0].startswith("Report"):
             continue
-        if (tup[0].startswith('Warehouse')):
+        if tup[0].startswith("Warehouse"):
             next_warehouse = extract_warehouse_tag(tup)
             continue
         result[next_warehouse].append((tup[0], int(replace_empty(tup[1]))))
@@ -136,21 +133,27 @@ def post_invoice(request):
                 worksheet[f"{letter}{i}"] = col
         estimate = get_estimate(start_date, end_date)
 
-    worksheet = workbook.create_sheet(title='Estimated')
+    worksheet = workbook.create_sheet(title="Estimated")
     for i, item in enumerate(estimate, 1):
         for j, col in enumerate(item, 1):
             letter = get_column_letter(j)
             worksheet[f"{letter}{i}"] = col
 
-    worksheet = workbook['Summary']
+    worksheet = workbook["Summary"]
     # repair broken linkes
     for i in range(68):
-        worksheet[f"D{3 + i}"] = f"=IFERROR(VLOOKUP(A{i + 3},DET!$A$1:$C$61,2,FALSE), 0)"
-        worksheet[f"L{3 + i}"] =  f"=IFERROR(VLOOKUP(A{i + 3},MG!$A$1:$C$61,2,FALSE), 0)"
-        worksheet[f"M{3 + i}"] =  f"=IFERROR(VLOOKUP(A{i + 3},MGT1!$A$1:$C$61,2,FALSE), 0)" 
-        worksheet[f"I{3 + i}"] =  f"=IFERROR(VLOOKUP(A{i + 3},Estimated!$A$1:$C$61,2,FALSE), 0)" 
-        worksheet[f"G{3 + i}"] =  f"=E{i + 3}*C{i + 3}+F{i + 3}" 
-        worksheet[f"J{3 + i}"] =  f"=D{i + 3}-G{i + 3}" 
+        worksheet[
+            f"D{3 + i}"
+        ] = f"=IFERROR(VLOOKUP(A{i + 3},DET!$A$1:$C$61,2,FALSE), 0)"
+        worksheet[f"L{3 + i}"] = f"=IFERROR(VLOOKUP(A{i + 3},MG!$A$1:$C$61,2,FALSE), 0)"
+        worksheet[
+            f"M{3 + i}"
+        ] = f"=IFERROR(VLOOKUP(A{i + 3},MGT1!$A$1:$C$61,2,FALSE), 0)"
+        worksheet[
+            f"I{3 + i}"
+        ] = f"=IFERROR(VLOOKUP(A{i + 3},Estimated!$A$1:$C$61,2,FALSE), 0)"
+        worksheet[f"G{3 + i}"] = f"=E{i + 3}*C{i + 3}+F{i + 3}"
+        worksheet[f"J{3 + i}"] = f"=D{i + 3}-G{i + 3}"
 
     f = NamedTemporaryFile(delete=False)
     workbook.save(f.name)
@@ -164,9 +167,54 @@ def post_invoice(request):
     response[
         "Content-Disposition"
     ] = f'attachment; filename="CountWorksheet{start_date.strftime("%Y-%m-%d")}through{end_date.strftime("%Y-%m-%d")}.xlsx"'
-    
+
     return response
 
 
 def sharepoint_error(request):
     return render(request, "counts/sharepoint_error.html")
+
+
+def stockouts_table(request):
+    warehouses = Warehouse.objects.filter(
+        date__gt=datetime.datetime.now().date() - datetime.timedelta(days=45),
+        date__lt=datetime.datetime.now().date() + datetime.timedelta(days=2),
+    )
+    context = {
+        "stockouts": [
+            stockout
+            for warehouse in warehouses
+            for stockout in warehouse.stockouts_list()
+        ]
+    }
+    return render(request, "counts/stockouts_table.html", context)
+
+
+def substitutions_table(request):
+    warehouses = Warehouse.objects.filter(
+        date__gt=datetime.datetime.now().date() - datetime.timedelta(days=45),
+        date__lt=datetime.datetime.now().date() + datetime.timedelta(days=2),
+    )
+    context = {
+        "substitutions": [
+            substitution
+            for warehouse in warehouses
+            for substitution in warehouse.substitutions_list()
+        ]
+    }
+    return render(request, "counts/substitutions_table.html", context)
+
+
+def additions_table(request):
+    warehouses = Warehouse.objects.filter(
+        date__gt=datetime.datetime.now().date() - datetime.timedelta(days=45),
+        date__lt=datetime.datetime.now().date() + datetime.timedelta(days=2),
+    )
+    context = {
+        "additions": [
+            addition
+            for warehouse in warehouses
+            for addition in warehouse.additions_list()
+        ]
+    }
+    return render(request, "counts/additions_table.html", context)

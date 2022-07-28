@@ -129,6 +129,43 @@ class Warehouse(models.Model):
                                 self.additions.all()
                                 )],
                 }
+    
+    def stockouts_list(self):
+        return [
+            {
+                'date': self.date,
+                'time_window': self.time_window,
+                'item_code': stock_out.to_remove.item_code,
+                'description': stock_out.to_remove.description,
+            }
+            for stock_out in self.out.all()
+        ]
+
+    def additions_list(self):
+        return [
+            {
+                'date': self.date,
+                'time_window': self.time_window,
+                'item_code': addition.to_remove.item_code,
+                'description': addition.to_remove.description,
+            }
+            for addition in self.additions.all()
+        ]
+
+    def substitutions_list(self):
+        return [
+            {
+                'date': self.date,
+                'time_window': self.time_window,
+                'removed': substitution.to_remove.item_code,
+                'removed_description': substitution.to_remove.description,
+                'replaced': substitution.to_add.item_code,
+                'replaced_description': substitution.to_add.description,
+                'replacement_ratio': substitution.ratio
+            }
+
+            for substitution in self.substitutions.all()
+        ]
 
     def __str__(self) -> str:
         return f'{self.date}, {self.time_window}'

@@ -49,6 +49,7 @@ class Item:
     recurrance: int = 1
     expand_rule: str = '111'
 
+
 @dataclass
 class Share:
     """An item paired with the quantity in the box"""
@@ -140,9 +141,11 @@ def print_letter_label(box: Box) -> RequiresContext[str, Warehouse]:
         attr, target = warehouse.labeler.bin_listen_to
         key = make_bin_key(attr, target, box)
         if not warehouse.labeler.bin_labels.get(key):
-            warehouse.labeler.bin_labels[key] = warehouse.labeler.label_pool.pop()
+            warehouse.labeler.bin_labels[key] = warehouse.labeler.label_pool.pop(
+            )
 
-        warehouse.labeler.bin_quantities[key] = warehouse.labeler.bin_quantities.get(key, 0) + 1
+        warehouse.labeler.bin_quantities[key] = warehouse.labeler.bin_quantities.get(
+            key, 0) + 1
         return warehouse.labeler.bin_labels[key]
 
     return RequiresContext(inner)
@@ -252,7 +255,8 @@ def make_changes(
     """Turns a list of commands into a change prototype."""
     return RequiresContext(
         lambda prototype: reduce(
-            concat, [make_change(command)(prototype) for command in commands], []
+            concat, [make_change(command)(prototype)
+                     for command in commands], []
         )
     )
 

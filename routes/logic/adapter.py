@@ -124,6 +124,8 @@ def build_box_order(stop: van.Stop, translator: Translator) -> boxes.BoxOrder:
         menu_name=string_box(stop),
         changes=get_all_modifications(stop)(translator),
     )
+
+
 def organize_racks(box: boxes.Box) -> Dict[str, boxes.Box]:
     """Displays racks in proper order."""
     # Need to pull this into a config.
@@ -211,7 +213,6 @@ def build_fulfillment_context(
     }
 
 def serialize_route(route: List[van.Visit]):
-    print(route)
     return [asdict(visit) for visit in route]
 
 def build_route_context(

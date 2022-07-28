@@ -1,0 +1,44 @@
+{% extends 'texts/base.html' %}
+{% block content %}
+<table>
+    <caption>Substitutions by date</caption>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Time window</th>
+            <th>Removed Item Code</th>
+            <th>Replaced Description</th>
+            <th>Replaced Item Code</th>
+            <th>Replaced Description</th>
+            <th>Replacement Ratio</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for substitution in substitutions %}
+        <tr>
+            <td>
+               {{ substitution.date }}
+            </td>
+            <td>
+                {{ substitution.time_window }}
+            </td>
+            <td>
+                {{ substitution.removed }}
+            </td>
+            <td>
+                {{ substitution.removed_description }}
+            </td>
+            <td>
+                {{ substitution.replaced }}
+            </td>
+            <td>
+                {{ substitution.replaced_description }}
+            </td>
+            <td>
+                {{ substitution.replacement_ratio }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

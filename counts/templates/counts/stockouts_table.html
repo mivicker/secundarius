@@ -1,0 +1,32 @@
+{% extends 'texts/base.html' %}
+{% block content %}
+<table>
+    <caption>Stockouts by date</caption>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Time window</th>
+            <th>Product Item Code</th>
+            <th>Product Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stockout in stockouts %}
+        <tr>
+            <td>
+               {{ stockout.date }}
+            </td>
+            <td>
+                {{ stockout.time_window }}
+            </td>
+            <td>
+                {{ stockout.item_code }}
+            </td>
+            <td>
+                {{ stockout.description }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

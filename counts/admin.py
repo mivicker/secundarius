@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Menu, Item, Share, Substitution, Addition, OutOfStock
+from .models import Menu, Item, Share, Substitution, Addition, OutOfStock, Warehouse
 
 
 class ShareTabularInline(admin.TabularInline):
@@ -13,6 +13,11 @@ class MenuAdmin(admin.ModelAdmin):
 
 @admin.register(Item)
 class ProductAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Warehouse)
+class WarehouseAdmin(admin.ModelAdmin):
     pass
 
 

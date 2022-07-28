@@ -35,6 +35,7 @@
 
 #secundarius {
 	font-family: 'Mr Dafoe', cursive;
+    font-display: block;
     font-weight: normal;
 	font-size: 100px;
 }
