@@ -31,6 +31,8 @@ ADDITIONS_DICT = {
     "Bread": [("change", "MG1136", 1)],
     "MixedVegetables": [("change", "MG1178", 1)],
     "Strawberries": [("change", "MG1286", 1)],
+    "MilkGallon": [("change", "MG1063", 1)],
+    "MilkHalfGallon": [("change", "MG1186", 1)],
 }
 
 

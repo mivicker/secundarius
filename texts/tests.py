@@ -74,10 +74,10 @@ class TestRenderUserSMSTemplate(TestCase):
     def test_pluck_variables(self):
         template = "This is a text that will be sent to [[ name ]], at [[ phone ]]."
 
-        vars = pluck_variables(template)
+        variables = pluck_variables(template)
 
-        self.assertIn('name', vars)
-        self.assertIn('phone', vars)
+        self.assertIn('name', variables)
+        self.assertIn('phone', variables)
 
     def test_render_sms_template(self):
         template = "An important message on [[ date ]] for [[ customer ]]!"
