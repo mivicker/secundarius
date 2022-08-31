@@ -15,7 +15,7 @@ def show_map(request):
 def place_map(_):
     with open(
         os.path.join(
-            BASE_DIR, "map", "static", "map", "Below1point5povertyover55.json"
+            BASE_DIR, "map", "static", "data", "Below1point5povertyover55.json"
         )
     ) as f:
         return JsonResponse(json.load(f))
