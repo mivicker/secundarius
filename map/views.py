@@ -13,6 +13,9 @@ def show_map(request):
 
 @login_required
 def place_map(_):
-    with open(os.path.join(BASE_DIR, "map", "Below1point5povertyover55.json")) as f:
+    with open(
+        os.path.join(
+            BASE_DIR, "map", "static", "map", "Below1point5povertyover55.json"
+        )
+    ) as f:
         return JsonResponse(json.load(f))
-
