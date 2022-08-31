@@ -36,6 +36,7 @@ ALLOWED_HOSTS = secrets["ALLOWED_HOSTS"]
 # Application definition
 
 INSTALLED_APPS = [
+    'map.apps.MapConfig',
     'counts.apps.CountsConfig',
     'users.apps.UsersConfig',
     'texts.apps.TextsConfig',
