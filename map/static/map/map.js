@@ -26,7 +26,8 @@ const drawDoorDashLimit = (coords) => {
         }),
         L.circle(coords, {
             interactive: false,
-            color: 'orange',
+            color: 'gold',
+            strokeOpacity: 0.5,
             weight: 3,
             stroke: true,
              fillColor: 'yellow',
@@ -57,9 +58,15 @@ let zctas_obj = d3.json(current_domain + "/zips")
         // Pull out all values for use in calculating color scale.
         const V = d3.map(data["features"], item => item["properties"]["below poverty over 55"]);
 
+        const scale = legend({
+            color: d3.scaleSequential(d3.extent(V), d3.interpolateViridis),
+            title: "Population with income < 150% of federal poverty line and age > 55"
+        });
+
         // 
         const viridis = d3.scaleSequential().domain(d3.extent(V))
             .interpolator(d3.interpolateViridis);
+
 
         var zctas = L.geoJSON(data, {
             style: function (feature) {
@@ -83,7 +90,7 @@ var ddDetroit = drawDoorDashLimit([42.353997, -83.013971]),
     ddMercado = drawDoorDashLimit([42.32467105050505, -83.0807821010101]),
     ddFrec2 = drawDoorDashLimit([42.43706555, -82.9618918750452]);
 
-var gleanersHubs = L.layerGroup([ddDetroit, ddTaylor, ddMercado, ddFrec2]).addTo(map);
+var gleanersHubs = L.layerGroup([ddDetroit, ddTaylor, ddMercado, ddFrec2]);
 var baseMaps = {};
 var overlayMaps = {
     "Detroit Headquarters":  ddDetroit,

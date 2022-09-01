@@ -2,22 +2,73 @@
 <html>
     <head>
         <style type="text/css" media="all">
+            #spread {
+                position: 'relative';
+            }
+
+            #title,
+            #map {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
             #map {
                 height: 100%;
                 width: 100%;
                 border: darkgray solid 1px;
             }
+
+            #title {
+                z-index: 500;
+                font-size: 1.2em;
+                margin-left: 4em;
+                color: white;
+                font-family: 'Helvetica';
+                text-shadow: 2px 1px #000000;
+            }
+            #attribution {
+                font-size: 0.8em;
+                background-color: rgba(255, 255, 255, 0.4);
+                padding-left: 0.5em;
+                padding-bottom: 0.5em;
+                padding-right: 0.75em;
+                position: absolute;
+                z-index: 501;
+                font-family: 'Helvetica';
+                bottom: 0;
+                right: 0;
+            }
+            #legend {
+                z-index: 520;
+                position: absolute;
+                padding: 1em;
+                bottom: 0em;
+                left: 0em;
+                background-color: rgba(255, 255, 255, 0.7);
+            }
+
         </style>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin=""/>
         <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
         <script src="https://d3js.org/d3.v7.min.js"></script>
     </head>
     <body>
-        <div id="map"></div>
+        <div id="spread">
+            <div id="title">
+                <h1>Estimated population with income 150% below poverty & age greater than 55</h1>
+            </div>
+            <div id="attribution">
+                <p>This product uses the Census Bureau Data API but is not endorsed or certified by the Census Bureau.</p>
+            </div>
+            <div id="map"></div>
+        </div>
             <script type="text/javascript">
                 var current_domain = "{{ request.site.domain }}";
             </script>
-            <script type="text/javascript" src="{% static 'map/map.js' %}">
+            <script type="text/javascript" src="{% static 'map/legend.js' %}"></script>
+            <script type="text/javascript" src="{% static 'map/map.js' %}"></script>
+            <svg id="legend"></svg>
         </script>
     </body>
 </html>
