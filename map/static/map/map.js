@@ -89,6 +89,12 @@ var ddDetroit = drawDoorDashLimit([42.353997, -83.013971]),
     ddTaylor = drawDoorDashLimit([42.262563, -83.241248]),
     ddMercado = drawDoorDashLimit([42.32467105050505, -83.0807821010101]),
     ddFrec2 = drawDoorDashLimit([42.43706555, -82.9618918750452]);
+    oneEightyChurch = drawDoorDashLimit([42.38705584563758, -83.18194704697986]);
+    zephiasWestland = drawDoorDashLimit([42.31737078901744, -83.38426133533464]);
+    zelphiasNovi = drawDoorDashLimit([42.44418509574468, -83.45413379787233]);
+    catholicCharitiesSouthfield = drawDoorDashLimit([42.469084558928444, -83.23586451912944]);
+    catholicCharitiesPontiac = drawDoorDashLimit([42.63578928571429, -83.29903185714286]);
+    seniorAlliance = drawDoorDashLimit([42.26886094956443, -83.36276059218768]);
 
 var gleanersHubs = L.layerGroup([ddDetroit, ddTaylor, ddMercado, ddFrec2]);
 var baseMaps = {};
@@ -97,6 +103,12 @@ var overlayMaps = {
     "Mercado Food Hub":  ddMercado,
     "Taylor Warehouse":  ddTaylor,
     "Frec 2":  ddFrec2,
+    "180 Church (Wayne Metro)": oneEightyChurch,
+    "Zelphia's Westland": zelphiasWestland,
+    "Zelphia's Novi": zelphiasNovi,
+    "Catholic Charities - Southfield": catholicCharitiesSouthfield,
+    "Catholic Charities - Pontiac": catholicCharitiesPontiac,
+    "The Senior Alliance": seniorAlliance,
 };
 
 var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
