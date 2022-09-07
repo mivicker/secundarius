@@ -92,6 +92,7 @@ var ddDetroit = drawDoorDashLimit([42.353997, -83.013971]),
     oneEightyChurch = drawDoorDashLimit([42.38705584563758, -83.18194704697986]),
     zelphiasWestland = drawDoorDashLimit([42.31737078901744, -83.38426133533464]),
     zelphiasNovi = drawDoorDashLimit([42.44418509574468, -83.45413379787233]),
+    catholicCharitiesMacomb = drawDoorDashLimit([42.4621696, -82.8840659]),
     catholicCharitiesSouthfield = drawDoorDashLimit([42.469084558928444, -83.23586451912944]),
     catholicCharitiesPontiac = drawDoorDashLimit([42.63578928571429, -83.29903185714286]),
     seniorAlliance = drawDoorDashLimit([42.26886094956443, -83.36276059218768]);
@@ -108,6 +109,7 @@ var overlayMaps = {
     "Zelphia's Novi": zelphiasNovi,
     "Catholic Charities - Southfield": catholicCharitiesSouthfield,
     "Catholic Charities - Pontiac": catholicCharitiesPontiac,
+    "Catholic Charities - St Clair Shores": catholicCharitiesMacomb,
     "The Senior Alliance": seniorAlliance,
 };
 
