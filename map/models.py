@@ -2,7 +2,6 @@ import json
 from decimal import Decimal
 import urllib.parse
 from django.db import models
-from django.conf import settings
 import requests
 
 
@@ -28,19 +27,18 @@ class Location(models.Model):
         """
         Returns lattitude and longitude for a provided address.
         """
+        base_url = "https://nominatim.openstreetmap.org/"
+        
+        safe_address = urllib.parse.quote(address)
+        query_template = f"search.php?q={safe_address}&format=jsonv2"
 
-        with open(settings.key) as f:
-            secrets = json.load(f)
-        gmaps_base_url = "https://maps.googleapis.com/maps/api/geocode/json/"
-        query_string = urllib.parse.urlencode({"address": address, "key": secrets["GMAPS_KEY"]})
-        maps_uri = f"{gmaps_base_url}?{query_string}"
-        response = requests.get(maps_uri)
+        response = requests.get(base_url + query_template)
+
         data = json.loads(response.content)
-        if data["status"] == "OK":
-            lat = data['results'][0]['geometry']['location']['lat']
-            lng = data['results'][0]['geometry']['location']['lng']
-
-        return Decimal(lat), Decimal(lng)
+        try:
+            return (Decimal(data[0]["lat"]), Decimal(data[0]["lon"]))
+        except IndexError:
+            return Decimal('NaN'), Decimal('NaN')
 
 
 class Partner(models.Model):
