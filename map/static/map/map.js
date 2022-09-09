@@ -16,15 +16,17 @@ return `<p><b>${zcta["NAME20"]}</b></p>
 };
 
 
-const drawDoorDashLimit = (coords) => {
+const drawDoorDashLimit = (site) => {
+    var name = L.divIcon({html: `<p>${site.name}</p>`});
     return L.layerGroup([
-        L.circle(coords, {
+        L.marker([site["lat"], site["lng"]], {icon: name}),
+        L.circle([site["lat"], site["lng"]], {
             color: 'green',
             fillColor: 'green',
             radius: 50,
             fillOpacity: "1",
         }),
-        L.circle(coords, {
+        L.circle([site["lat"], site["lng"]], {
             interactive: false,
             color: 'gold',
             strokeOpacity: 0.5,
@@ -34,7 +36,7 @@ const drawDoorDashLimit = (coords) => {
              fillOpacity: '0',
             radius: miles_to_meters(10)
         }),
-        L.circle(coords, {
+        L.circle([site["lat"], site["lng"]], {
             interactive: false,
             color: 'green',
             weight: 3,
@@ -53,6 +55,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: 'c. OpenSteetMap'
 }).addTo(map);
 
+
 let zctas_obj = d3.json(current_domain + "/zips")
     .then(data => {
         // Pull out all values for use in calculating color scale.
@@ -66,7 +69,6 @@ let zctas_obj = d3.json(current_domain + "/zips")
         // 
         const viridis = d3.scaleSequential().domain(d3.extent(V))
             .interpolator(d3.interpolateViridis);
-
 
         var zctas = L.geoJSON(data, {
             style: function (feature) {
@@ -85,32 +87,16 @@ let zctas_obj = d3.json(current_domain + "/zips")
         }).addTo(map).bringToBack();
     });
 
-var ddDetroit = drawDoorDashLimit([42.353997, -83.013971]),
-    ddTaylor = drawDoorDashLimit([42.262563, -83.241248]),
-    ddMercado = drawDoorDashLimit([42.32467105050505, -83.0807821010101]),
-    ddFrec2 = drawDoorDashLimit([42.43706555, -82.9618918750452]),
-    oneEightyChurch = drawDoorDashLimit([42.38705584563758, -83.18194704697986]),
-    zelphiasWestland = drawDoorDashLimit([42.31737078901744, -83.38426133533464]),
-    zelphiasNovi = drawDoorDashLimit([42.44418509574468, -83.45413379787233]),
-    catholicCharitiesMacomb = drawDoorDashLimit([42.4621696, -82.8840659]),
-    catholicCharitiesSouthfield = drawDoorDashLimit([42.469084558928444, -83.23586451912944]),
-    catholicCharitiesPontiac = drawDoorDashLimit([42.63578928571429, -83.29903185714286]),
-    seniorAlliance = drawDoorDashLimit([42.26886094956443, -83.36276059218768]);
 
-var gleanersHubs = L.layerGroup([ddDetroit, ddTaylor, ddMercado, ddFrec2]);
-var baseMaps = {};
-var overlayMaps = {
-    "Detroit Headquarters":  ddDetroit,
-    "Mercado Food Hub":  ddMercado,
-    "Taylor Warehouse":  ddTaylor,
-    "Frec 2":  ddFrec2,
-    "180 Church (Wayne Metro)": oneEightyChurch,
-    "Zelphia's Westland": zelphiasWestland,
-    "Zelphia's Novi": zelphiasNovi,
-    "Catholic Charities - Southfield": catholicCharitiesSouthfield,
-    "Catholic Charities - Pontiac": catholicCharitiesPontiac,
-    "Catholic Charities - St Clair Shores": catholicCharitiesMacomb,
-    "The Senior Alliance": seniorAlliance,
-};
+var control = L.control.layers({},{})
 
-var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+d3.json(current_domain +"/sites")
+    .then(data => {
+        for (site of data.sites) {
+            var name = L.divIcon({html: `<h1>${site.name}</h1>`});
+            var circle = drawDoorDashLimit(site);
+            control.addOverlay(circle, site.name);
+        }
+    });
+
+control.addTo(map);

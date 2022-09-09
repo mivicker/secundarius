@@ -40,8 +40,32 @@ class Location(models.Model):
         except IndexError:
             return Decimal('NaN'), Decimal('NaN')
 
+    def __str__(self):
+        return self.address
+
 
 class Partner(models.Model):
     name = models.CharField(max_length=75)
+    short_name = models.CharField(max_length=75)
+
+    def __str__(self):
+        return self.name
+
+
+class Site(models.Model):
+    name = models.CharField(max_length=75)
+    partner = models.ForeignKey(Partner, on_delete=models.SET_NULL, null=True)
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
+
+    def as_dict(self):
+        return {
+            "name": self.name,
+            "partner": self.partner.name,
+            "address": self.location.address,
+            "lat": self.location.latitude,
+            "lng": self.location.longitude,
+        }
+
+    def __str__(self):
+        return self.name
 
