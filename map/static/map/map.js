@@ -17,7 +17,10 @@ return `<p><b>${zcta["NAME20"]}</b></p>
 
 
 const drawDoorDashLimit = (site) => {
-    var name = L.divIcon({html: `<p>${site.name}</p>`});
+    var name = L.divIcon({
+        className: "circ-titles",
+        html: `<p>${site.name}</p>`
+    });
     return L.layerGroup([
         L.marker([site["lat"], site["lng"]], {icon: name}),
         L.circle([site["lat"], site["lng"]], {
