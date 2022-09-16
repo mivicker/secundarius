@@ -1,11 +1,40 @@
+from dataclasses import dataclass, asdict
 import json
 from decimal import Decimal
+from typing import Optional, Tuple
 import urllib.parse
 from django.db import models
 import requests
+from geopy import distance
 
 
-def geocode(address):
+@dataclass
+class Address:
+    street_address: str
+    city: str
+    state: str
+    zip_code: str
+
+    def assemble(self):
+        f"{self.street_address}, {self.city}, {self.state} {self.zip_code}"
+
+
+def parse_address(address: str) -> Optional[Address]:
+    try:
+        street_address, city, state_zip = address.split(",")
+        state, zip_code = state_zip.strip().split(" ")
+
+        return Address(
+            street_address=street_address,
+            city=city.strip(),
+            state=state,
+            zip_code=zip_code,
+        )
+    except ValueError:
+        return None
+
+
+def geocode(address) -> Tuple[Decimal, Decimal]:
     """
     Returns lattitude and longitude for a provided address.
     """
@@ -29,20 +58,42 @@ class Location(models.Model):
     state = models.CharField(max_length=2, default="MI")
     zip_code = models.CharField(max_length=5)
     latitude = models.FloatField(blank=True, null=True, editable=False)
-    longitude = models.FloatField(blank=True, null=True, editable=False)
+    longitude= models.FloatField(blank=True, null=True, editable=False)
     
     @property
     def address(self):
         return f"{self.street_address}, {self.city}, {self.state} {self.zip_code}"
 
+    @property
+    def coords(self) -> Tuple[Decimal, Decimal]:
+        return (Decimal(self.latitude), Decimal(self.longitude))
+
     def save(self, *args, **kwargs):
         if not self.latitude or self.longitude:
             self.latitude, self.longitude = geocode(self.address)
         super().save(*args, **kwargs)
-    
 
     def __str__(self):
         return self.address
+
+
+def find_location(address: Address) -> Optional[Location]:
+    locations = Location.objects.filter(
+        **asdict(address)
+    )
+
+    if not locations:
+        return None
+
+    return locations[0]
+
+
+def cached_geocode(address_string: str) -> Tuple[Decimal, Decimal]:
+    if (address := parse_address(address_string)) is not None:
+        if (location := find_location(address)) is not None:
+            return location.coords
+
+    return geocode(address_string)
 
 
 class Partner(models.Model):
@@ -78,4 +129,31 @@ class Site(models.Model):
         return self.name
 
 
+def calc_site_distances(address_coords: Tuple[Decimal, Decimal]):
+    """
+    Return sites < 10 miles away from address.
+    """
+    return [
+        (site, distance.distance(site.location.coords, address_coords))
+        for site in Site.objects.all()
+    ]
+
+
+def suggest_site(coords: Tuple[Decimal, Decimal]) -> Optional[Site]:
+    distances = calc_site_distances(coords)
+    available = [site for site, distance in distances 
+                 if ((distance.miles < 10) & (site.referral_type in ["PR", "SD", "RF"]))]
+    if not available:
+        return None
+
+    # Check for priority sites first.
+    for site in available:
+        if site.referral_type == "PR":
+            return site
+
+    # If no priority sites, provide closest
+    return available[0]
+
+# [zelphias, gleaners - taylor, senior alliance] -> gleaners - taylor
+# [senior alliance, zelphias] -> zelphias
 
