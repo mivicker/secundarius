@@ -53,11 +53,9 @@ class TestGeocode(TestCase):
         self.assertEqual(location, self.test_location)
 
     def test_cached_geocode(self):
-        """
-        This doesn't test the case where the address is not found. Have
-        to figure out a way to test if this goes to the database or not.
-        """
-        lat, lng = cached_geocode(self.test_address)
+        coords = cached_geocode(self.test_address)
 
-        self.assertAlmostEqual(lat, self.correct_lat)
-        self.assertAlmostEqual(lng, self.correct_lng)
+        self.assertAlmostEqual(coords.lat, self.correct_lat)
+        self.assertAlmostEqual(coords.lng, self.correct_lng)
+        self.assertTrue(coords.cached)
+

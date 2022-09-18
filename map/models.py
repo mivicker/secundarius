@@ -9,6 +9,13 @@ from geopy import distance
 
 
 @dataclass
+class Coords:
+    lat: Decimal
+    lng: Decimal
+    cached: bool
+
+
+@dataclass
 class Address:
     street_address: str
     city: str
@@ -39,7 +46,7 @@ def geocode(address) -> Tuple[Decimal, Decimal]:
     Returns lattitude and longitude for a provided address.
     """
     base_url = "https://nominatim.openstreetmap.org/"
-    
+
     safe_address = urllib.parse.quote(address)
     query_template = f"search.php?q={safe_address}&format=jsonv2"
 
@@ -49,7 +56,7 @@ def geocode(address) -> Tuple[Decimal, Decimal]:
     try:
         return (Decimal(data[0]["lat"]), Decimal(data[0]["lon"]))
     except IndexError:
-        return Decimal('NaN'), Decimal('NaN')
+        return Decimal("NaN"), Decimal("NaN")
 
 
 class Location(models.Model):
@@ -58,11 +65,13 @@ class Location(models.Model):
     state = models.CharField(max_length=2, default="MI")
     zip_code = models.CharField(max_length=5)
     latitude = models.FloatField(blank=True, null=True, editable=False)
-    longitude= models.FloatField(blank=True, null=True, editable=False)
-    
+    longitude = models.FloatField(blank=True, null=True, editable=False)
+
     @property
     def address(self):
-        return f"{self.street_address}, {self.city}, {self.state} {self.zip_code}"
+        return (
+            f"{self.street_address}, {self.city}, {self.state} {self.zip_code}"
+        )
 
     @property
     def coords(self) -> Tuple[Decimal, Decimal]:
@@ -78,9 +87,7 @@ class Location(models.Model):
 
 
 def find_location(address: Address) -> Optional[Location]:
-    locations = Location.objects.filter(
-        **asdict(address)
-    )
+    locations = Location.objects.filter(**asdict(address))
 
     if not locations:
         return None
@@ -88,12 +95,22 @@ def find_location(address: Address) -> Optional[Location]:
     return locations[0]
 
 
-def cached_geocode(address_string: str) -> Tuple[Decimal, Decimal]:
+def cached_geocode(address_string: str) -> Coords:
     if (address := parse_address(address_string)) is not None:
         if (location := find_location(address)) is not None:
-            return location.coords
+            lat, lng = location.coords
+            return Coords(
+                lat=lat,
+                lng=lng,
+                cached=True
+            )
 
-    return geocode(address_string)
+    lat, lng = geocode(address_string)
+    return Coords(
+        lat=lat,
+        lng=lng,
+        cached=False
+    )
 
 
 class Partner(models.Model):
@@ -109,10 +126,13 @@ class Site(models.Model):
     partner = models.ForeignKey(Partner, on_delete=models.SET_NULL, null=True)
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
     referral_types = (
-        ("PR", "Priority"), # assign to nearest of these hubs if in range
-        ("SD", "Secondary"), # assign to nearest of these hubs if not in range of pr hub
-        ("RF", "Referral"), # notify agent to refer client to this agency
-        ("IN", "Inert"), # not available for referrals, but would like to map.
+        ("PR", "Priority"),  # assign to nearest of these hubs if in range
+        (
+            "SD",
+            "Secondary",
+        ),  # assign to nearest of these hubs if not in range of pr hub
+        ("RF", "Referral"),  # notify agent to refer client to this agency
+        ("IN", "Inert"),  # not available for referrals, but would like to map.
     )
     referral_type = models.CharField(max_length=2, choices=referral_types)
 
@@ -141,8 +161,11 @@ def calc_site_distances(address_coords: Tuple[Decimal, Decimal]):
 
 def suggest_site(coords: Tuple[Decimal, Decimal]) -> Optional[Site]:
     distances = calc_site_distances(coords)
-    available = [site for site, distance in distances 
-                 if ((distance.miles < 10) & (site.referral_type in ["PR", "SD", "RF"]))]
+    available = [
+        site
+        for site, distance in distances
+        if ((distance.miles < 10) & (site.referral_type in ["PR", "SD", "RF"]))
+    ]
     if not available:
         return None
 
@@ -154,6 +177,6 @@ def suggest_site(coords: Tuple[Decimal, Decimal]) -> Optional[Site]:
     # If no priority sites, provide closest
     return available[0]
 
+
 # [zelphias, gleaners - taylor, senior alliance] -> gleaners - taylor
 # [senior alliance, zelphias] -> zelphias
-
