@@ -14,6 +14,10 @@ class Coords:
     lng: Decimal
     cached: bool
 
+    @property
+    def coords(self):
+        return (self.lat, self.lng)
+
 
 @dataclass
 class Address:
@@ -59,6 +63,16 @@ def geocode(address) -> Tuple[Decimal, Decimal]:
         return Decimal("NaN"), Decimal("NaN")
 
 
+def cached_geocode(address_string: str) -> Coords:
+    if (address := parse_address(address_string)) is not None:
+        if (location := find_location(address)) is not None:
+            lat, lng = location.coords
+            return Coords(lat=lat, lng=lng, cached=True)
+
+    lat, lng = geocode(address_string)
+    return Coords(lat=lat, lng=lng, cached=False)
+
+
 class Location(models.Model):
     street_address = models.CharField(max_length=100)
     city = models.CharField(max_length=50)
@@ -79,7 +93,9 @@ class Location(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.latitude or self.longitude:
-            self.latitude, self.longitude = geocode(self.address)
+            coords = cached_geocode(self.address)
+            self.latitude = coords.lat
+            self.longitude = coords.lng
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -95,22 +111,10 @@ def find_location(address: Address) -> Optional[Location]:
     return locations[0]
 
 
-def cached_geocode(address_string: str) -> Coords:
-    if (address := parse_address(address_string)) is not None:
-        if (location := find_location(address)) is not None:
-            lat, lng = location.coords
-            return Coords(
-                lat=lat,
-                lng=lng,
-                cached=True
-            )
-
-    lat, lng = geocode(address_string)
-    return Coords(
-        lat=lat,
-        lng=lng,
-        cached=False
-    )
+def location_from_address(address: Optional[Address]) -> Optional[Location]:
+    if not address:
+        return
+    return Location.objects.create(**asdict(address))
 
 
 class Partner(models.Model):
@@ -127,10 +131,7 @@ class Site(models.Model):
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
     referral_types = (
         ("PR", "Priority"),  # assign to nearest of these hubs if in range
-        (
-            "SD",
-            "Secondary",
-        ),  # assign to nearest of these hubs if not in range of pr hub
+        ("SD", "Secondary"),  # assign to these hubs if not in range of pr hub
         ("RF", "Referral"),  # notify agent to refer client to this agency
         ("IN", "Inert"),  # not available for referrals, but would like to map.
     )
@@ -149,21 +150,22 @@ class Site(models.Model):
         return self.name
 
 
-def calc_site_distances(address_coords: Tuple[Decimal, Decimal]):
+def calc_site_distances(address_coords: Coords):
     """
     Return sites < 10 miles away from address.
     """
     return [
-        (site, distance.distance(site.location.coords, address_coords))
+        (site, distance.distance(site.location.coords, address_coords.coords))
         for site in Site.objects.all()
     ]
 
 
-def suggest_site(coords: Tuple[Decimal, Decimal]) -> Optional[Site]:
+def suggest_site(coords: Coords) -> Optional[Site]:
     distances = calc_site_distances(coords)
+    arranged = sorted(distances, key=lambda x: x[1])
     available = [
         site
-        for site, distance in distances
+        for site, distance in arranged
         if ((distance.miles < 10) & (site.referral_type in ["PR", "SD", "RF"]))
     ]
     if not available:
