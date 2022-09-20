@@ -6,13 +6,16 @@ import urllib.parse
 from django.db import models
 import requests
 from geopy import distance
+from returns.result import Failure, Result, Success, safe
+from returns.pipeline import flow, is_successful
+from returns.pointfree import bind
 
 
 @dataclass
 class Coords:
     lat: Decimal
     lng: Decimal
-    cached: bool
+    cached: bool = False
 
     @property
     def coords(self):
@@ -30,47 +33,67 @@ class Address:
         f"{self.street_address}, {self.city}, {self.state} {self.zip_code}"
 
 
-def parse_address(address: str) -> Optional[Address]:
+class BadAddressString(Exception):
+    pass
+
+
+def parse_address(address: str) -> Result[Address, Exception]:
     try:
         street_address, city, state_zip = address.split(",")
         state, zip_code = state_zip.strip().split(" ")
 
-        return Address(
+        return Success(Address(
             street_address=street_address,
             city=city.strip(),
             state=state,
             zip_code=zip_code,
-        )
+        ))
     except ValueError:
-        return None
+        raise BadAddressString
 
 
-def geocode(address) -> Tuple[Decimal, Decimal]:
-    """
-    Returns lattitude and longitude for a provided address.
-    """
+@safe
+def make_geocode_request(address_str: str) -> requests.Response:
     base_url = "https://nominatim.openstreetmap.org/"
-
-    safe_address = urllib.parse.quote(address)
+    safe_address = urllib.parse.quote(address_str)
     query_template = f"search.php?q={safe_address}&format=jsonv2"
-
     response = requests.get(base_url + query_template)
+    response.raise_for_status()
 
+    return response
+
+
+@safe
+def parse_json(response: requests.Response) -> Coords:
     data = json.loads(response.content)
-    try:
-        return (Decimal(data[0]["lat"]), Decimal(data[0]["lon"]))
-    except IndexError:
-        return Decimal("NaN"), Decimal("NaN")
+    return Coords(
+        lat = Decimal(data[0]["lat"]), 
+        lng = Decimal(data[0]["lon"])
+    )
 
 
-def cached_geocode(address_string: str) -> Coords:
-    if (address := parse_address(address_string)) is not None:
-        if (location := find_location(address)) is not None:
-            lat, lng = location.coords
-            return Coords(lat=lat, lng=lng, cached=True)
+def geocode_address(address_string: str) -> Result[Coords, Exception]:
+    return flow(
+        address_string,
+        make_geocode_request,
+        bind(parse_json),
+    )
 
-    lat, lng = geocode(address_string)
-    return Coords(lat=lat, lng=lng, cached=False)
+
+def cached_geocode(address_string: str) -> Result[Coords, str]:
+    location: Result = flow(
+        address_string,
+        parse_address,
+        bind(find_location)
+    )
+    if is_successful(location):
+        return Success(location.unwrap().coords)
+
+    coords = geocode_address(address_string)
+    if is_successful(coords):
+        return Success(coords.unwrap())
+
+    return Failure("Could not geocode address")
 
 
 class Location(models.Model):
@@ -88,8 +111,11 @@ class Location(models.Model):
         )
 
     @property
-    def coords(self) -> Tuple[Decimal, Decimal]:
-        return (Decimal(self.latitude), Decimal(self.longitude))
+    def coords(self) -> Coords:
+        return Coords(
+            lat=Decimal(self.latitude), 
+            lng=Decimal(self.longitude)
+        )
 
     def save(self, *args, **kwargs):
         if not self.latitude or self.longitude:
@@ -102,13 +128,11 @@ class Location(models.Model):
         return self.address
 
 
-def find_location(address: Address) -> Optional[Location]:
+def find_location(address: Address) -> Result[Location, str]:
     locations = Location.objects.filter(**asdict(address))
-
-    if not locations:
-        return None
-
-    return locations[0]
+    if locations.exists():
+        return Success(locations[0])
+    return Failure("Location not found")
 
 
 def location_from_address(address: Optional[Address]) -> Optional[Location]:
