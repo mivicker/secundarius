@@ -49,7 +49,7 @@ def parse_address(address: str) -> Result[Address, Exception]:
             zip_code=zip_code,
         ))
     except ValueError:
-        raise BadAddressString
+         return Failure(BadAddressString())
 
 
 @safe
@@ -114,12 +114,13 @@ class Location(models.Model):
     def coords(self) -> Coords:
         return Coords(
             lat=Decimal(self.latitude), 
-            lng=Decimal(self.longitude)
+            lng=Decimal(self.longitude),
+            cached=True,
         )
 
     def save(self, *args, **kwargs):
         if not self.latitude or self.longitude:
-            coords = cached_geocode(self.address)
+            coords = cached_geocode(self.address).unwrap()
             self.latitude = coords.lat
             self.longitude = coords.lng
         super().save(*args, **kwargs)
@@ -179,7 +180,7 @@ def calc_site_distances(address_coords: Coords):
     Return sites < 10 miles away from address.
     """
     return [
-        (site, distance.distance(site.location.coords, address_coords.coords))
+        (site, distance.distance(site.location.coords.coords, address_coords.coords))
         for site in Site.objects.all()
     ]
 

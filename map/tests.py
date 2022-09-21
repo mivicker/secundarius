@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django.test import TestCase
+from returns.pipeline import is_successful
 from map.models import (
     Address,
     Location,
@@ -7,7 +8,7 @@ from map.models import (
     Site,
     cached_geocode,
     find_location,
-    geocode,
+    geocode_address,
     location_from_address,
     parse_address,
     suggest_site,
@@ -29,9 +30,9 @@ class TestGeocode(TestCase):
         return super().setUp()
 
     def test_geocode(self):
-        lat, lng = geocode(self.test_address)
-        self.assertAlmostEqual(lat, self.correct_lat)
-        self.assertAlmostEqual(lng, self.correct_lng)
+        coords = geocode_address(self.test_address).unwrap()
+        self.assertAlmostEqual(coords.lat, self.correct_lat)
+        self.assertAlmostEqual(coords.lng, self.correct_lng)
 
     def test_parse_address(self):
         expected = Address(
@@ -40,7 +41,7 @@ class TestGeocode(TestCase):
             state="MI",
             zip_code="48207",
         )
-        result = parse_address(self.test_address)
+        result = parse_address(self.test_address).unwrap()
 
         self.assertEqual(result, expected)
 
@@ -52,12 +53,12 @@ class TestGeocode(TestCase):
             zip_code="48207",
         )
 
-        location = find_location(address)
+        location = find_location(address).unwrap()
 
         self.assertEqual(location, self.test_location)
 
     def test_cached_geocode(self):
-        coords = cached_geocode(self.test_address)
+        coords = cached_geocode(self.test_address).unwrap()
 
         self.assertAlmostEqual(coords.lat, self.correct_lat)
         self.assertAlmostEqual(coords.lng, self.correct_lng)
@@ -84,7 +85,7 @@ class TestDispatch(TestCase):
             Site.objects.create(
                 name=f"site {i}",
                 partner=partner,
-                location=location_from_address(parse_address(address)),
+                location=location_from_address(parse_address(address).unwrap()),
                 referral_type=referral_type,
             )
             for i, (referral_type, address) in enumerate(locations)
@@ -92,7 +93,7 @@ class TestDispatch(TestCase):
 
     def test_primary_closest(self):
         # test address in two primary zones goes to closest
-        coords = cached_geocode("6544 Grandmont Ave, Detroit MI, 48228")
+        coords = cached_geocode("6544 Grandmont Ave, Detroit MI, 48228").unwrap()
         suggested = suggest_site(coords)
         if suggested is None:
             self.fail()
@@ -102,7 +103,7 @@ class TestDispatch(TestCase):
     def test_primary_over_secondary(self):
         # test address in primary zone and secondary zone
         #    goes to primary even if secondary is closer
-        coords = cached_geocode("1965 Country Club Dr, Grosse Pointe Woods, MI 48236")
+        coords = cached_geocode("1965 Country Club Dr, Grosse Pointe Woods, MI 48236").unwrap()
         suggested = suggest_site(coords)
         if suggested is None:
             self.fail()
@@ -112,7 +113,11 @@ class TestDispatch(TestCase):
     def test_secondary_closest(self):
         # test address in two secondary zones goes to closest
         coords = cached_geocode("1965 Country Club Dr, Grosse Pointe Woods, MI 48236")
-        suggested = suggest_site(coords)
+        if not is_successful(coords):
+            self.fail()
+
+        suggested = suggest_site(coords.unwrap())
+        
         if suggested is None:
             self.fail()
 
@@ -124,7 +129,7 @@ class TestDispatch(TestCase):
 
     def test_address_outside_zone(self):
         # test if address is in no zone fails gracefully
-        coords = cached_geocode("814 Bentley Dr, Monroe, MI 48162")
+        coords = cached_geocode("814 Bentley Dr, Monroe, MI 48162").unwrap()
         suggested = suggest_site(coords)
 
         if suggested is not None:
