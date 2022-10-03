@@ -1,10 +1,12 @@
 import os
 import json
+
+from returns.pipeline import is_successful
 from secundarius.settings import BASE_DIR
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
-from map.models import Site
+from map.models import Site, cached_geocode, suggest_site
 from django.http import JsonResponse
 
 
@@ -30,5 +32,25 @@ def place_map(_):
 
 @csrf_exempt
 def calc_best(request):
-    print(request.POST)
-    return JsonResponse({"message": "calc_best ran"})
+    address = request.POST["address"]
+    coords = cached_geocode(address)
+
+    if not is_successful(coords):
+        return JsonResponse({
+            "status": "failure",
+            "message": "Unable to locate address."
+        })
+
+    site = suggest_site(coords.unwrap())
+
+    if site is not None:
+        return JsonResponse({
+            "status": "success",
+            "message": site.name
+        })
+
+    return JsonResponse({
+        "status": "failure",
+        "message": "No delivery hub within range."
+    })
+
