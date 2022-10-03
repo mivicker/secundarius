@@ -13,7 +13,7 @@ from counts.views import (
     additions_table,
     substitutions_table,
 )
-from map.views import place_map, show_map, serve_sites
+from map.views import place_map, show_map, serve_sites, calc_best
 
 
 urlpatterns = [
@@ -27,6 +27,7 @@ urlpatterns = [
     path("zips/", place_map, name="zips"),
     path("map/", show_map, name="map"),
     path("sites/", serve_sites, name="sites"),
+    path("calc_best/", calc_best, name="calc"),
     path(
         "logout/",
         auth_views.LogoutView.as_view(template_name="users/logout.html"),

@@ -1,7 +1,8 @@
 import os
 import json
 from secundarius.settings import BASE_DIR
-from django.contrib.auth.views import login_required
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from map.models import Site
 from django.http import JsonResponse
@@ -26,3 +27,8 @@ def place_map(_):
         )
     ) as f:
         return JsonResponse(json.load(f))
+
+@csrf_exempt
+def calc_best(request):
+    print(request.POST)
+    return JsonResponse({"message": "calc_best ran"})
