@@ -191,7 +191,7 @@ def suggest_site(coords: Coords) -> Optional[Site]:
     available = [
         site
         for site, distance in arranged
-        if ((distance.miles < 10) & (site.referral_type in ["PR", "SD", "RF"]))
+        if ((distance.miles < 9) & (site.referral_type in ["PR", "SD", "RF"]))
     ]
     if not available:
         return None
