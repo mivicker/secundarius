@@ -30,14 +30,20 @@ def place_map(_):
     ) as f:
         return JsonResponse(json.load(f))
 
+
+@login_required
+def site_finder(request):
+    return render(request, "map/find_site.html")
+
+
 @csrf_exempt
 def calc_best(request):
-    address = request.POST["address"]
+    address = json.loads(request.body)["address"]
     coords = cached_geocode(address)
 
     if not is_successful(coords):
         return JsonResponse({
-            "status": "failure",
+            "status": "SEARCH FAILED",
             "message": "Unable to locate address."
         })
 
@@ -45,12 +51,13 @@ def calc_best(request):
 
     if site is not None:
         return JsonResponse({
-            "status": "success",
-            "message": site.name
+            "status": "SUCCESS",
+            "message": site.name,
+            "referral_type": site.referral_type
         })
 
     return JsonResponse({
-        "status": "failure",
+        "status": "NO HUB",
         "message": "No delivery hub within range."
     })
 

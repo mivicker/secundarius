@@ -1,0 +1,78 @@
+{% extends 'texts/base.html' %}
+{% block content %}
+<div class="nav">
+	<p><a href="{% url 'home' %}">Home</a> > Send texts</p>
+</div>
+<h1>Find nearest delivery hub for an address</h1>
+<div id="vue_app">
+    <h4>Enter client address</h4>
+      <form>
+          <div>
+              <p>Street address</p>
+              <input type="text" ref="streetaddress">
+          </div>
+          <div>
+              <p>City</p>
+              <input type="text" ref="city">
+          </div>
+          <div>
+              <p>ZIP</p>
+              <input type="text" ref="zip">
+          </div>
+        <button @click.prevent="geocodeAddress()">Find nearest hub</button>
+      </form>
+      <p>[[ status ]]</p>
+      <h5>[[ hub ]]</h5>
+</div>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script type="text/javascript">
+
+    var current_domain = "{{ request.site.domain }}";
+    var url = current_domain + /calc_best/;
+
+    function combine_address(streetaddress, city, zip) {
+        return streetaddress + ", " + city + ", " + "MI " + zip;
+    };
+
+    const app = new Vue({
+        el: "#vue_app",
+        delimiters: ["[[","]]"],
+        data: {
+            status: "",
+            hub: ""
+        },
+        methods: {
+            handleResponse (response) {
+                if (response.data["status"] === "NO HUB") {
+                    this.status = "Address not in range of available hubs";
+                    this.hub = "";
+                } else if (response.data["status"] === "SEARCH FAILED") {
+                    this.status = "Unable to find address provided";
+                    this.hub = "";
+                } else {
+                    let referral_type = response.data["referral_type"];
+                    if ((referral_type === "PR") || (referral_type === "SD")) {
+                        this.status = "Sign up directly for";
+                        this.hub = response.data["message"];
+                    } else if (referral_type === "RF") {
+                        this.status = "Refer this address to";
+                        this.hub = response.data["message"];
+                    };
+                };
+            },
+            async geocodeAddress () {
+                this.status = "Seeking appropriate hub..."
+                let full_address = combine_address(
+                    this.$refs.streetaddress.value,
+                    this.$refs.city.value,
+                    this.$refs.zip.value
+                );
+                axios.post(url, {address: full_address})
+                    .then((response) => {
+                        this.handleResponse(response);
+                    });
+            }
+        }
+    });
+</script>
+{% endblock %}
